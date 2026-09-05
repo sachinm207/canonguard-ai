@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: canonguard-clickhouse
+    ports:
+      - "8123:8123" # HTTP API
+      - "9000:9000" # Native protocol
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./backend/app/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      CLICKHOUSE_DB: canonguard
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: canonguard-backend
+    ports:
+      - "8005:8005"
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      CLICKHOUSE_DATABASE: canonguard
+      CLICKHOUSE_SECURE: "false"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+      - clickhouse
+
+volumes:
+  clickhouse_data:
