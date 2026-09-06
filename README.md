@@ -5,6 +5,7 @@
 > **Sub-20ms Target:** Verified inside ClickHouse at **0.6ms – 1.8ms**  
 > **Studio Guide & Glossary:** [Read GUIDE.md](GUIDE.md)  
 > **Competitive Analysis & Market Study:** [Read COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)  
+> **Knowledge Base & Q&A Archive:** [Read KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)  
 > **Open Source License:** [MIT License](LICENSE)
 
 ---

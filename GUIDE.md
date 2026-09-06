@@ -110,3 +110,16 @@ Major studios (Marvel Studios, Lucasfilm, DC, Paramount) manage universes spanni
 For a full breakdown of how CanonGuard AI compares to industry tools like **Final Draft 13**, **World Anvil**, **Campfire**, **Filmustage**, **StoryBirdie**, and **Sudowrite/ChatGPT**, check out our in-depth research:
 👉 **[Read COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)**
 
+---
+
+## 🧠 6. Architectural Knowledge Base & Q&A Archive
+
+For deep technical insights on:
+- What is "Canon"? (Etymology, history & Hollywood tiers)
+- Why sub-20ms latency is mathematically essential for writer cognitive flow
+- Scalability mathematics for 50+ movies in ClickHouse (only ~25 MB; $0.0006/month)
+- Complete Q&A archive of all architectural decisions
+
+👉 **[Read KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)**
+
+
