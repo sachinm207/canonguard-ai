@@ -55,9 +55,10 @@ class ClickHouseEngine:
         if not self.universes:
             from .seed_universes import seed_all_universes
             seed_all_universes()
-        if universe_id in self.universes:
-            self.active_universe_id = universe_id
-            return True
+        for uid in self.universes:
+            if uid.lower() == universe_id.lower():
+                self.active_universe_id = uid
+                return True
         return False
 
     def get_active_universe(self) -> Dict[str, Any]:
