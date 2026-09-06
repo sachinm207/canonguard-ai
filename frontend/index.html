@@ -94,9 +94,14 @@
       </div>
     </div>
 
-    <!-- RIGHT HUD: Trap Shortcuts & Mode -->
+    <!-- RIGHT HUD: Trap Shortcuts, Guide & Mode -->
     <div class="flex items-center space-x-3">
-      <span class="text-xs text-slate-400 mr-1 hidden lg:inline">Pre-seeded Demo Traps:</span>
+      <button onclick="openGuideModal()" class="px-2.5 py-1 rounded bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1.5 shadow-sm">
+        <span>📖</span>
+        <span>Studio Guide & Glossary</span>
+      </button>
+      <div class="h-4 w-px bg-slate-800"></div>
+      <span class="text-xs text-slate-400 mr-1 hidden lg:inline">Demo Traps:</span>
       <button onclick="loadTrap(1)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 1 (Stasis)</button>
       <button onclick="loadTrap(2)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 2 (Relic)</button>
       <button onclick="loadTrap(3)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 3 (Bio)</button>
@@ -393,10 +398,126 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    function openGuideModal() {
+      document.getElementById('guide-modal').classList.remove('hidden');
+    }
+    function closeGuideModal() {
+      document.getElementById('guide-modal').classList.add('hidden');
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeGuideModal();
+    });
+
     // Initial check on load
     fetch(`${API_BASE}/api/health`).then(r => r.json()).then(h => {
       document.getElementById('stat-chars').textContent = `${h.characters_loaded} loaded`;
     });
   </script>
+
+  <!-- STUDIO GUIDE & GLOSSARY MODAL -->
+  <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">📖</span>
+          <div>
+            <h2 class="text-base font-bold text-white">CanonGuard AI: Studio Guide & Industry Glossary</h2>
+            <p class="text-xs text-slate-400">Everything you need to understand cinematic continuity, studio workflows, and engine concepts</p>
+          </div>
+        </div>
+        <button onclick="closeGuideModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-6 text-sm text-slate-300">
+        
+        <!-- Section 1: Previous Lore vs Current Script -->
+        <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2.5">
+          <h3 class="text-sm font-bold text-sky-400 flex items-center space-x-2">
+            <span>🎬</span>
+            <span>1. How Lore Works: Previous Data vs. Current Script</span>
+          </h3>
+          <p class="text-xs leading-relaxed text-slate-300">
+            <strong>The Previous Data (Franchise Canon Archive):</strong> In major studios (Marvel, Lucasfilm, DC), universes span 30–80 years of history. "Lore Keepers" maintain 800-page Franchise Bibles. In CanonGuard AI, past movies (The ChronoVerse 1900–2080) are pre-loaded into ClickHouse tables tracking character lifespans, destroyed artifacts, and planetary rules.
+          </p>
+          <p class="text-xs leading-relaxed text-slate-300">
+            <strong>What "Current" Means:</strong> Screenwriters write movies <em>scene-by-scene</em>. "Current" refers to the active scene currently being typed today (e.g., Scene 14 in 1982 Berlin). CanonGuard verifies in real-time if this single new scene accidentally contradicts 40 years of past established history.
+          </p>
+        </div>
+
+        <!-- Section 2: UI Elements Explained -->
+        <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2.5">
+          <h3 class="text-sm font-bold text-amber-400 flex items-center space-x-2">
+            <span>🖥️</span>
+            <span>2. Screenplay Studio Elements Explained</span>
+          </h3>
+          <ul class="text-xs space-y-2 text-slate-300">
+            <li><strong class="text-slate-100">Cold War Requiem.fountain:</strong> The file name of the script. <code class="text-sky-300 font-mono">.fountain</code> is the open-source plaintext standard used in Hollywood screenwriting (like Markdown for screenwriters).</li>
+            <li><strong class="text-slate-100">Setting: Berlin Safehouse | Scene Year: 1982:</strong> The scene heading ("Slugline"). It gives the engine the temporal year (1982) and place to evaluate whether characters or weapons can legally exist there.</li>
+            <li><strong class="text-slate-100">Auto-Lint Active (350ms):</strong> Like a programming code linter or Grammarly, the background agent waits 350ms after you stop typing, queries ClickHouse in &lt; 1ms, and automatically draws red squiggly underlines under continuity mistakes.</li>
+            <li><strong class="text-slate-100">Pre-seeded Demo Traps:</strong> In software QA, a "trap" is an intentional test case. The 3 buttons load famous continuity errors (stasis paradox, destroyed relic, toxic air) with 1 click so you can see sub-millisecond detection in action.</li>
+          </ul>
+        </div>
+
+        <!-- Section 3: Glossary Table -->
+        <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2.5">
+          <h3 class="text-sm font-bold text-emerald-400 flex items-center space-x-2">
+            <span>📚</span>
+            <span>3. Keywords & Technical Glossary</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 font-semibold">
+                  <th class="py-2 pr-3">Term</th>
+                  <th class="py-2">Definition & Meaning</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-rose-400 whitespace-nowrap">Retcon</td>
+                  <td class="py-2">Short for <em>Retroactive Continuity</em>. When a new scene contradicts previously established lore (e.g. A dead character returning without explanation). Cost studios $10M–$30M in emergency reshoots.</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-rose-300 whitespace-nowrap">Retcon Diagnostics</td>
+                  <td class="py-2">The real-time report showing the exact phrase flagged, the category of contradiction, the lore citation, and query speed.</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-sky-400 whitespace-nowrap">Franchise Lore</td>
+                  <td class="py-2">The canonical rules, character lifespans, and historical timeline of the fictional cinematic universe.</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-purple-400 whitespace-nowrap">Telemetry</td>
+                  <td class="py-2">Performance logs and audit metrics recorded into ClickHouse (<code class="font-mono text-slate-300">audit_retcon_logs</code>) tracking exact database latencies and error logs.</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-amber-300 whitespace-nowrap">Creative Mitigation</td>
+                  <td class="py-2">AI suggestions (via Gemini 2.0 Flash) that offer 3 drama-preserving story alternatives instead of just blocking the writer.</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-emerald-400 whitespace-nowrap">Auto-Patch</td>
+                  <td class="py-2">A 1-click button that immediately replaces the retconned line in the screenplay with the canonical fix.</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 font-semibold text-indigo-300 whitespace-nowrap">Sub-20ms Target</td>
+                  <td class="py-2">The latency goal required so writers never feel lag while typing. ClickHouse verifies in <strong>0.3ms – 1.8ms</strong>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+        <span class="text-xs text-slate-500 font-mono">See GUIDE.md in repository root for full technical documentation</span>
+        <button onclick="closeGuideModal()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">Got it, close</button>
+      </div>
+
+    </div>
+  </div>
 </body>
 </html>

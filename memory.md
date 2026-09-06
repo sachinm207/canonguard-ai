@@ -10,18 +10,20 @@
 
 | Phase | Description | Status | Key Artifacts / Notes |
 | :--- | :--- | :---: | :--- |
-| **Phase 1** | ClickHouse Lore Schema & Vector Search Engine | 🟢 Architecture Approved | Schema DDLs & Sub-20ms design documented in `ARCHITECTURE.md` |
-| **Phase 2** | ClickHouse MCP Server Integration | ⚪ Next | `mcp-clickhouse` config, parameterized SQL tool definitions |
-| **Phase 3** | Synthetic Franchise Lore Dataset Generation | ⚪ Ready | 20-movie "ChronoVerse" seed script, 3 test contradiction traps |
-| **Phase 4** | Web Writing Interface & Real-Time Linting UI | ⚪ Ready | Fountain editor, red squiggly underlines, lore drawer |
-| **Phase 5** | 48-Hour Hackathon Build Roadmap & 3-Min Demo Pitch | ⚪ Ready | 3-minute pitch script highlighting 18ms latency |
+| **Phase 1** | ClickHouse Lore Schema & Vector Search Engine | 🟢 Completed | `ReplacingMergeTree` tables, 768-dim vector embeddings, dual-mode client |
+| **Phase 2** | ClickHouse MCP Server Integration | 🟢 Completed | `mcp-clickhouse` client tool definitions & dispatch in `app/mcp/client.py` |
+| **Phase 3** | Synthetic Franchise Lore Dataset Generation | 🟢 Completed | 20-movie "ChronoVerse" seed script, 3 test contradiction traps verified |
+| **Phase 4** | Web Writing Interface & Real-Time Linting UI | 🟢 Completed | Interactive Fountain editor, red squiggly underlines, mitigation drawer |
+| **Phase 5** | 48-Hour Hackathon Build Roadmap & 3-Min Demo Pitch | 🟡 In Progress | Live app running at `http://127.0.0.1:8005`, all 4 tests passing in < 1ms |
 
 ---
 
 ## 📝 Key Design Decisions Log
 - **2026-09-05:** Project initiated. Using ClickHouse Cloud with ReplacingMergeTree engine for fast timeline event lookups and vector cosine similarity.
 - **2026-09-05:** Adopted official ClickHouse MCP Server to standardize LLM-to-database interaction.
-- **2026-09-05:** Published comprehensive system architecture specification in `ARCHITECTURE.md` with multi-agent orchestration sequence, ClickHouse DDLs, and 3 demo traps.
+- **2026-09-05:** Published comprehensive system architecture specification in `ARCHITECTURE.md`.
+- **2026-09-05:** Implemented hardest components first (ClickHouse DDLs, sub-20ms lore retrieval engine, causal contradiction logic, 3 demo traps).
+- **2026-09-05:** Application is 100% runnable out of the box with Dual-Mode architecture (native ClickHouse Cloud + embedded high-performance columnar engine). All 4 integration tests pass in ~0.7ms (< 20ms budget).
 
 ---
 

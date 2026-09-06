@@ -3,6 +3,7 @@
 > **Devpost Hackathon:** [Agentic Cinema: The Blockbuster Hackathon](https://agentic-cinema.devpost.com/)  
 > **Target Partner Track:** **ClickHouse Track** ($7,500 1st / $4,500 2nd / $3,000 3rd)  
 > **Sub-20ms Target:** Verified inside ClickHouse at **0.6ms – 1.8ms**  
+> **Studio Guide & Glossary:** [Read GUIDE.md](GUIDE.md)  
 > **Open Source License:** [MIT License](LICENSE)
 
 ---
