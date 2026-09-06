@@ -89,22 +89,32 @@
       </div>
       <div class="h-3 w-px bg-slate-800"></div>
       <div class="flex items-center space-x-2">
-        <span class="text-xs text-slate-400">Franchise Universe:</span>
-        <span class="font-mono text-xs font-semibold text-sky-400">ChronoVerse (1900-2080)</span>
+        <span class="text-xs text-slate-400">Canon Universe:</span>
+        <select id="universe-select" onchange="switchActiveUniverse(this.value)" class="bg-slate-900 border border-slate-700 text-sky-400 text-xs font-semibold rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono cursor-pointer hover:border-slate-600 transition">
+          <option value="CHRONOVERSE">ChronoVerse (1900–2080)</option>
+          <option value="GALACTIC_IMPERIUM">Galactic Imperium (2100–3200)</option>
+          <option value="MYTHOS_REALM">Mythos Realm (Age of Legends)</option>
+        </select>
       </div>
     </div>
 
-    <!-- RIGHT HUD: Trap Shortcuts, Guide & Mode -->
-    <div class="flex items-center space-x-3">
+    <!-- RIGHT HUD: Trap Shortcuts, Guide & Ingestion Mode -->
+    <div class="flex items-center space-x-2.5">
+      <button onclick="openIngestModal()" class="px-2.5 py-1 rounded bg-amber-950/70 hover:bg-amber-900 text-xs font-semibold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1.5 shadow-sm">
+        <span>📥</span>
+        <span>Upload Lore Bible</span>
+      </button>
       <button onclick="openGuideModal()" class="px-2.5 py-1 rounded bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1.5 shadow-sm">
         <span>📖</span>
-        <span>Studio Guide & Glossary</span>
+        <span>Guide</span>
       </button>
       <div class="h-4 w-px bg-slate-800"></div>
-      <span class="text-xs text-slate-400 mr-1 hidden lg:inline">Demo Traps:</span>
-      <button onclick="loadTrap(1)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 1 (Stasis)</button>
-      <button onclick="loadTrap(2)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 2 (Relic)</button>
-      <button onclick="loadTrap(3)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 3 (Bio)</button>
+      <div id="traps-container" class="flex items-center space-x-2">
+        <span class="text-xs text-slate-400 mr-1 hidden lg:inline">Traps:</span>
+        <button onclick="loadTrap(1)" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 1</button>
+        <button onclick="loadTrap(2)" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 2</button>
+        <button onclick="loadTrap(3)" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition">Trap 3</button>
+      </div>
     </div>
   </header>
 
@@ -117,13 +127,18 @@
       <!-- Script Meta Bar -->
       <div class="h-10 bg-slate-900/50 border-b border-slate-800/80 px-6 flex items-center justify-between text-xs text-slate-400">
         <div class="flex items-center space-x-4">
-          <span class="font-semibold text-slate-300">Cold War Requiem.fountain</span>
+          <span class="font-semibold text-slate-300" id="current-title-display">Cold War Requiem.fountain</span>
           <span class="text-slate-600">|</span>
-          <span>Setting: <strong class="text-slate-300">Berlin Safehouse</strong></span>
+          <span>Setting: <strong class="text-slate-300" id="current-setting-display">Berlin Safehouse</strong></span>
           <span class="text-slate-600">|</span>
           <span>Scene Year: <strong class="text-slate-300" id="current-year-display">1982</strong></span>
         </div>
-        <div class="flex items-center space-x-2 text-[11px]">
+        <div class="flex items-center space-x-3 text-[11px]">
+          <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
+          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium">
+            <span>📂</span>
+            <span>Upload Script</span>
+          </button>
           <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">Auto-Lint Active (350ms)</span>
         </div>
       </div>
@@ -369,23 +384,222 @@
       violationCount.textContent = `0 Violations`;
     }
 
-    function loadTrap(trapNum) {
-      if (trapNum === 1) {
-        document.getElementById('current-year-display').textContent = '1982';
-        textarea.value = "Viktor arrives at the Berlin safehouse in 1982 to meet Elena.";
-      } else if (trapNum === 2) {
-        document.getElementById('current-year-display').textContent = '1982';
-        textarea.value = "Elena pulls the Sunstone from her coat to open the portal in 1982.";
-      } else if (trapNum === 3) {
-        document.getElementById('current-year-display').textContent = '1988';
-        textarea.value = "On Planet Zora, Lord Vane removes his helmet and takes a deep breath of the air.";
+    let currentUniverseMetadata = null;
+    let allUniversesList = [];
+
+    // --- MULTI-UNIVERSE MANAGEMENT ---
+    async function loadAvailableUniverses() {
+      try {
+        const res = await fetch(`${API_BASE}/api/universes`);
+        const data = await res.json();
+        currentUniverseMetadata = data.active_universe;
+        allUniversesList = data.universes;
+
+        const select = document.getElementById('universe-select');
+        select.innerHTML = '';
+        allUniversesList.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = `${u.name} (${u.characters_count || 0} chars)`;
+          if (u.is_active) opt.selected = true;
+          select.appendChild(opt);
+        });
+
+        applyUniverseToUI(currentUniverseMetadata);
+      } catch (err) {
+        console.error("Failed to load universes:", err);
       }
-      validateScript(textarea.value);
+    }
+
+    async function switchActiveUniverse(universeId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/switch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ universe_id: universeId })
+        });
+        const data = await res.json();
+        if (data.status === 'SUCCESS') {
+          currentUniverseMetadata = data.active_universe;
+          applyUniverseToUI(currentUniverseMetadata);
+          // Re-validate current script
+          validateScript(textarea.value);
+        }
+      } catch (err) {
+        console.error("Failed to switch universe:", err);
+      }
+    }
+
+    function applyUniverseToUI(universe) {
+      if (!universe) return;
+      document.getElementById('current-year-display').textContent = universe.default_year || 1982;
+      document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
+      document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
+      
+      // Render dynamic traps
+      renderTraps(universe.demo_traps || []);
+      
+      // Set sample script if textarea is empty or default
+      if (!textarea.value.trim() || textarea.value.includes("Viktor") || textarea.value.includes("Kael") || textarea.value.includes("Eldor")) {
+        if (universe.demo_traps && universe.demo_traps.length > 0) {
+          textarea.value = universe.demo_traps[0].script;
+          validateScript(textarea.value);
+        }
+      }
+    }
+
+    function renderTraps(traps) {
+      const container = document.getElementById('traps-container');
+      container.innerHTML = `<span class="text-xs text-slate-400 mr-1 hidden lg:inline">Traps:</span>`;
+      if (!traps || traps.length === 0) {
+        container.innerHTML += `<span class="text-[11px] text-slate-500 font-mono">None</span>`;
+        return;
+      }
+      traps.forEach((trap, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "px-2 py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition";
+        btn.textContent = trap.title || `Trap ${idx + 1}`;
+        btn.onclick = () => {
+          document.getElementById('current-year-display').textContent = trap.year || 1982;
+          document.getElementById('current-setting-display').textContent = trap.location || "Location";
+          textarea.value = trap.script;
+          validateScript(trap.script);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // --- SCREENPLAY DOCUMENT UPLOAD & DRAG-AND-DROP ---
+    async function handleScreenplayFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      readAndProcessScreenplay(file);
+    }
+
+    function readAndProcessScreenplay(file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target.result;
+        try {
+          const res = await fetch(`${API_BASE}/api/screenplay/parse`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: content, filename: file.name })
+          });
+          const data = await res.json();
+          textarea.value = data.content;
+          document.getElementById('current-title-display').textContent = data.filename;
+          document.getElementById('current-year-display').textContent = data.scene_year;
+          document.getElementById('current-setting-display').textContent = data.location;
+          validateScript(data.content);
+        } catch (err) {
+          // Fallback to local insertion
+          textarea.value = content;
+          document.getElementById('current-title-display').textContent = file.name;
+          validateScript(content);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Drag-and-drop on screenplay editor
+    textarea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      textarea.classList.add('ring-2', 'ring-sky-500');
+    });
+    textarea.addEventListener('dragleave', () => {
+      textarea.classList.remove('ring-2', 'ring-sky-500');
+    });
+    textarea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      textarea.classList.remove('ring-2', 'ring-sky-500');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        readAndProcessScreenplay(e.dataTransfer.files[0]);
+      }
+    });
+
+    // --- CUSTOM LORE BIBLE INGESTION ---
+    function openIngestModal() {
+      document.getElementById('ingest-modal').classList.remove('hidden');
+    }
+    function closeIngestModal() {
+      document.getElementById('ingest-modal').classList.add('hidden');
+    }
+
+    function loadSampleBible(type) {
+      if (type === 'cyberpunk') {
+        document.getElementById('ingest-univ-name').value = "CyberCity 2099";
+        document.getElementById('ingest-genre').value = "Cyberpunk / Dystopian";
+        document.getElementById('ingest-era').value = "2090-2105";
+        document.getElementById('ingest-desc').value = "High-tech low-life megacorp war with cybernetic neural engrams.";
+        document.getElementById('ingest-content').value = 
+`# Franchise: CyberCity 2099
+Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)
+Character: Nyx Shadow (Born: 2065, Died: 2120, Status: Alive)
+Relic: Neon Pulse Rifle (Destroyed in 2075)
+Rule: Sector 4 is bathed in lethal neurotoxin gas without cybernetic respirators.`;
+      } else if (type === 'darkfantasy') {
+        document.getElementById('ingest-univ-name').value = "Shadow Realm: Age of Ash";
+        document.getElementById('ingest-genre').value = "Dark Fantasy";
+        document.getElementById('ingest-era').value = "Year 800-950";
+        document.getElementById('ingest-desc').value = "A blighted kingdom of cursed knights and extinguished relics.";
+        document.getElementById('ingest-content').value = 
+`# Franchise: Shadow Realm
+Character: Lord Malgath (Born: 780, Died: 840, Status: Dead)
+Character: Lady Rowena (Born: 815, Status: Alive)
+Relic: Soulforged Chalice (Shattered in Year 830)
+Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals without the Obsidian Sigil.`;
+      }
+    }
+
+    async function submitLoreIngestion() {
+      const name = document.getElementById('ingest-univ-name').value.trim();
+      const genre = document.getElementById('ingest-genre').value.trim();
+      const era = document.getElementById('ingest-era').value.trim();
+      const desc = document.getElementById('ingest-desc').value.trim();
+      const content = document.getElementById('ingest-content').value.trim();
+
+      if (!name || !content) {
+        alert("Please provide at least a Franchise Name and Lore Bible Content.");
+        return;
+      }
+
+      const btn = document.getElementById('ingest-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin mr-1">⏳</span> Ingesting into ClickHouse...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/ingest-document`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            universe_name: name,
+            genre: genre,
+            era: era,
+            description: desc,
+            document_content: content
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'SUCCESS') {
+          alert(`🎉 Successfully ingested "${name}" into ClickHouse!\n\n• ${data.characters_ingested} Characters\n• ${data.relics_ingested} Relics\n• ${data.rules_ingested} Lore Axioms\n\nSwitched active universe to "${name}".`);
+          closeIngestModal();
+          await loadAvailableUniverses();
+        } else {
+          alert("Ingestion failed: " + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert("Error ingesting document: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚡ Ingest into ClickHouse Engine</span>`;
+      }
     }
 
     function switchTab(tab) {
       if (tab === 'lore') {
-        alert('Franchise Lore Explorer: 45 Characters, 20 Movies, 4 Axioms loaded in ClickHouse.');
+        const univ = currentUniverseMetadata ? currentUniverseMetadata.name : 'Active Universe';
+        alert(`Franchise Lore Explorer: Displaying lore for ${univ}. Check /api/lore/characters or /api/lore/rules.`);
       } else if (tab === 'telemetry') {
         window.open('/api/audit-logs', '_blank');
       }
@@ -405,14 +619,94 @@
       document.getElementById('guide-modal').classList.add('hidden');
     }
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeGuideModal();
+      if (e.key === 'Escape') {
+        closeGuideModal();
+        closeIngestModal();
+      }
     });
 
     // Initial check on load
     fetch(`${API_BASE}/api/health`).then(r => r.json()).then(h => {
       document.getElementById('stat-chars').textContent = `${h.characters_loaded} loaded`;
     });
+    // Load universes on boot
+    loadAvailableUniverses();
   </script>
+
+  <!-- LORE BIBLE INGESTION MODAL -->
+  <div id="ingest-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">📥</span>
+          <div>
+            <h2 class="text-base font-bold text-white">Upload & Ingest Custom Franchise Lore</h2>
+            <p class="text-xs text-slate-400">Add your own cinematic universe or story bible to test with CanonGuard AI</p>
+          </div>
+        </div>
+        <button onclick="closeIngestModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
+        
+        <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+          <span class="text-amber-400 font-bold">Quick Templates:</span>
+          <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition">⚡ CyberCity 2099</button>
+          <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition">🔮 Shadow Realm (Dark Fantasy)</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Franchise Universe Name</label>
+            <input id="ingest-univ-name" type="text" placeholder="e.g. CyberCity 2099" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium">
+          </div>
+          <div>
+            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Genre</label>
+            <input id="ingest-genre" type="text" placeholder="e.g. Cyberpunk / Noir" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Era / Timeline Range</label>
+            <input id="ingest-era" type="text" placeholder="e.g. 2090–2105" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Brief Description</label>
+            <input id="ingest-desc" type="text" placeholder="e.g. Dystopian megacorp city" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content (.txt, .md, or tagged entities)</label>
+            <span class="text-[10px] text-slate-500">Supports markdown, JSON, or plain story notes</span>
+          </div>
+          <textarea id="ingest-content" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
+e.g.:
+Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)
+Relic: Neon Pulse Rifle (Destroyed in 2075)
+Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+        <span class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="closeIngestModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Cancel</button>
+          <button id="ingest-submit-btn" onclick="submitLoreIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5">
+            <span>⚡ Ingest into ClickHouse Engine</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- STUDIO GUIDE & GLOSSARY MODAL -->
   <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">

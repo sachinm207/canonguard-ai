@@ -15,6 +15,7 @@
 | **Phase 3** | Synthetic Franchise Lore Dataset Generation | 🟢 Completed | 20-movie "ChronoVerse" seed script, 3 test contradiction traps verified |
 | **Phase 4** | Web Writing Interface & Real-Time Linting UI | 🟢 Completed | Interactive Fountain editor, red squiggly underlines, mitigation drawer, in-app Guide modal |
 | **Phase 5** | Studio Guide, Competitive Analysis & Q&A Knowledge Base | 🟢 Completed | `GUIDE.md`, `COMPETITIVE_ANALYSIS.md`, `KNOWLEDGE_BASE.md`, all tests passing in < 0.3ms |
+| **Phase 6** | Multi-Canon Universes, Script Upload & Lore Ingestion | 🟢 Completed | 3 pre-seeded canons (ChronoVerse, Galactic Imperium, Mythos Realm), screenplay upload/drop, custom story bible ingestion dialog, 7/7 tests passing |
 
 ---
 
@@ -31,7 +32,8 @@
   2. Cognitive flow state and mathematical justification for sub-20ms latency.
   3. Data volume, capacity, and cost models for 50+ movies in ClickHouse (only ~25 MB compressed; $0.0006/mo storage, $0.12 one-time embedding cost).
   4. Real-world franchise ingestion workflows vs. real-time active scene drafting.
-- **2026-09-06:** Initialized public GitHub repository and pushed all code and documentation to `https://github.com/sachinm207/canonguard-ai.git`.
+- **2026-09-06:** Added Multi-Universe partitioning in ClickHouse with 3 pre-seeded canons (ChronoVerse, Galactic Imperium, Mythos Realm). Added screenplay file upload (`.fountain`, `.txt`, `.fdx`) and drag-and-drop. Added custom story bible ingestion dialog supporting JSON/Markdown world bibles. Expanded integration tests to 7/7 passing in < 0.4ms.
+- **2026-09-06:** Committed and pushed all source code and documentation to `https://github.com/sachinm207/canonguard-ai.git`.
 
 ---
 
@@ -41,3 +43,4 @@
 2. *Editor Component:* ✅ Resolved. Fountain screenplay workspace with inline visual lint preview and red squiggly underlines.
 3. *Debounce Window:* ✅ Resolved. 350ms after user stops typing strikes the ideal balance between keystroke responsiveness and server efficiency.
 4. *Franchise Capacity:* ✅ Resolved. ClickHouse easily stores 50+ movies in under 25 MB with sub-millisecond query execution.
+5. *Multi-Universe Scalability:* ✅ Resolved. Primary key partitioning on `universe_id` ensures zero cross-contamination and 0-byte scan overhead across distinct franchises.

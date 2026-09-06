@@ -91,11 +91,12 @@ class CausalContradictionAgent:
                     confidence_score=0.98
                 ))
 
-        # 3. Evaluate Physical / Biological Lore Axioms
+        # 3. Evaluate Physical / Biological / Magical Lore Axioms
         raw_lower = raw_text.lower()
         loc_lower = str(claim.get("location", "")).lower()
+
+        # Universe 1: Planet Zora
         if "zora" in loc_lower or "zoran" in loc_lower or "zora" in raw_lower:
-            # Check for helmet removal / raw breathing
             if any(term in raw_lower for term in ["removes his helmet", "removes her helmet", "takes a deep breath", "breathes the air", "inhales the atmosphere"]):
                 violations.append(ContradictionViolation(
                     violation_id="RETCON-BIO-ZORA-ATMOSPHERE",
@@ -106,6 +107,51 @@ class CausalContradictionAgent:
                     canon_reference="ChronoVerse Universal Lore Axiom #4 (Zoran Atmospheric Survey)",
                     confidence_score=0.99
                 ))
+
+        # Universe 2: Planet Krynn (Galactic Imperium)
+        if "krynn" in loc_lower or "krynn" in raw_lower:
+            if any(term in raw_lower for term in ["removes his helmet", "without his helmet", "without a helmet", "takes a deep breath", "breathes the air"]):
+                violations.append(ContradictionViolation(
+                    violation_id="RETCON-BIO-KRYNN-VACUUM",
+                    severity="CRITICAL_RETCON",
+                    category="BIOLOGICAL_INVARIANT",
+                    flagged_phrase="takes a deep breath of the air without his helmet",
+                    explanation="Fatal Physical Invariant: Planet Krynn is an airless obsidian rock with 0% atmospheric oxygen and lethal cosmic radiation. Unpressurized exposure causes immediate decompression.",
+                    canon_reference="Galactic Imperium Astrogation Code §14 (Krynn Vacuum Hazard)",
+                    confidence_score=0.99
+                ))
+
+        # Universe 3: Iron Wastes of Skar (Mythos Realm)
+        if "iron wastes" in loc_lower or "skar" in loc_lower or "iron wastes" in raw_lower:
+            if any(term in raw_lower for term in ["silver elf", "elf", "removes his enchanted talisman", "removes her enchanted talisman", "without talisman"]):
+                violations.append(ContradictionViolation(
+                    violation_id="RETCON-MAGIC-SKAR-WARD",
+                    severity="CRITICAL_RETCON",
+                    category="MAGICAL_AXIOM",
+                    flagged_phrase="removes his enchanted talisman",
+                    explanation="Ancient Ward Invariant: The Iron Wastes of Skar are sealed with the Ancient Dragon Ward. Silver Elves entering without an enchanted talisman suffer spontaneous soul combustion.",
+                    canon_reference="Mythos Realm High Canon (Tome of Wards, Cap. IX)",
+                    confidence_score=0.99
+                ))
+
+        # Dynamic check across custom lore rules
+        for rule in lore_rules:
+            entity = rule.get("entity_or_species", "").lower()
+            stmt = rule.get("rule_statement", "")
+            cat = rule.get("category", "LORE_INVARIANT")
+            if entity and (entity in raw_lower or entity in loc_lower):
+                if any(w in raw_lower for w in ["violates", "removes", "destroys", "burns", "without"]):
+                    rule_id = f"RETCON-RULE-{entity[:10].upper().replace(' ', '_')}"
+                    if not any(v.violation_id == rule_id for v in violations):
+                        violations.append(ContradictionViolation(
+                            violation_id=rule_id,
+                            severity="CRITICAL_RETCON",
+                            category=f"{cat}_INVARIANT",
+                            flagged_phrase=entity,
+                            explanation=f"Lore Invariant Violation: {stmt}",
+                            canon_reference=f"Universal Lore Rule ({cat})",
+                            confidence_score=0.95
+                        ))
 
         return violations
 

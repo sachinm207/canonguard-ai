@@ -197,5 +197,26 @@ ClickHouse is uniquely suited for CanonGuard AI because of four technical superp
 * **Franchise Lore:** The collective canon, history, character timelines, and rules governing a fictional cinematic universe.
 * **Telemetry:** Performance logs and audit metrics recorded into ClickHouse tracking query execution times, violations caught, and mitigations accepted.
 * **Creative Mitigation:** AI-generated narrative solutions that preserve the writer's dramatic intention while adhering to canon.
-* **Auto-Patch:** A 1-click button that automatically replaces the continuity violation in the screenplay with the selected AI mitigation.
 * **Sub-20ms Target:** Completing database continuity verification faster than 20ms—the human threshold for instantaneous perception.
+
+---
+
+## 8. Multi-Universe Architecture & Document Ingestion Pipeline
+
+### Why Multi-Universe Partitioning?
+Studios rarely produce only one franchise. Warner Bros. manages the DC Universe, Harry Potter / Wizarding World, and Lord of the Rings. Disney manages Marvel (MCU) and Star Wars. 
+
+In CanonGuard AI, all entities (`franchise_characters`, `canon_timeline_events`, `entity_relationships`, `canon_lore_rules`) are tagged with a primary key prefix: `universe_id`:
+```sql
+SELECT status, death_year, stasis_start_year, stasis_end_year
+FROM franchise_characters
+WHERE universe_id = 'galactic_imperium' AND name = 'Kael';
+```
+- **Zero Cross-Contamination:** Characters or relics from ChronoVerse can never accidentally trigger violations when a writer works in Galactic Imperium or Mythos Realm.
+- **Partition Pruning:** ClickHouse partitions queries by `universe_id`, meaning queries on one universe scan **0 bytes** of data from other franchises.
+
+### Custom Story Bible Ingestion Pipeline
+When a user uploads a new story bible:
+1. **Parser Layer:** Extracts entities (`characters`, `relics`, `rules`) from JSON, Markdown headers, or plain text.
+2. **Schema Ingestion:** Dynamically registers the new universe in ClickHouse memory with isolated collections.
+3. **Instant Hot-Swapping:** Activates the newly ingested universe as `active_universe_id` in sub-millisecond time, allowing the writer to immediately begin typing and verifying against their proprietary world bible.

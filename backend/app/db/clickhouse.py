@@ -47,6 +47,91 @@ class ClickHouseEngine:
         self.relationships: List[Dict[str, Any]] = []
         self.lore_rules: List[Dict[str, Any]] = []
         self.audit_logs: List[Dict[str, Any]] = []
+        self.universes: Dict[str, Dict[str, Any]] = {}
+        self.active_universe_id: str = settings.UNIVERSE_ID
+
+    def switch_universe(self, universe_id: str) -> bool:
+        """Switch the active franchise canon in the engine."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        if universe_id in self.universes:
+            self.active_universe_id = universe_id
+            return True
+        return False
+
+    def get_active_universe(self) -> Dict[str, Any]:
+        """Returns the currently active franchise metadata."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        return self.universes.get(self.active_universe_id, {
+            "id": self.active_universe_id,
+            "name": self.active_universe_id,
+            "default_year": 1982,
+            "default_location": "Berlin Safehouse",
+            "default_title": "Active_Script.fountain",
+            "demo_traps": []
+        })
+
+    def get_all_universes(self) -> List[Dict[str, Any]]:
+        """Returns all loaded canons with active indicators."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        result = []
+        for uid, udata in self.universes.items():
+            u_copy = dict(udata)
+            u_copy["is_active"] = (uid == self.active_universe_id)
+            # Add character and event counts for UI display
+            u_copy["characters_count"] = len([c for c in self.characters if c.get("universe_id") == uid])
+            u_copy["events_count"] = len([e for e in self.timeline_events if e.get("universe_id") == uid])
+            u_copy["rules_count"] = len([r for r in self.lore_rules if r.get("universe_id") == uid])
+            result.append(u_copy)
+        return result
+
+    def ingest_custom_universe(
+        self,
+        universe_id: str,
+        name: str,
+        genre: str,
+        era: str,
+        description: str,
+        characters: List[Dict[str, Any]],
+        timeline_events: List[Dict[str, Any]],
+        relationships: List[Dict[str, Any]],
+        lore_rules: List[Dict[str, Any]],
+        default_year: int = 2026,
+        default_location: str = "Central Facility",
+        demo_traps: Optional[List[Dict[str, Any]]] = None
+    ) -> Dict[str, Any]:
+        """Ingests a user-uploaded story bible or custom canon into ClickHouse."""
+        self.universes[universe_id] = {
+            "id": universe_id,
+            "name": name,
+            "genre": genre,
+            "era": era,
+            "description": description,
+            "default_year": default_year,
+            "default_location": default_location,
+            "default_title": f"{name.replace(' ', '_')}.fountain",
+            "demo_traps": demo_traps or []
+        }
+        for c in characters:
+            c["universe_id"] = universe_id
+        for e in timeline_events:
+            e["universe_id"] = universe_id
+        for r in relationships:
+            r["universe_id"] = universe_id
+        for rule in lore_rules:
+            rule["universe_id"] = universe_id
+
+        self.characters.extend(characters)
+        self.timeline_events.extend(timeline_events)
+        self.relationships.extend(relationships)
+        self.lore_rules.extend(lore_rules)
+        self.active_universe_id = universe_id
+        return self.universes[universe_id]
 
     def check_character_status(self, character_names: List[str], scene_year: int) -> Dict[str, Any]:
         """
@@ -83,7 +168,7 @@ class ClickHouseEngine:
                 """
                 res = self.client.query(query, parameters={
                     "year": scene_year,
-                    "univ": settings.UNIVERSE_ID,
+                    "univ": self.active_universe_id,
                     "names": normalized_names
                 })
                 for row in res.result_rows:
@@ -109,6 +194,8 @@ class ClickHouseEngine:
     def _embedded_check_characters(self, normalized_names: List[str], scene_year: int, start_time: float) -> Dict[str, Any]:
         results = []
         for char in self.characters:
+            if char.get("universe_id") and char.get("universe_id") != self.active_universe_id:
+                continue
             char_name = char["name"].lower()
             aliases = [a.lower() for a in char.get("aliases", [])]
             if char_name in normalized_names or any(a in normalized_names for a in aliases):
@@ -167,7 +254,7 @@ class ClickHouseEngine:
                 LIMIT 10
                 """
                 res = self.client.query(query, parameters={
-                    "univ": settings.UNIVERSE_ID,
+                    "univ": self.active_universe_id,
                     "objs": normalized
                 })
                 for row in res.result_rows:
@@ -199,6 +286,8 @@ class ClickHouseEngine:
     def _embedded_check_relics(self, normalized: List[str], scene_year: int, start_time: float) -> Dict[str, Any]:
         results = []
         for rel in self.relationships:
+            if rel.get("universe_id") and rel.get("universe_id") != self.active_universe_id:
+                continue
             subj = rel["subject_name"].lower()
             obj = rel["object_name"].lower()
             if subj in normalized or obj in normalized:
@@ -228,6 +317,8 @@ class ClickHouseEngine:
         """
         rules = []
         for rule in self.lore_rules:
+            if rule.get("universe_id") and rule.get("universe_id") != self.active_universe_id:
+                continue
             if category and rule.get("category", "").lower() != category.lower():
                 continue
             if entity_or_species and entity_or_species.lower() not in rule.get("entity_or_species", "").lower():
@@ -249,6 +340,8 @@ class ClickHouseEngine:
 
         scored_events = []
         for event in self.timeline_events:
+            if event.get("universe_id") and event.get("universe_id") != self.active_universe_id:
+                continue
             e_vec = np.array(event["embedding"], dtype=np.float32)
             e_norm = np.linalg.norm(e_vec)
             if e_norm == 0:
@@ -262,7 +355,7 @@ class ClickHouseEngine:
     def record_audit_log(self, screenplay_title: str, flagged_line: str, violation_type: str, mitigation: str, latency_ms: float):
         log_entry = {
             "log_id": str(uuid.uuid4()),
-            "universe_id": settings.UNIVERSE_ID,
+            "universe_id": self.active_universe_id,
             "screenplay_title": screenplay_title,
             "flagged_line": flagged_line,
             "violation_type": violation_type,

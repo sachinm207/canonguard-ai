@@ -74,7 +74,206 @@ def health_check():
         "relationships_loaded": len(ch_engine.relationships),
         "lore_rules_loaded": len(ch_engine.lore_rules),
         "audit_logs_count": len(ch_engine.audit_logs),
+        "active_universe": ch_engine.get_active_universe(),
         "target_latency_budget": "< 20ms"
+    }
+
+@app.get("/api/universes")
+def get_universes():
+    """Returns all available franchise universes and the active one."""
+    return {
+        "active_universe": ch_engine.get_active_universe(),
+        "universes": ch_engine.get_all_universes()
+    }
+
+class SwitchUniverseRequest(BaseModel):
+    universe_id: str
+
+@app.post("/api/universe/switch")
+def switch_universe(req: SwitchUniverseRequest):
+    """Switches the active franchise canon in the ClickHouse engine."""
+    success = ch_engine.switch_universe(req.universe_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Universe '{req.universe_id}' not found.")
+    active = ch_engine.get_active_universe()
+    logger.info(f"Switched active universe to {active['name']} ({req.universe_id})")
+    return {"status": "SUCCESS", "active_universe": active}
+
+class IngestLoreDocumentRequest(BaseModel):
+    universe_name: str
+    genre: Optional[str] = "Custom Sci-Fi / Fantasy"
+    era: Optional[str] = "Current Timeline"
+    description: Optional[str] = "User-uploaded franchise story bible."
+    document_content: str
+
+@app.post("/api/universe/ingest-document")
+def ingest_lore_document(req: IngestLoreDocumentRequest):
+    """
+    Ingests a user's custom Lore Bible / Story Bible document into ClickHouse.
+    Extracts characters, dates, destroyed relics, and universe invariants,
+    registers the custom universe, and immediately activates it.
+    """
+    import re
+    import uuid
+    uid = f"CUSTOM_{re.sub(r'[^A-Z0-9]', '_', req.universe_name.upper())[:15]}_{str(uuid.uuid4())[:4]}"
+    
+    characters = []
+    relationships = []
+    rules = []
+    events = []
+
+    # Check for structured lines: Character, Relic, Rule
+    lines = req.document_content.splitlines()
+    for line in lines:
+        l = line.strip().lstrip("-*#").strip()
+        if not l:
+            continue
+        if any(l.lower().startswith(p) for p in ["character:", "name:", "hero:", "villain:"]):
+            parts = l.split(":", 1)
+            raw_name = parts[1].strip()
+            name_match = re.match(r'([^(]+)', raw_name)
+            c_name = name_match.group(1).strip() if name_match else raw_name
+            b_match = re.search(r'born[:\s]+(\d+)', raw_name, re.I)
+            d_match = re.search(r'died[:\s]+(\d+)', raw_name, re.I)
+            stasis_match = re.search(r'stasis[:\s]+(\d+)\s*-\s*(\d+)', raw_name, re.I)
+            b_year = int(b_match.group(1)) if b_match else 1950
+            d_year = int(d_match.group(1)) if d_match else None
+            s_start = int(stasis_match.group(1)) if stasis_match else None
+            s_end = int(stasis_match.group(2)) if stasis_match else None
+            status = "STASIS" if s_start else ("DEAD" if d_year else "ALIVE")
+            characters.append({
+                "character_id": str(uuid.uuid4()),
+                "name": c_name,
+                "aliases": [],
+                "species": "HUMAN",
+                "birth_year": b_year,
+                "death_year": d_year,
+                "status": status,
+                "stasis_start_year": s_start,
+                "stasis_end_year": s_end,
+                "home_planet": "Earth",
+                "powers": ["Custom Ability"]
+            })
+        elif any(l.lower().startswith(p) for p in ["relic:", "artifact:", "weapon:", "item:"]):
+            parts = l.split(":", 1)
+            raw_relic = parts[1].strip()
+            r_match = re.match(r'([^(]+)', raw_relic)
+            r_name = r_match.group(1).strip() if r_match else raw_relic
+            dest_match = re.search(r'(?:destroyed|shattered|melted|lost)(?:\s+in)?[:\s]+(\d+)', raw_relic, re.I)
+            dest_year = int(dest_match.group(1)) if dest_match else 2000
+            relationships.append({
+                "relationship_id": str(uuid.uuid4()),
+                "subject_name": "Franchise Order",
+                "predicate": "POSSESSES",
+                "object_name": r_name,
+                "valid_from_year": 1900,
+                "valid_to_year": dest_year,
+                "status": "DESTROYED",
+                "source_media": "Uploaded Story Bible"
+            })
+        elif any(l.lower().startswith(p) for p in ["rule:", "axiom:", "law:"]):
+            parts = l.split(":", 1)
+            stmt = parts[1].strip()
+            rules.append({
+                "rule_id": str(uuid.uuid4()),
+                "category": "PHYSICS",
+                "entity_or_species": "Uploaded Rule",
+                "rule_statement": stmt,
+                "canon_tier": "ABSOLUTE"
+            })
+
+    # If document was raw prose without tags, extract capitalized entity names
+    if not characters:
+        found_names = re.findall(r'\b([A-Z][a-z]+ [A-Z][a-z]+|[A-Z][a-z]{3,})\b', req.document_content)
+        unique_names = list(dict.fromkeys(found_names))[:8]
+        for name in unique_names:
+            characters.append({
+                "character_id": str(uuid.uuid4()),
+                "name": name,
+                "aliases": [],
+                "species": "HUMAN",
+                "birth_year": 1960,
+                "death_year": 2010 if "died" in req.document_content.lower() else None,
+                "status": "DEAD" if "died" in req.document_content.lower() else "ALIVE",
+                "stasis_start_year": None,
+                "stasis_end_year": None,
+                "home_planet": "Earth",
+                "powers": ["Leadership"]
+            })
+
+    # Ingest into ClickHouse
+    universe_metadata = ch_engine.ingest_custom_universe(
+        universe_id=uid,
+        name=req.universe_name,
+        genre=req.genre or "Custom Lore",
+        era=req.era or "Active Era",
+        description=req.description or "User-uploaded story bible.",
+        characters=characters,
+        timeline_events=events,
+        relationships=relationships,
+        lore_rules=rules
+    )
+
+    logger.info(f"Custom universe '{req.universe_name}' ({uid}) ingested into ClickHouse with {len(characters)} characters, {len(relationships)} relics, {len(rules)} rules.")
+    return {
+        "status": "SUCCESS",
+        "universe": universe_metadata,
+        "characters_ingested": len(characters),
+        "relics_ingested": len(relationships),
+        "rules_ingested": len(rules)
+    }
+
+class ScreenplayUploadRequest(BaseModel):
+    content: str
+    filename: Optional[str] = "Screenplay.fountain"
+
+@app.post("/api/screenplay/parse")
+def parse_screenplay_upload(req: ScreenplayUploadRequest):
+    """
+    Parses an uploaded screenplay file (.fountain, .txt),
+    extracts slugline, scene year, and location, and runs real-time validation.
+    """
+    import re
+    slug_match = re.search(r'(?:INT\.|EXT\.)[^\n]+', req.content)
+    slug = slug_match.group(0).strip() if slug_match else "INT. BERLIN SAFEHOUSE - NIGHT - 1982"
+    
+    year_match = re.search(r'\b(1\d{3}|2\d{3})\b', slug)
+    if not year_match:
+        year_match = re.search(r'\b(1\d{3}|2\d{3})\b', req.content)
+    scene_year = int(year_match.group(1)) if year_match else 1982
+
+    # Extract location from slugline
+    loc = "Main Safehouse"
+    if "-" in slug:
+        parts = slug.split("-")
+        if len(parts) >= 2:
+            loc = parts[0].replace("INT.", "").replace("EXT.", "").strip()
+
+    first_action_line = ""
+    for line in req.content.splitlines():
+        l = line.strip()
+        if l and not l.startswith("INT.") and not l.startswith("EXT.") and not l.isupper():
+            first_action_line = l
+            break
+    if not first_action_line:
+        first_action_line = req.content.strip()[:200]
+
+    # Validate against current active universe
+    val_result = orchestrator.validate_screenplay_stream(
+        text=first_action_line,
+        screenplay_title=req.filename,
+        fallback_year=scene_year,
+        fallback_location=loc
+    )
+
+    return {
+        "filename": req.filename,
+        "slugline": slug,
+        "scene_year": scene_year,
+        "location": loc,
+        "content": req.content,
+        "preview_line": first_action_line,
+        "validation": val_result
     }
 
 @app.post("/api/validate-scene", response_model=ValidationResponse)
@@ -94,21 +293,23 @@ def validate_scene(req: SceneValidationRequest):
 @app.get("/api/lore/characters")
 def get_characters(query: Optional[str] = None):
     """Browse or search canonical characters in the universe."""
-    chars = ch_engine.characters
+    chars = [c for c in ch_engine.characters if c.get("universe_id") == ch_engine.active_universe_id]
     if query:
         q = query.lower()
         chars = [c for c in chars if q in c["name"].lower() or any(q in a.lower() for a in c.get("aliases", []))]
-    return {"total": len(chars), "characters": chars[:50]}
+    return {"total": len(chars), "universe": ch_engine.active_universe_id, "characters": chars[:50]}
 
 @app.get("/api/lore/timeline")
 def get_timeline():
     """Returns canonical timeline events."""
-    return {"total": len(ch_engine.timeline_events), "events": ch_engine.timeline_events}
+    events = [e for e in ch_engine.timeline_events if e.get("universe_id") == ch_engine.active_universe_id]
+    return {"total": len(events), "universe": ch_engine.active_universe_id, "events": events}
 
 @app.get("/api/lore/rules")
 def get_lore_rules():
     """Returns absolute physical, biological, and technological lore invariants."""
-    return {"total": len(ch_engine.lore_rules), "rules": ch_engine.lore_rules}
+    rules = [r for r in ch_engine.lore_rules if r.get("universe_id") == ch_engine.active_universe_id]
+    return {"total": len(rules), "universe": ch_engine.active_universe_id, "rules": rules}
 
 @app.get("/api/audit-logs")
 def get_audit_logs():

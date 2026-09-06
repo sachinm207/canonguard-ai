@@ -105,19 +105,96 @@ Major studios (Marvel Studios, Lucasfilm, DC, Paramount) manage universes spanni
 
 ---
 
-## 🔬 5. Competitive Landscape & Market Study
+## 🌌 6. Multi-Canon Universe Selector
+
+Different productions and writers work in distinct universes with unique physical laws, character timelines, and artifacts. CanonGuard AI includes **3 pre-configured cinematic universes** out of the box, with instant switching:
+
+| Universe | Genre & Timeline | Key Figures & Relics | Sample Continuity Rules |
+| :--- | :--- | :--- | :--- |
+| **ChronoVerse** | Sci-Fi / Time-Travel (1900–2080) | Viktor, Elena, Malakor; The Sunstone | Cryogenic stasis (1975–1995); Sunstone vaporized in 1960; Planet Zora has 85% ammonia atmosphere. |
+| **Galactic Imperium** | Space Opera (2100–3200) | Grand Inquisitor Kael, Commander Vesh; Kyber Singularity Core | Inquisitor Kael executed in 2180; Kyber Core shattered in 2150; Planet Krynn has airless vacuum and solar radiation. |
+| **Mythos Realm** | High Fantasy (Age of Legends, 1000–1500) | High King Eldor, Prince Theron; The Aethelgard Blade | King Eldor slain in 1450; Aethelgard Blade melted in dragonfire in 1300; Iron Wastes of Skar block all magic. |
+
+### How to Switch Universes:
+1. Locate the **Universe selector dropdown** in the studio header (`🌌 Universe: ChronoVerse (1900-2080)`).
+2. Select any universe (e.g. `Galactic Imperium`).
+3. The editor slugline and preloaded demo traps dynamically refresh with continuity traps specific to that universe!
+
+---
+
+## 📂 7. Screenplay Document Upload & Drag-and-Drop
+
+Writing teams do not have to copy-paste scripts line-by-line. CanonGuard AI provides native file upload and drag-and-drop:
+
+1. **Click `📂 Upload Script` Button:**
+   - In the toolbar above the editor, click **`📂 Upload Script`**.
+   - Select any `.fountain`, `.txt`, or `.fdx` screenplay from your computer.
+   - The file parses automatically, updates the scene slugline, and begins real-time continuity validation immediately.
+2. **Drag-and-Drop directly onto the editor:**
+   - Drag any `.fountain` or `.txt` file from your desktop or file manager directly onto the text editor.
+   - The editor highlights with an active drop border, immediately imports the script text, and triggers continuous linting.
+
+---
+
+## 📥 8. Custom Story Bible & Lore Ingestion
+
+Have your own novel, video game, or TV show universe? You can ingest your own **Story Bible** into CanonGuard AI:
+
+1. Click **`📥 Upload Lore Bible`** in the header.
+2. An ingestion dialog appears with:
+   - **Quick Sample Templates:** Click `Load CyberCity 2099` or `Load Shadow Realm` to see pre-populated templates.
+   - **Universe Details:** Provide a Universe ID and Name (e.g. `dune_expanded_lore`, `Dune Expanded Canon`).
+   - **Story Bible Content:** Paste your structured JSON, Markdown, or plaintext lore notes.
+3. **Structured JSON Bible Schema:**
+```json
+{
+  "characters": [
+    {
+      "name": "Alex Mercer",
+      "status": "DEAD",
+      "death_year": 2045,
+      "stasis_start_year": 0,
+      "stasis_end_year": 0,
+      "faction": "Cyber-Resist",
+      "bio": "Legendary netrunner neutralized in the 2045 mainframe collapse."
+    }
+  ],
+  "relics": [
+    {
+      "name": "Neural Core",
+      "status": "DESTROYED",
+      "destruction_year": 2040,
+      "notes": "Destroyed in the Great Grid Surge of 2040."
+    }
+  ],
+  "rules": [
+    {
+      "rule_text": "Neural overclocking beyond Level 4 induces fatal synaptic shock.",
+      "category": "BIOLOGICAL_INVARIANT",
+      "severity": "CRITICAL"
+    }
+  ]
+}
+```
+4. Click **`⚡ Ingest into ClickHouse`**:
+   - The engine parses your entities, indexes them into ClickHouse tables under the new `universe_id`, and immediately activates your custom canon!
+
+---
+
+## 🔬 9. Competitive Landscape & Market Study
 
 For a full breakdown of how CanonGuard AI compares to industry tools like **Final Draft 13**, **World Anvil**, **Campfire**, **Filmustage**, **StoryBirdie**, and **Sudowrite/ChatGPT**, check out our in-depth research:
 👉 **[Read COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)**
 
 ---
 
-## 🧠 6. Architectural Knowledge Base & Q&A Archive
+## 🧠 10. Architectural Knowledge Base & Q&A Archive
 
 For deep technical insights on:
 - What is "Canon"? (Etymology, history & Hollywood tiers)
 - Why sub-20ms latency is mathematically essential for writer cognitive flow
 - Scalability mathematics for 50+ movies in ClickHouse (only ~25 MB; $0.0006/month)
+- Multi-universe partitioning architecture and custom ingestion pipelines
 - Complete Q&A archive of all architectural decisions
 
 👉 **[Read KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)**

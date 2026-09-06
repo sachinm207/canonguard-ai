@@ -49,32 +49,48 @@ docker compose up -d
 
 ### 3. Run Automated Retcon Trap Tests
 ```bash
-python3 -m backend.tests.test_canon_engine
+PYTHONPATH=. pytest backend/tests/test_canon_engine.py -v
 ```
 Output:
 ```text
-✅ Trap 1 Passed! Verified in 0.73ms (Target < 20ms). Mitigation: Use Disciple Malakor
-✅ Trap 2 Passed! Verified in 0.74ms. Relic contradiction caught.
-✅ Trap 3 Passed! Verified in 0.61ms. Lethal atmosphere retcon caught.
-✅ Valid Canon Line Passed in 0.66ms with zero false positives.
-🎉 ALL 4 CANON ENGINE INTEGRATION TESTS PASSED UNDER 20ms!
+backend/tests/test_canon_engine.py::test_trap_1_cryogenic_stasis_violation PASSED [ 14%]
+backend/tests/test_canon_engine.py::test_trap_2_destroyed_relic_violation PASSED [ 28%]
+backend/tests/test_canon_engine.py::test_trap_3_biological_invariant_violation PASSED [ 42%]
+backend/tests/test_canon_engine.py::test_valid_canon_line_passes_instantly PASSED [ 57%]
+backend/tests/test_canon_engine.py::test_galactic_imperium_canon PASSED  [ 71%]
+backend/tests/test_canon_engine.py::test_mythos_realm_canon PASSED       [ 85%]
+backend/tests/test_canon_engine.py::test_custom_lore_document_ingestion PASSED [100%]
+🎉 ALL 7 CANON ENGINE INTEGRATION TESTS PASSED UNDER 20ms (0.12ms - 0.37ms)!
 ```
 
 ---
 
-## 🎯 4. The 3 Pre-Seeded Demo Traps
+## 🎯 4. Multi-Canon Support & Pre-Seeded Universes
 
-Click the buttons in the Studio header to test the traps live:
+CanonGuard AI supports switching between multiple fictional universes instantly, or ingesting custom ones:
 
-| Trap | Screenplay Input | Canonical Fact in ClickHouse | Retcon Caught (< 20ms) | Suggested AI Mitigation |
+| Universe | Scenario Tested | Canonical Fact in ClickHouse | Retcon Caught (< 20ms) | Suggested AI Mitigation |
 | :--- | :--- | :--- | :---: | :--- |
-| **Trap 1: Stasis Paradox** | *"Viktor arrives at the Berlin safehouse in 1982 to meet Elena."* | Viktor was in cryogenic stasis from 1975 to 1995 (*ChronoVerse III*). | ❌ **0.75 ms** | Swap Viktor with his disciple **Malakor** who was active in Berlin in 1982. |
-| **Trap 2: Destroyed Relic** | *"Elena pulls the Sunstone from her trenchcoat in Berlin, 1982."* | The Sunstone was atomized in the Solaria core in 1960 (*ChronoVerse II*). | ❌ **0.63 ms** | Reveal the stone is a **forged replica** created by the Syndicate. |
-| **Trap 3: Toxic Atmosphere** | *"On Planet Zora, Lord Vane removes his helmet and takes a deep breath of the air."* | Zoran atmosphere is 85% toxic ammonia (*Lore Rule #4*). | ❌ **0.36 ms** | Engage helmet internal rebreather filter; do not expose lung tissue. |
+| **ChronoVerse** (Trap 1: Stasis) | *"Viktor arrives at the Berlin safehouse in 1982 to meet Elena."* | Viktor was in cryogenic stasis from 1975 to 1995 (*ChronoVerse III*). | ❌ **0.25 ms** | Swap Viktor with his disciple **Malakor** who was active in Berlin in 1982. |
+| **ChronoVerse** (Trap 2: Relic) | *"Elena pulls the Sunstone from her coat in Berlin, 1982."* | The Sunstone was atomized in the Solaria core in 1960 (*ChronoVerse II*). | ❌ **0.18 ms** | Reveal the stone is a **forged replica** created by the Syndicate. |
+| **ChronoVerse** (Trap 3: Atmosphere) | *"On Planet Zora, Lord Vane removes his helmet and takes a deep breath of the air."* | Zoran atmosphere is 85% toxic ammonia (*Lore Rule #4*). | ❌ **0.14 ms** | Engage helmet internal rebreather filter; do not expose lung tissue. |
+| **Galactic Imperium** | *"Inquisitor Kael arrives at the orbital citadel in 2190."* | Grand Inquisitor Kael executed in 2180; Kyber Core shattered in 2150. | ❌ **0.22 ms** | Replace with Commander Vesh; swap Kyber Core for Resonance Matrix. |
+| **Mythos Realm** | *"High King Eldor draws the Aethelgard Blade in 1480."* | King Eldor died in 1450; Aethelgard Blade melted in dragonfire in 1300. | ❌ **0.19 ms** | Replace with Prince Theron; wield Reforged Shadow Dagger. |
 
 ---
 
-## 🏛️ 5. ClickHouse Schema & Performance Architecture
+## 📂 5. Document Upload & Custom Story Bible Ingestion
+
+1. **Screenplay Upload (`.fountain`, `.txt`, `.fdx`):**
+   - Click the **`📂 Upload Script`** button or drag-and-drop any screenplay directly onto the writing canvas.
+   - Screenplay sluglines and scenes parse automatically with real-time linting.
+2. **Story Bible Ingestion (`📥 Upload Lore Bible`):**
+   - Click **`📥 Upload Lore Bible`** in the header.
+   - Load pre-made templates (`CyberCity 2099`, `Shadow Realm`) or paste your custom JSON/Markdown lore bible.
+   - Click **`⚡ Ingest into ClickHouse`** to index characters, relics, and rules into isolated ClickHouse partitions and start writing in your custom universe!
+---
+
+## 🏛️ 6. ClickHouse Schema & Performance Architecture
 
 ClickHouse powers the memory layer using `ReplacingMergeTree` and vector similarity:
 1. `franchise_characters`: Columnar character status, birth/death bounds, and stasis ranges.
@@ -87,7 +103,7 @@ Dual-Mode Architecture: Automatically connects to native ClickHouse via `clickho
 
 ---
 
-## 🤖 6. Multi-Agent Network
+## 🤖 7. Multi-Agent Network
 
 - **1. Stream Ingestion Agent:** Debounces keystrokes (350ms) and extracts `(Subject, Action, Object, Location, Year)`.
 - **2. ClickHouse Lore Retrieval Agent:** Executes parallel lookups across ClickHouse in `< 18ms`.

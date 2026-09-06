@@ -37,7 +37,8 @@ class StreamIngestionAgent:
         line = text.strip()
         
         # 1. Check for Year in Slugline or text: e.g. "1982", "1960", "2045"
-        year_match = re.search(r'\b(19\d{2}|20\d{2})\b', line)
+        # 1. Check for Year in Slugline or text: e.g. "1480", "1982", "2190"
+        year_match = re.search(r'\b(1\d{3}|2\d{3})\b', line)
         scene_year = int(year_match.group(1)) if year_match else fallback_year
 
         # 2. Extract Location
@@ -46,24 +47,52 @@ class StreamIngestionAgent:
             location = "Berlin"
         elif "zora" in line.lower() or "zoran" in line.lower():
             location = "Planet Zora"
+        elif "krynn" in line.lower():
+            location = "Planet Krynn"
+        elif "valos" in line.lower():
+            location = "Valos Prime"
         elif "solaria" in line.lower():
             location = "Solaria Core"
         elif "siberia" in line.lower() or "siberian" in line.lower():
             location = "Siberian Cryo-Vault"
+        elif "silver citadel" in line.lower():
+            location = "Silver Citadel"
+        elif "iron wastes" in line.lower() or "skar" in line.lower():
+            location = "Iron Wastes of Skar"
 
-        # 3. Known Franchise Characters Lookup
-        known_characters = ["Viktor", "Malakor", "Elena", "Lord Vane", "Aria Starkov", "Marcus Kovacs", "Selene Drake"]
+        # 3. Dynamic Franchise Characters Lookup
+        from ..db.clickhouse import ch_engine
         detected_characters = []
-        for char in known_characters:
-            if re.search(rf'\b{re.escape(char)}\b', line, re.IGNORECASE):
-                detected_characters.append(char)
+        for char in ch_engine.characters:
+            if char.get("universe_id") == ch_engine.active_universe_id:
+                c_name = char["name"]
+                if re.search(rf'\b{re.escape(c_name)}\b', line, re.IGNORECASE):
+                    if c_name not in detected_characters:
+                        detected_characters.append(c_name)
+                for alias in char.get("aliases", []):
+                    if re.search(rf'\b{re.escape(alias)}\b', line, re.IGNORECASE):
+                        if c_name not in detected_characters:
+                            detected_characters.append(c_name)
 
-        # 4. Known Relics / Objects Lookup
-        known_relics = ["Sunstone", "Quantum Chronometer", "Aegis Blade", "Chrono-Key", "The Iron Vanguard"]
+        # Fallback if no character matched
+        if not detected_characters:
+            for fallback_c in ["Viktor", "Malakor", "Elena", "Lord Vane", "Grand Inquisitor Kael", "Commander Vesh", "Lady Seraphina", "High King Eldor", "Prince Theron", "Queen Morwen"]:
+                if re.search(rf'\b{re.escape(fallback_c)}\b', line, re.IGNORECASE):
+                    detected_characters.append(fallback_c)
+
+        # 4. Dynamic Relics / Objects Lookup
         detected_objects = []
-        for relic in known_relics:
-            if re.search(rf'\b{re.escape(relic)}\b', line, re.IGNORECASE):
-                detected_objects.append(relic)
+        for rel in ch_engine.relationships:
+            if rel.get("universe_id") == ch_engine.active_universe_id:
+                obj_name = rel.get("object_name", "")
+                if obj_name and re.search(rf'\b{re.escape(obj_name)}\b', line, re.IGNORECASE):
+                    if obj_name not in detected_objects:
+                        detected_objects.append(obj_name)
+
+        if not detected_objects:
+            for fallback_r in ["Sunstone", "Kyber Singularity Core", "Aethelgard Blade", "Chrono-Key", "The Iron Vanguard"]:
+                if re.search(rf'\b{re.escape(fallback_r)}\b', line, re.IGNORECASE):
+                    detected_objects.append(fallback_r)
 
         # 5. Extract Primary Action / Claim
         action = "interacts"
