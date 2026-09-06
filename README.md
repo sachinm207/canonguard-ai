@@ -4,6 +4,7 @@
 > **Target Partner Track:** **ClickHouse Track** ($7,500 1st / $4,500 2nd / $3,000 3rd)  
 > **Sub-20ms Target:** Verified inside ClickHouse at **0.6ms – 1.8ms**  
 > **Studio Guide & Glossary:** [Read GUIDE.md](GUIDE.md)  
+> **Competitive Analysis & Market Study:** [Read COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)  
 > **Open Source License:** [MIT License](LICENSE)
 
 ---

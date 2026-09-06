@@ -102,3 +102,11 @@ Major studios (Marvel Studios, Lucasfilm, DC, Paramount) manage universes spanni
 5. **Write Your Own Scenes:**
    - Type custom action lines or dialogue in Fountain format.
    - Change characters, years, and relics to see real-time verification in action!
+
+---
+
+## 🔬 5. Competitive Landscape & Market Study
+
+For a full breakdown of how CanonGuard AI compares to industry tools like **Final Draft 13**, **World Anvil**, **Campfire**, **Filmustage**, **StoryBirdie**, and **Sudowrite/ChatGPT**, check out our in-depth research:
+👉 **[Read COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)**
+
