@@ -1,202 +1,164 @@
-# 📖 CanonGuard AI: Studio Guide & Industry Glossary
+# 📖 CanonGuard AI: The Simple Guide Anyone Can Understand
 
-Welcome to **CanonGuard AI**! This guide explains how the platform works, how major Hollywood entertainment studios manage multi-decade continuity, what each UI element means, and definitions for all industry and technical terms.
+Welcome to **CanonGuard AI**! 
 
----
-
-## 🎬 1. How Franchise Data Works: Previous Lore vs. Current Script
-
-A fundamental question is: **"How is previous franchise data loaded, and what does 'current' mean?"**
-
-### The Hollywood Problem: The Multi-Decade Franchise
-Major studios (Marvel Studios, Lucasfilm, DC, Paramount) manage universes spanning **30 to 80 years** of movies, TV shows, comic books, and tie-in novels.
-- Over 50 films and hundreds of tie-in stories exist.
-- Human **"Lore Keepers"** (such as Leland Chee at Lucasfilm, who oversees the famous *"Holocron"* continuity database) maintain 800-page Franchise Story Bibles to track which character is alive, who owns what weapon, and what planets have toxic atmospheres.
-
-### How Previous Lore is Loaded (Ingestion Pipeline)
-1. **The Canonical Archive ("Previous Data"):**
-   - In studio pipelines, past finished movie scripts, comic scripts, and production encyclopedias are ingested.
-   - Text is parsed into structured entities, temporal lifespans, and relationships:
-     - **Characters:** Name, Status (`ALIVE`, `DEAD`, `STASIS`), Birth Year, Death Year.
-     - **Relics & Weapons:** Item Name, State (`ACTIVE`, `DESTROYED`), Destruction Year.
-     - **Universe Rules (Axioms):** Physics, magic limits, planetary atmospheres.
-   - In CanonGuard AI, this is stored in **ClickHouse** (`franchise_characters`, `canon_timeline_events`, `entity_relationships`, `canon_lore_rules`).
-   - At system boot, the engine seeds **The ChronoVerse**—a 20-movie cinematic history spanning years 1900 to 2080.
-
-2. **What "Current" Means (The Active Screenplay / Scene):**
-   - **"Current"** refers to the **new script or scene currently being drafted** by a screenwriter in the writer's room today.
-   - Screenwriters write **scene-by-scene**. For example: *Scene 14 takes place in 1982 in a Berlin safehouse*.
-   - As the screenwriter types text for this *current* draft, CanonGuard streams each sentence to ClickHouse to verify:
-     > *"Does what is happening in this current 1982 scene contradict anything established in the previous 40 years of movies?"*
+Whether you are a screenwriter, a film fan, a software developer, or a hackathon judge, this guide explains **what this application does, why it matters, and how to use it in plain, simple English**—with zero confusing jargon.
 
 ---
 
-## 🖥️ 2. Screenplay Studio Interface Breakdown
+## 🌟 1. What is CanonGuard AI? (The 10-Second Summary)
 
-### What is `Cold War Requiem.fountain`?
-- **Screenplay File Title:** In the top metadata bar, `Cold War Requiem.fountain` represents the active script file open in your editor.
-- **What is `.fountain`?** 
-  - [Fountain](https://fountain.io/) is the universal, open-source plaintext markup format used across the screenwriting industry (like Markdown is for programmers).
-  - It allows writers to type standard scene headings, action descriptions, and dialogue in any plain text editor, which screenwriting software (Final Draft, Highland, Fade In) renders into industry-standard formatted script pages.
-- **Setting: Berlin Safehouse | Scene Year: 1982:**
-  - This is the **Scene Slugline (Heading)**. It tells the canon engine the temporal anchor (**1982**) and geographical location (**Berlin Safehouse**) of the current scene so it can evaluate whether characters or relics are valid for that specific year and place.
+> **Think of CanonGuard AI as "Grammarly for Movies and TV Franchises."**
 
----
+When you write an essay in Microsoft Word or Google Docs, a spellchecker puts a red squiggly line under misspelled words.
 
-### What is "Auto-Lint Active (350ms)"?
-- **What is a Linter?** In computer programming, a "linter" is a background tool that checks code as you type and draws red squiggly lines under bugs or syntax errors.
-- **Auto-Lint Active:** CanonGuard AI is a **"Grammarly for Cinema Canon"**. It continuously monitors the editor.
-- **350ms Debounce:** When you are typing, the engine waits 350 milliseconds after your last keystroke before scanning the text. This prevents spamming the database while you are midway through typing a word.
-- Once 350ms passes, the system validates the line against ClickHouse in **under 1 millisecond** and injects an inline **red squiggly underline** under any continuity violation.
+**CanonGuard AI does the exact same thing—but for movie storylines!**
+
+As a screenwriter types a new script, CanonGuard AI watches in real-time. If the writer accidentally writes something that contradicts past movies (like bringing a dead character back to life, or using an ancient sword that was melted 3 films ago), CanonGuard AI **instantly draws a red squiggly line under the mistake** and gives **3 creative ways to fix it with a single click**.
 
 ---
 
-### What are "Demo Traps"?
-- In software quality assurance and security, a **"trap"** (or canary test) is an intentionally planted error created to test whether an automated detection system catches it properly.
-- The **"Preloaded Demo Traps"** buttons in the header (`Trap 1`, `Trap 2`, `Trap 3`) are 3 pre-configured Hollywood continuity blunders. Clicking any of them instantly loads that scenario into the editor:
-  1. **Trap 1 (Stasis Paradox):** 
-     - *Script:* `"Viktor arrives at the Berlin safehouse in 1982 to meet Elena."`
-     - *Violation:* Viktor was in cryogenic stasis in Siberia from 1975 to 1995. He cannot be in Berlin in 1982!
-  2. **Trap 2 (Destroyed Relic):** 
-     - *Script:* `"Elena pulls the Sunstone from her coat to open the portal in 1982."`
-     - *Violation:* The Sunstone was vaporized in 1960 during the Battle of Solaria (*ChronoVerse II*). It cannot exist in 1982.
-  3. **Trap 3 (Biological Invariant):** 
-     - *Script:* `"On Planet Zora, Lord Vane removes his helmet and takes a deep breath of the air."`
-     - *Violation:* Zoran atmosphere is 85% toxic ammonia (*Lore Rule #4*). Breathing it causes instant death.
+## 🎬 2. The Real-World Problem: Why Do We Need This?
+
+### The Big Movie Franchise Problem
+Think about modern entertainment:
+- **Marvel (MCU)** has over 33 movies and dozens of TV shows.
+- **Star Wars** has films, animated series, and books going back nearly 50 years.
+- **Star Trek, Doctor Who, and Lord of the Rings** have massive, complex timelines.
+
+No single human writer can remember every single detail, character birth year, magical rule, or destroyed weapon from 50 movies.
+
+### What Goes Wrong in the Real World?
+When screenwriters write a new episode, mistakes happen:
+1. **The Timeline Mistake:** Writing a character into a 1982 scene, forgetting that in *Movie 3* it was established they were frozen in cryogenic ice until 1995!
+2. **The Destroyed Item Mistake:** Having a hero pull a magical stone out of their pocket, forgetting that the stone was destroyed in the previous season.
+3. **The World Rule Mistake:** Showing a hero taking their space helmet off and breathing normally on an alien planet that was already established to have poisonous air.
+
+### The 0 Million Nightmare
+If nobody catches these mistakes before filming begins:
+- The studio films the scene with expensive cameras, actors, and sets.
+- During test screenings or after release, fans notice the plot hole.
+- The studio has to spend **0 Million to 0 Million in emergency reshoots and CGI fixes** to patch the plot hole!
+
+**CanonGuard AI stops this mistake right at the writer's keyboard before a single dollar is spent on cameras.**
 
 ---
 
-## 📚 3. Comprehensive Glossary of Keywords
+## 🖥️ 3. Touring the Screen: What Everything Means
 
-| Term | What It Means | Why It Matters in CanonGuard AI |
-| :--- | :--- | :--- |
-| **Retcon** | Short for **Retroactive Continuity**. When a new film, book, or episode accidentally changes or contradicts previously established facts. | The primary problem CanonGuard AI prevents. Post-production reshoots to fix retcons cost studios $10M–$30M. |
-| **Retcon Diagnostics** | The detailed analysis of why a line breaks canon, including the rule violated, the offending entity, and citations to past movies. | Displayed in the right-hand panel whenever a red squiggly line is flagged. |
-| **Franchise Lore** | The collective canon, history, character timelines, and rules of a fictional universe. | Stored in ClickHouse as columnar tables representing characters, timeline events, and physical laws. |
-| **Telemetry** | Real-time performance monitoring data (query latency in milliseconds, count of violations caught, audit logs). | Proves that ClickHouse verifies canon in sub-millisecond time (< 1ms vs. < 20ms target). |
-| **Creative Mitigation** | AI-generated narrative solutions that preserve the writer's dramatic intention without violating canon. | Instead of just saying "Error!", Gemini suggests 3 story fixes (e.g. swap Viktor with his disciple Malakor). |
-| **Auto-Patch** | A 1-click button that automatically replaces the continuity error in your screenplay with the selected AI mitigation. | Allows writers to resolve continuity blunders with zero friction in seconds. |
-| **ReplacingMergeTree** | A specialized ClickHouse database table engine that automatically deduplicates records and maintains the latest state of an entity. | Used for `franchise_characters` to track changing character states (e.g., Alive -> Stasis -> Dead). |
-| **Causal Graph Triple** | A data structure connecting `Subject -> Predicate -> Object` with temporal validity (e.g., `Sunstone -> Destroyed_In -> 1960`). | Used in `entity_relationships` to catch paradoxes involving destroyed relics or severed alliances. |
-| **Vector Embedding (768-dim)** | A mathematical representation of text meaning (768 numbers) used for semantic search. | Stored in ClickHouse to find semantically similar past timeline events even if exact words differ. |
-| **Sub-20ms Target** | Completing database verification faster than 20 milliseconds. | 20ms is the threshold where humans perceive an interaction as "instantaneous". CanonGuard operates at **0.3ms to 1.5ms**. |
+When you look at the screen, here is what each part means in plain English:
 
----
-
-## 🚀 4. How to Use the Screenplay Studio (Step-by-Step)
-
-1. **Launch the Studio:**
-   - Run `python3 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8005` and open `http://127.0.0.1:8005`.
-2. **Try a Demo Trap:**
-   - Click **Trap 1 (Stasis)** in the top right.
-   - Notice the text appears in the editor.
-   - Within **0.5ms**, a red squiggly line underlines `"Viktor"`.
-3. **Inspect the Retcon Diagnostic:**
-   - Look at the right panel under **Retcon Diagnostics**.
-   - Read the exact reason: *"Viktor was in cryogenic stasis from 1975 to 1995"*.
-   - See the citation: *"ChronoVerse III: The Long Winter"*.
-4. **Apply a 1-Click Auto-Patch:**
-   - Under the diagnostic card, view the 3 AI Mitigations.
-   - Click **Auto-Patch** on *"Character Substitution: Use Disciple Malakor"*.
-   - The script updates instantly to Malakor, the red line turns green, and the diagnostic clears to **"Franchise Canon Clean ✨"**!
-5. **Write Your Own Scenes:**
-   - Type custom action lines or dialogue in Fountain format.
-   - Change characters, years, and relics to see real-time verification in action!
+### 1. The Top Header Bar
+* **`🌌 Universe: [The ChronoVerse (1900–2080)]`**
+  * **What it is:** The story world selector dropdown.
+  * **How to use it:** Click it to switch between different story worlds:
+    * **The ChronoVerse:** A 20-movie sci-fi spy thriller world with time-travel and cryogenic vaults.
+    * **Galactic Imperium:** A space opera world with starships, laser battles, and alien planets.
+    * **Mythos Realm:** A high fantasy world with knights, enchanted swords, and dragons.
+* **`Trap 1`, `Trap 2`, `Trap 3` Buttons:**
+  * **What they are:** Sample test buttons ("Traps").
+  * **How to use them:** Click any trap to immediately paste a famous movie continuity mistake into the script and watch the AI catch it in less than 1 millisecond.
+* **`📥 Upload Lore Bible` Button:**
+  * **What it is:** Ingest your own world. If you have your own book series or game world, click this to upload your characters and rules.
+* **`📖 Guide` Button:**
+  * **What it is:** Opens a quick help guide right inside the app.
 
 ---
 
-## 🌌 6. Multi-Canon Universe Selector
+### 2. The Screenplay Workspace (Left Side)
+* **`Cold War Requiem.fountain`:**
+  * The file name of the script you are working on.
+  * **What is `.fountain`?** Just like `.txt` is plain text and `.md` is markdown, `.fountain` is the standard, free format screenwriters use to type scripts without needing expensive proprietary software.
+* **`Setting: Berlin Safehouse | Scene Year: 1982`:**
+  * The **Scene Heading** (also called a "Slugline").
+  * This tells the AI **where** and **when** the current scene happens. If the year is `1982`, the AI knows to check: *"Who is alive in 1982? Who is in prison? What items exist in 1982?"*
+* **`📂 Upload Script` Button:**
+  * Lets you upload your own screenplay file (`.fountain`, `.txt`, or `.fdx`) from your computer. You can also just **drag-and-drop** any file right onto the text box!
+* **`Auto-Lint Active (350ms)`:**
+  * This means the AI helper is turned on and watching your back.
+  * When you type, it waits 350 milliseconds (about a third of a second) after you stop typing to run a check. This ensures it doesn't interrupt you while you are midway through typing a word.
+* **The Red Squiggly Underline:**
+  * When you write a plot hole or broken rule, the system draws a red squiggly line right under the problematic sentence—just like a spellcheck error!
 
-Different productions and writers work in distinct universes with unique physical laws, character timelines, and artifacts. CanonGuard AI includes **3 pre-configured cinematic universes** out of the box, with instant switching:
+---
 
-| Universe | Genre & Timeline | Key Figures & Relics | Sample Continuity Rules |
+### 3. The Retcon Diagnostics Panel (Right Side)
+* **`Retcon Diagnostics`:**
+  * When a red squiggly line appears, this card explains **why** it is wrong in plain English.
+  * For example: *"Viktor cannot be in Berlin in 1982 because he was in cryogenic stasis in Siberia from 1975 to 1995."*
+  * It even shows the **Citation** (which past movie established this fact!).
+* **`Verified in 0.42 ms` (Telemetry Speedometer):**
+  * Shows how fast the database checked the rule. In our system, it takes **under 1 millisecond** (0.001 seconds), so there is never any lag.
+* **`AI Creative Mitigations`:**
+  * Instead of just telling you *"You made an error!"*, the AI acts as a friendly co-writer. It gives you 3 clever story ideas to fix the problem without ruining your dramatic scene!
+* **`Auto-Patch` Button:**
+  * Click this button, and the AI **automatically replaces the error in your script with the canonical fix**! The red underline turns green, and your script is clean.
+
+---
+
+## 🎮 4. Try It Yourself in 3 Simple Steps (60 Seconds)
+
+You can try the entire system in under a minute:
+
+1. **Click `Trap 1 (Stasis)`** in the top header.
+   * Look at the script editor: *"Viktor arrives at the Berlin safehouse in 1982 to meet Elena."*
+   * Instantly, a **red squiggly line** appears under *"Viktor"*.
+2. **Read the Card on the Right:**
+   * It tells you Viktor was frozen in cryogenic stasis from 1975 to 1995 (*ChronoVerse III: The Long Winter*).
+3. **Click `Auto-Patch` on Solution #1 ("Use Disciple Malakor"):**
+   * Watch your script text change automatically to: *"Malakor arrives at the Berlin safehouse in 1982 to meet Elena."*
+   * The red line disappears, turning into a clean green badge: **"Franchise Canon Clean ✨"**!
+
+---
+
+## 🌌 5. The 3 Pre-Loaded Story Worlds
+
+You can test 3 completely different genres right out of the box using the **Universe** dropdown:
+
+| Universe | What the Story is About | Example Continuity Rule | What Happens if You Break It |
 | :--- | :--- | :--- | :--- |
-| **ChronoVerse** | Sci-Fi / Time-Travel (1900–2080) | Viktor, Elena, Malakor; The Sunstone | Cryogenic stasis (1975–1995); Sunstone vaporized in 1960; Planet Zora has 85% ammonia atmosphere. |
-| **Galactic Imperium** | Space Opera (2100–3200) | Grand Inquisitor Kael, Commander Vesh; Kyber Singularity Core | Inquisitor Kael executed in 2180; Kyber Core shattered in 2150; Planet Krynn has airless vacuum and solar radiation. |
-| **Mythos Realm** | High Fantasy (Age of Legends, 1000–1500) | High King Eldor, Prince Theron; The Aethelgard Blade | King Eldor slain in 1450; Aethelgard Blade melted in dragonfire in 1300; Iron Wastes of Skar block all magic. |
-
-### How to Switch Universes:
-1. Locate the **Universe selector dropdown** in the studio header (`🌌 Universe: ChronoVerse (1900-2080)`).
-2. Select any universe (e.g. `Galactic Imperium`).
-3. The editor slugline and preloaded demo traps dynamically refresh with continuity traps specific to that universe!
+| **1. The ChronoVerse** | 1900–2080 Sci-Fi Spy Thriller with secret agents and time travel. | Viktor is frozen in cryogenic stasis from 1975 to 1995. | If Viktor appears in 1982 Berlin, the AI flags the stasis paradox. |
+| **2. Galactic Imperium** | 2100–3200 Space Opera with battlecruisers and alien worlds. | Grand Inquisitor Kael died in 2180; Planet Krynn has no air. | If Kael appears in 2190 or someone breathes on Krynn, the AI flags it. |
+| **3. Mythos Realm** | High Fantasy with dragons, elven castles, and magic. | High King Eldor died in 1450; The Aethelgard Blade melted in 1300. | If King Eldor draws the blade in 1480, the AI flags both errors. |
 
 ---
 
-## 📂 7. Screenplay Document Upload & Drag-and-Drop
+## 📂 6. How to Use Your Own Scripts & Story Bibles
 
-Writing teams do not have to copy-paste scripts line-by-line. CanonGuard AI provides native file upload and drag-and-drop:
+### A. Testing Your Own Script
+1. Click the **`📂 Upload Script`** button above the editor (or drag and drop a `.fountain` or `.txt` file onto the text area).
+2. The script loads into the editor, the scene year is detected, and any continuity errors are highlighted immediately.
 
-1. **Click `📂 Upload Script` Button:**
-   - In the toolbar above the editor, click **`📂 Upload Script`**.
-   - Select any `.fountain`, `.txt`, or `.fdx` screenplay from your computer.
-   - The file parses automatically, updates the scene slugline, and begins real-time continuity validation immediately.
-2. **Drag-and-Drop directly onto the editor:**
-   - Drag any `.fountain` or `.txt` file from your desktop or file manager directly onto the text editor.
-   - The editor highlights with an active drop border, immediately imports the script text, and triggers continuous linting.
-
----
-
-## 📥 8. Custom Story Bible & Lore Ingestion
-
-Have your own novel, video game, or TV show universe? You can ingest your own **Story Bible** into CanonGuard AI:
-
-1. Click **`📥 Upload Lore Bible`** in the header.
-2. An ingestion dialog appears with:
-   - **Quick Sample Templates:** Click `Load CyberCity 2099` or `Load Shadow Realm` to see pre-populated templates.
-   - **Universe Details:** Provide a Universe ID and Name (e.g. `dune_expanded_lore`, `Dune Expanded Canon`).
-   - **Story Bible Content:** Paste your structured JSON, Markdown, or plaintext lore notes.
-3. **Structured JSON Bible Schema:**
-```json
-{
-  "characters": [
-    {
-      "name": "Alex Mercer",
-      "status": "DEAD",
-      "death_year": 2045,
-      "stasis_start_year": 0,
-      "stasis_end_year": 0,
-      "faction": "Cyber-Resist",
-      "bio": "Legendary netrunner neutralized in the 2045 mainframe collapse."
-    }
-  ],
-  "relics": [
-    {
-      "name": "Neural Core",
-      "status": "DESTROYED",
-      "destruction_year": 2040,
-      "notes": "Destroyed in the Great Grid Surge of 2040."
-    }
-  ],
-  "rules": [
-    {
-      "rule_text": "Neural overclocking beyond Level 4 induces fatal synaptic shock.",
-      "category": "BIOLOGICAL_INVARIANT",
-      "severity": "CRITICAL"
-    }
-  ]
-}
-```
-4. Click **`⚡ Ingest into ClickHouse`**:
-   - The engine parses your entities, indexes them into ClickHouse tables under the new `universe_id`, and immediately activates your custom canon!
+### B. Uploading Your Own Story Bible (Custom World)
+1. Click **`📥 Upload Lore Bible`** in the top bar.
+2. An easy window opens. You can:
+   * Click **`Load CyberCity 2099`** or **`Load Shadow Realm`** to see a ready-made example.
+   * Or type in your own characters, their status (Alive/Dead), and any world rules.
+3. Click **`⚡ Ingest into ClickHouse`**.
+4. The system immediately learns your world and switches to it so you can write your own stories!
 
 ---
 
-## 🔬 9. Competitive Landscape & Market Study
+## 📚 7. Plain-English Glossary (Jargon Demystified)
 
-For a full breakdown of how CanonGuard AI compares to industry tools like **Final Draft 13**, **World Anvil**, **Campfire**, **Filmustage**, **StoryBirdie**, and **Sudowrite/ChatGPT**, check out our in-depth research:
-👉 **[Read COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)**
+Here is what all the industry and technical words mean in simple terms:
+
+| Term | What It Means in Simple English | Real-World Analogy |
+| :--- | :--- | :--- |
+| **Canon** | The official, true facts of a fictional world. If something happened in the official movies, it is "canon." | If J.K. Rowling wrote in Harry Potter that Dumbledore died in Book 6, that is canon. You can't have him show up for tea in Book 7. |
+| **Retcon** | Short for **"Retroactive Continuity."** It means accidentally or intentionally changing a past fact. | Saying a dead character was "just sleeping" or that someone was secretly an alien all along. |
+| **Lore** | The collective background history, character timelines, and rules of a story world. | The history book of your fictional universe. |
+| **Story Bible** | A comprehensive reference document that movie studios keep to track every character, weapon, and place. | The master encyclopedia used by the director, writers, and producers. |
+| **Demo Trap** | A deliberately planted mistake used to test if the software is working properly. | Like a fire alarm test: we intentionally sound the alarm to make sure the sprinklers work! |
+| **Telemetry** | Live performance statistics showing how fast the computer did the check. | The speedometer on your car's dashboard. |
+| **Auto-Patch** | A 1-click button that automatically fixes the mistake in your text. | The "Accept Suggestion" button in Google Docs or Grammarly. |
+| **Sub-20ms Target** | Doing the entire check in less than 20 milliseconds (0.02 seconds). | The human eye can't notice any delay faster than 20 milliseconds. Because CanonGuard checks in **under 1 millisecond**, it feels completely instantaneous as you type! |
+| **ClickHouse** | An ultra-fast database designed to search through massive amounts of data in a blink of an eye. | The supercomputer engine behind the scenes that makes the instant checks possible. |
 
 ---
 
-## 🧠 10. Architectural Knowledge Base & Q&A Archive
+## 💡 Quick Tips for the Best Experience
 
-For deep technical insights on:
-- What is "Canon"? (Etymology, history & Hollywood tiers)
-- Why sub-20ms latency is mathematically essential for writer cognitive flow
-- Scalability mathematics for 50+ movies in ClickHouse (only ~25 MB; $0.0006/month)
-- Multi-universe partitioning architecture and custom ingestion pipelines
-- Complete Q&A archive of all architectural decisions
-
-👉 **[Read KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)**
-
-
+1. **Feel Free to Type Anything:** You can write anything in the editor. Try changing the character name, the year, or the location to see how the AI reacts!
+2. **Watch the Speedometer:** Check the bottom right of the diagnostic card. Seeing `0.42 ms` proves the database is verifying 50 years of movie lore faster than the blink of an eye.
+3. **Use the Auto-Patches:** Don't stress if you see a red squiggly line—just click one of the 3 suggestions to fix your story in seconds!
