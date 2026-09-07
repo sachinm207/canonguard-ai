@@ -99,6 +99,21 @@ def switch_universe(req: SwitchUniverseRequest):
     logger.info(f"Switched active universe to {active['name']} ({req.universe_id})")
     return {"status": "SUCCESS", "active_universe": active}
 
+@app.delete("/api/universe/{universe_id}")
+def delete_universe(universe_id: str):
+    """Deletes a custom franchise universe from ClickHouse."""
+    success = ch_engine.delete_universe(universe_id)
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete universe '{universe_id}'. Either it does not exist or it is a protected core universe."
+        )
+    return {
+        "status": "SUCCESS",
+        "deleted_universe_id": universe_id,
+        "active_universe": ch_engine.get_active_universe()
+    }
+
 class IngestLoreDocumentRequest(BaseModel):
     universe_name: str
     genre: Optional[str] = "Custom Sci-Fi / Fantasy"
@@ -112,10 +127,21 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
     Ingests a user's custom Lore Bible / Story Bible document into ClickHouse.
     Extracts characters, dates, destroyed relics, and universe invariants,
     registers the custom universe, and immediately activates it.
+    Rejects duplicate franchise names.
     """
     import re
     import uuid
-    uid = f"CUSTOM_{re.sub(r'[^A-Z0-9]', '_', req.universe_name.upper())[:15]}_{str(uuid.uuid4())[:4]}"
+
+    # Prevent duplicate universe names
+    existing = ch_engine.find_universe_by_name(req.universe_name)
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail=f"A universe named '{req.universe_name}' already exists (ID: {existing['id']}). Please choose a unique name or delete the existing universe first."
+        )
+
+    clean_name = re.sub(r'[^A-Z0-9]', '_', req.universe_name.upper())[:15].strip('_')
+    uid = f"CUSTOM_{clean_name}_{str(uuid.uuid4())[:4]}"
     
     characters = []
     relationships = []

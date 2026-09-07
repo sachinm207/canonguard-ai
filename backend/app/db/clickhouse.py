@@ -91,6 +91,41 @@ class ClickHouseEngine:
             result.append(u_copy)
         return result
 
+    def find_universe_by_name(self, name: str) -> Optional[Dict[str, Any]]:
+        """Finds an existing universe by its human-readable name or ID (case-insensitive)."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        target = name.strip().lower()
+        for uid, udata in self.universes.items():
+            if udata.get("name", "").strip().lower() == target or uid.strip().lower() == target:
+                return udata
+        return None
+
+    def delete_universe(self, universe_id: str) -> bool:
+        """Deletes a custom universe and purges its entities from memory."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        protected = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
+        # Find matching uid
+        matched_uid = None
+        for uid in self.universes:
+            if uid.lower() == universe_id.lower():
+                matched_uid = uid
+                break
+        if not matched_uid or matched_uid in protected:
+            return False
+
+        del self.universes[matched_uid]
+        self.characters = [c for c in self.characters if c.get("universe_id") != matched_uid]
+        self.timeline_events = [e for e in self.timeline_events if e.get("universe_id") != matched_uid]
+        self.relationships = [r for r in self.relationships if r.get("universe_id") != matched_uid]
+        self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != matched_uid]
+        if self.active_universe_id == matched_uid:
+            self.active_universe_id = "CHRONOVERSE"
+        return True
+
     def ingest_custom_universe(
         self,
         universe_id: str,

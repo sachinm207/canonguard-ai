@@ -95,6 +95,10 @@
           <option value="GALACTIC_IMPERIUM">Galactic Imperium (2100–3200)</option>
           <option value="MYTHOS_REALM">Mythos Realm (Age of Legends)</option>
         </select>
+        <button id="btn-delete-universe" onclick="deleteActiveCustomUniverse()" class="hidden px-2 py-1 rounded bg-rose-950/80 hover:bg-rose-900 text-xs font-semibold text-rose-300 border border-rose-800/60 hover:border-rose-500 transition shadow-sm flex items-center space-x-1" title="Delete this custom universe from ClickHouse">
+          <span>🗑️</span>
+          <span class="hidden sm:inline">Delete</span>
+        </button>
       </div>
     </div>
 
@@ -443,6 +447,16 @@
       document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
       document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
       
+      // Toggle Delete button for custom universes
+      const delBtn = document.getElementById('btn-delete-universe');
+      if (delBtn) {
+        if (universe && !['CHRONOVERSE', 'GALACTIC_IMPERIUM', 'MYTHOS_REALM'].includes(universe.id)) {
+          delBtn.classList.remove('hidden');
+        } else {
+          delBtn.classList.add('hidden');
+        }
+      }
+
       // Render dynamic traps
       renderTraps(universe.demo_traps || []);
       
@@ -452,6 +466,27 @@
           textarea.value = universe.demo_traps[0].script;
           validateScript(textarea.value);
         }
+      }
+    }
+
+    async function deleteActiveCustomUniverse() {
+      if (!currentUniverseMetadata) return;
+      const uid = currentUniverseMetadata.id;
+      const name = currentUniverseMetadata.name;
+      if (!confirm(`Are you sure you want to delete custom universe "${name}" from ClickHouse?`)) {
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/${uid}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.status === 'SUCCESS') {
+          alert(`Deleted universe "${name}". Reverting to ChronoVerse.`);
+          await loadAvailableUniverses();
+        } else {
+          alert(`Could not delete: ${data.detail || 'Unknown error'}`);
+        }
+      } catch (e) {
+        alert(`Error deleting universe: ${e.message}`);
       }
     }
 
@@ -621,6 +656,13 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
         return;
       }
 
+      // Check if a universe with this name already exists
+      const duplicate = allUniversesList.find(u => u.name.trim().toLowerCase() === name.toLowerCase());
+      if (duplicate) {
+        alert(`⚠️ A universe named "${name}" already exists in ClickHouse!\n\nPlease choose a different, unique name for your new story bible (e.g. "${name} v2" or "${name}: Chapter 2"), or delete the existing one first.`);
+        return;
+      }
+
       const btn = document.getElementById('ingest-submit-btn');
       btn.disabled = true;
       btn.innerHTML = `<span class="animate-spin mr-1">⏳</span> Ingesting into ClickHouse...`;
@@ -638,12 +680,12 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
           })
         });
         const data = await res.json();
-        if (data.status === 'SUCCESS') {
+        if (res.ok && data.status === 'SUCCESS') {
           alert(`🎉 Successfully ingested "${name}" into ClickHouse!\n\n• ${data.characters_ingested} Characters\n• ${data.relics_ingested} Relics\n• ${data.rules_ingested} Lore Axioms\n\nSwitched active universe to "${name}".`);
           closeIngestModal();
           await loadAvailableUniverses();
         } else {
-          alert("Ingestion failed: " + JSON.stringify(data));
+          alert(`⚠️ Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`);
         }
       } catch (err) {
         alert("Error ingesting document: " + err.message);
