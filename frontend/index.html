@@ -593,6 +593,22 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       }
     }
 
+    function handleLoreFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('ingest-content').value = e.target.result;
+        const statusSpan = document.getElementById('lore-file-status');
+        if (statusSpan) statusSpan.textContent = `✓ Loaded: ${file.name}`;
+        const univInput = document.getElementById('ingest-univ-name');
+        if (!univInput.value.trim()) {
+          univInput.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        }
+      };
+      reader.readAsText(file);
+    }
+
     async function submitLoreIngestion() {
       const name = document.getElementById('ingest-univ-name').value.trim();
       const genre = document.getElementById('ingest-genre').value.trim();
@@ -723,8 +739,16 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
 
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content (.txt, .md, or tagged entities)</label>
-            <span class="text-[10px] text-slate-500">Supports markdown, JSON, or plain story notes</span>
+            <div class="flex items-center space-x-2">
+              <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content</label>
+              <input type="file" id="lore-file-input" accept=".txt,.md,.json" class="hidden" onchange="handleLoreFileUpload(event)">
+              <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1">
+                <span>📁</span>
+                <span>Select File (.txt, .md, .json)</span>
+              </button>
+              <span id="lore-file-status" class="text-[10px] text-emerald-400 font-mono"></span>
+            </div>
+            <span class="text-[10px] text-slate-500">Supports JSON, Markdown, or plain story notes</span>
           </div>
           <textarea id="ingest-content" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
 e.g.:

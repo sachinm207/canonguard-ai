@@ -122,84 +122,139 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
     rules = []
     events = []
 
-    # Check for structured lines: Character, Relic, Rule
-    lines = req.document_content.splitlines()
-    for line in lines:
-        l = line.strip().lstrip("-*#").strip()
-        if not l:
-            continue
-        if any(l.lower().startswith(p) for p in ["character:", "name:", "hero:", "villain:"]):
-            parts = l.split(":", 1)
-            raw_name = parts[1].strip()
-            name_match = re.match(r'([^(]+)', raw_name)
-            c_name = name_match.group(1).strip() if name_match else raw_name
-            b_match = re.search(r'born[:\s]+(\d+)', raw_name, re.I)
-            d_match = re.search(r'died[:\s]+(\d+)', raw_name, re.I)
-            stasis_match = re.search(r'stasis[:\s]+(\d+)\s*-\s*(\d+)', raw_name, re.I)
-            b_year = int(b_match.group(1)) if b_match else 1950
-            d_year = int(d_match.group(1)) if d_match else None
-            s_start = int(stasis_match.group(1)) if stasis_match else None
-            s_end = int(stasis_match.group(2)) if stasis_match else None
-            status = "STASIS" if s_start else ("DEAD" if d_year else "ALIVE")
-            characters.append({
-                "character_id": str(uuid.uuid4()),
-                "name": c_name,
-                "aliases": [],
-                "species": "HUMAN",
-                "birth_year": b_year,
-                "death_year": d_year,
-                "status": status,
-                "stasis_start_year": s_start,
-                "stasis_end_year": s_end,
-                "home_planet": "Earth",
-                "powers": ["Custom Ability"]
-            })
-        elif any(l.lower().startswith(p) for p in ["relic:", "artifact:", "weapon:", "item:"]):
-            parts = l.split(":", 1)
-            raw_relic = parts[1].strip()
-            r_match = re.match(r'([^(]+)', raw_relic)
-            r_name = r_match.group(1).strip() if r_match else raw_relic
-            dest_match = re.search(r'(?:destroyed|shattered|melted|lost)(?:\s+in)?[:\s]+(\d+)', raw_relic, re.I)
-            dest_year = int(dest_match.group(1)) if dest_match else 2000
-            relationships.append({
-                "relationship_id": str(uuid.uuid4()),
-                "subject_name": "Franchise Order",
-                "predicate": "POSSESSES",
-                "object_name": r_name,
-                "valid_from_year": 1900,
-                "valid_to_year": dest_year,
-                "status": "DESTROYED",
-                "source_media": "Uploaded Story Bible"
-            })
-        elif any(l.lower().startswith(p) for p in ["rule:", "axiom:", "law:"]):
-            parts = l.split(":", 1)
-            stmt = parts[1].strip()
-            rules.append({
-                "rule_id": str(uuid.uuid4()),
-                "category": "PHYSICS",
-                "entity_or_species": "Uploaded Rule",
-                "rule_statement": stmt,
-                "canon_tier": "ABSOLUTE"
-            })
+    # 1. Try parsing as JSON first
+    import json
+    doc_trimmed = req.document_content.strip()
+    is_json = False
+    if doc_trimmed.startswith("{") or doc_trimmed.startswith("["):
+        try:
+            parsed = json.loads(doc_trimmed)
+            is_json = True
+            if isinstance(parsed, dict):
+                for c in parsed.get("characters", []):
+                    c_name = c.get("name", "Unknown")
+                    d_year = c.get("death_year")
+                    s_start = c.get("stasis_start_year")
+                    s_end = c.get("stasis_end_year")
+                    stat = c.get("status", ("STASIS" if s_start else ("DEAD" if d_year else "ALIVE"))).upper()
+                    characters.append({
+                        "character_id": str(uuid.uuid4()),
+                        "name": c_name,
+                        "aliases": c.get("aliases", []),
+                        "species": c.get("species", "HUMAN"),
+                        "birth_year": c.get("birth_year", 1950),
+                        "death_year": d_year,
+                        "status": stat,
+                        "stasis_start_year": s_start,
+                        "stasis_end_year": s_end,
+                        "home_planet": c.get("home_planet", "Earth"),
+                        "powers": c.get("powers", ["Custom Ability"])
+                    })
+                for r in parsed.get("relics", []):
+                    r_name = r.get("name", "Relic")
+                    dest_yr = r.get("destruction_year") or r.get("destroyed_year") or 2000
+                    relationships.append({
+                        "relationship_id": str(uuid.uuid4()),
+                        "subject_name": "Franchise Order",
+                        "predicate": "POSSESSES",
+                        "object_name": r_name,
+                        "valid_from_year": r.get("valid_from_year", 1900),
+                        "valid_to_year": dest_yr,
+                        "status": r.get("status", "DESTROYED").upper(),
+                        "source_media": "Uploaded Story Bible"
+                    })
+                for rule in parsed.get("rules", []):
+                    stmt = rule.get("rule_statement") or rule.get("rule_text") or rule.get("statement") or str(rule)
+                    rules.append({
+                        "rule_id": str(uuid.uuid4()),
+                        "category": rule.get("category", "PHYSICS"),
+                        "entity_or_species": rule.get("entity_or_species", "Uploaded Rule"),
+                        "rule_statement": stmt,
+                        "canon_tier": "ABSOLUTE"
+                    })
+        except Exception as ex:
+            logger.warning(f"Could not parse JSON bible: {ex}")
+            is_json = False
 
-    # If document was raw prose without tags, extract capitalized entity names
-    if not characters:
-        found_names = re.findall(r'\b([A-Z][a-z]+ [A-Z][a-z]+|[A-Z][a-z]{3,})\b', req.document_content)
-        unique_names = list(dict.fromkeys(found_names))[:8]
-        for name in unique_names:
-            characters.append({
-                "character_id": str(uuid.uuid4()),
-                "name": name,
-                "aliases": [],
-                "species": "HUMAN",
-                "birth_year": 1960,
-                "death_year": 2010 if "died" in req.document_content.lower() else None,
-                "status": "DEAD" if "died" in req.document_content.lower() else "ALIVE",
-                "stasis_start_year": None,
-                "stasis_end_year": None,
-                "home_planet": "Earth",
-                "powers": ["Leadership"]
-            })
+    # 2. If not JSON, parse line-by-line (Markdown, tagged plaintext, or prose)
+    if not is_json:
+        lines = req.document_content.splitlines()
+        for line in lines:
+            l = line.strip().lstrip("-*#").strip()
+            if not l:
+                continue
+            if any(l.lower().startswith(p) for p in ["character:", "name:", "hero:", "villain:"]):
+                parts = l.split(":", 1)
+                raw_name = parts[1].strip()
+                name_match = re.match(r'([^(]+)', raw_name)
+                c_name = name_match.group(1).strip() if name_match else raw_name
+                b_match = re.search(r'born[:\s]+(\d+)', raw_name, re.I)
+                d_match = re.search(r'died[:\s]+(\d+)', raw_name, re.I)
+                stasis_match = re.search(r'stasis[:\s]+(\d+)\s*-\s*(\d+)', raw_name, re.I)
+                b_year = int(b_match.group(1)) if b_match else 1950
+                d_year = int(d_match.group(1)) if d_match else None
+                s_start = int(stasis_match.group(1)) if stasis_match else None
+                s_end = int(stasis_match.group(2)) if stasis_match else None
+                status = "STASIS" if s_start else ("DEAD" if d_year else "ALIVE")
+                characters.append({
+                    "character_id": str(uuid.uuid4()),
+                    "name": c_name,
+                    "aliases": [],
+                    "species": "HUMAN",
+                    "birth_year": b_year,
+                    "death_year": d_year,
+                    "status": status,
+                    "stasis_start_year": s_start,
+                    "stasis_end_year": s_end,
+                    "home_planet": "Earth",
+                    "powers": ["Custom Ability"]
+                })
+            elif any(l.lower().startswith(p) for p in ["relic:", "artifact:", "weapon:", "item:"]):
+                parts = l.split(":", 1)
+                raw_relic = parts[1].strip()
+                r_match = re.match(r'([^(]+)', raw_relic)
+                r_name = r_match.group(1).strip() if r_match else raw_relic
+                dest_match = re.search(r'(?:destroyed|shattered|melted|lost)(?:\s+in)?[:\s]+(\d+)', raw_relic, re.I)
+                dest_year = int(dest_match.group(1)) if dest_match else 2000
+                relationships.append({
+                    "relationship_id": str(uuid.uuid4()),
+                    "subject_name": "Franchise Order",
+                    "predicate": "POSSESSES",
+                    "object_name": r_name,
+                    "valid_from_year": 1900,
+                    "valid_to_year": dest_year,
+                    "status": "DESTROYED",
+                    "source_media": "Uploaded Story Bible"
+                })
+            elif any(l.lower().startswith(p) for p in ["rule:", "axiom:", "law:"]):
+                parts = l.split(":", 1)
+                stmt = parts[1].strip()
+                rules.append({
+                    "rule_id": str(uuid.uuid4()),
+                    "category": "PHYSICS",
+                    "entity_or_species": "Uploaded Rule",
+                    "rule_statement": stmt,
+                    "canon_tier": "ABSOLUTE"
+                })
+
+        # If document was raw prose without tags, extract capitalized entity names
+        if not characters:
+            found_names = re.findall(r'\b([A-Z][a-z]+ [A-Z][a-z]+|[A-Z][a-z]{3,})\b', req.document_content)
+            unique_names = list(dict.fromkeys(found_names))[:8]
+            for name in unique_names:
+                characters.append({
+                    "character_id": str(uuid.uuid4()),
+                    "name": name,
+                    "aliases": [],
+                    "species": "HUMAN",
+                    "birth_year": 1960,
+                    "death_year": 2010 if "died" in req.document_content.lower() else None,
+                    "status": "DEAD" if "died" in req.document_content.lower() else "ALIVE",
+                    "stasis_start_year": None,
+                    "stasis_end_year": None,
+                    "home_planet": "Earth",
+                    "powers": ["Leadership"]
+                })
 
     # Ingest into ClickHouse
     universe_metadata = ch_engine.ingest_custom_universe(
