@@ -104,9 +104,13 @@
 
     <!-- RIGHT HUD: Trap Shortcuts, Guide & Ingestion Mode -->
     <div class="flex items-center space-x-2.5">
-      <button onclick="openIngestModal()" class="px-2.5 py-1 rounded bg-amber-950/70 hover:bg-amber-900 text-xs font-semibold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1.5 shadow-sm">
+      <button onclick="openIngestModal('ingest')" class="px-2.5 py-1 rounded bg-amber-950/70 hover:bg-amber-900 text-xs font-semibold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1.5 shadow-sm" title="Upload a new story bible or lore document">
         <span>📥</span>
         <span>Upload Lore Bible</span>
+      </button>
+      <button onclick="openIngestModal('manage')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 hover:border-slate-500 transition flex items-center space-x-1.5 shadow-sm" title="View, switch, or delete existing franchises">
+        <span>📚</span>
+        <span class="hidden sm:inline">Manage Franchises</span>
       </button>
       <button onclick="openGuideModal()" class="px-2.5 py-1 rounded bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1.5 shadow-sm">
         <span>📖</span>
@@ -417,6 +421,9 @@
         });
 
         applyUniverseToUI(currentUniverseMetadata);
+        const countBadge = document.getElementById('manage-franchises-count');
+        if (countBadge) countBadge.textContent = allUniversesList.length;
+        renderManageUniversesList();
       } catch (err) {
         console.error("Failed to load universes:", err);
       }
@@ -433,6 +440,7 @@
         if (data.status === 'SUCCESS') {
           currentUniverseMetadata = data.active_universe;
           applyUniverseToUI(currentUniverseMetadata);
+          renderManageUniversesList();
           // Re-validate current script
           validateScript(textarea.value);
         }
@@ -452,6 +460,7 @@
       if (delBtn) {
         if (universe && !['CHRONOVERSE', 'GALACTIC_IMPERIUM', 'MYTHOS_REALM'].includes(universe.id)) {
           delBtn.classList.remove('hidden');
+          delBtn.title = `Delete "${universe.name}" from ClickHouse`;
         } else {
           delBtn.classList.add('hidden');
         }
@@ -469,25 +478,27 @@
       }
     }
 
-    async function deleteActiveCustomUniverse() {
-      if (!currentUniverseMetadata) return;
-      const uid = currentUniverseMetadata.id;
-      const name = currentUniverseMetadata.name;
-      if (!confirm(`Are you sure you want to delete custom universe "${name}" from ClickHouse?`)) {
+    async function deleteUniverseById(uid, name) {
+      if (!confirm(`Are you sure you want to permanently delete custom universe "${name}" from ClickHouse?\n\nThis will remove all characters, timeline events, and rules associated with this franchise.`)) {
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/api/universe/${uid}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}`, { method: 'DELETE' });
         const data = await res.json();
-        if (data.status === 'SUCCESS') {
-          alert(`Deleted universe "${name}". Reverting to ChronoVerse.`);
+        if (res.ok && data.status === 'SUCCESS') {
+          alert(`✅ Successfully deleted universe "${name}". Active universe reverted to ChronoVerse.`);
           await loadAvailableUniverses();
         } else {
-          alert(`Could not delete: ${data.detail || 'Unknown error'}`);
+          alert(`⚠️ Could not delete universe: ${data.detail || JSON.stringify(data)}`);
         }
-      } catch (e) {
-        alert(`Error deleting universe: ${e.message}`);
+      } catch (err) {
+        alert(`Error deleting universe: ${err.message}`);
       }
+    }
+
+    async function deleteActiveCustomUniverse() {
+      if (!currentUniverseMetadata) return;
+      await deleteUniverseById(currentUniverseMetadata.id, currentUniverseMetadata.name);
     }
 
     function renderTraps(traps) {
@@ -594,12 +605,83 @@
       }
     });
 
-    // --- CUSTOM LORE BIBLE INGESTION ---
-    function openIngestModal() {
+    // --- CUSTOM LORE BIBLE INGESTION & FRANCHISE MANAGER ---
+    function openIngestModal(view = 'ingest') {
       document.getElementById('ingest-modal').classList.remove('hidden');
+      switchModalView(view);
     }
     function closeIngestModal() {
       document.getElementById('ingest-modal').classList.add('hidden');
+    }
+
+    function switchModalView(view) {
+      const tabIngest = document.getElementById('modal-tab-ingest');
+      const tabManage = document.getElementById('modal-tab-manage');
+      const viewIngest = document.getElementById('modal-view-ingest');
+      const viewManage = document.getElementById('modal-view-manage');
+      if (!viewIngest || !viewManage) return;
+
+      if (view === 'manage') {
+        tabIngest.className = "pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition";
+        tabManage.className = "pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition";
+        viewIngest.classList.add('hidden');
+        viewManage.classList.remove('hidden');
+        renderManageUniversesList();
+      } else {
+        tabManage.className = "pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition";
+        tabIngest.className = "pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition";
+        viewManage.classList.add('hidden');
+        viewIngest.classList.remove('hidden');
+      }
+    }
+
+    function renderManageUniversesList() {
+      const container = document.getElementById('existing-universes-list');
+      const countBadge = document.getElementById('manage-franchises-count');
+      if (countBadge) countBadge.textContent = allUniversesList.length;
+      if (!container) return;
+
+      if (!allUniversesList || allUniversesList.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No franchises found in ClickHouse engine.</div>`;
+        return;
+      }
+
+      const protectedCore = ['CHRONOVERSE', 'GALACTIC_IMPERIUM', 'MYTHOS_REALM'];
+      container.innerHTML = allUniversesList.map(u => {
+        const isCore = protectedCore.includes(u.id);
+        const isActive = currentUniverseMetadata && currentUniverseMetadata.id === u.id;
+        const safeName = escapeHtml(u.name);
+        const attrName = safeName.replace(/'/g, "\\'");
+        return `
+          <div class="p-3.5 rounded-xl border ${isActive ? 'border-sky-500/80 bg-sky-950/20 ring-1 ring-sky-500/30' : 'border-slate-800 bg-slate-950/60'} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-slate-700">
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                <span class="text-sm font-bold text-white">${safeName}</span>
+                ${isCore 
+                  ? `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-slate-800 text-slate-400 border border-slate-700">🛡️ Core (Protected)</span>` 
+                  : `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-950/70 text-amber-300 border border-amber-800/70">✨ Custom Lore</span>`}
+                ${isActive ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-700">● Active</span>` : ''}
+              </div>
+              <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(u.description || 'No description provided.')}</p>
+              <div class="flex items-center space-x-3 text-[11px] text-slate-500 font-mono flex-wrap">
+                <span>Genre: <strong class="text-slate-300">${escapeHtml(u.genre || 'Sci-Fi')}</strong></span>
+                <span>•</span>
+                <span>Era: <strong class="text-slate-300">${escapeHtml(u.era || 'N/A')}</strong></span>
+                <span>•</span>
+                <span><strong class="text-emerald-400">${u.characters_count || 0}</strong> characters</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 self-end sm:self-center shrink-0">
+              ${!isActive 
+                ? `<button onclick="switchActiveUniverse('${u.id}'); closeIngestModal();" class="px-2.5 py-1 text-xs font-semibold rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition">Select</button>` 
+                : `<span class="text-xs text-emerald-400 font-medium px-2 py-1">In Use</span>`}
+              ${!isCore 
+                ? `<button onclick="deleteUniverseById('${u.id}', '${attrName}')" class="px-2.5 py-1 text-xs font-semibold rounded bg-rose-950/90 hover:bg-rose-900 text-rose-300 border border-rose-800 hover:border-rose-500 transition flex items-center space-x-1 shadow-sm" title="Permanently delete this franchise"><span>🗑️</span><span>Delete</span></button>` 
+                : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function loadSampleBible(type) {
@@ -659,7 +741,9 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       // Check if a universe with this name already exists
       const duplicate = allUniversesList.find(u => u.name.trim().toLowerCase() === name.toLowerCase());
       if (duplicate) {
-        alert(`⚠️ A universe named "${name}" already exists in ClickHouse!\n\nPlease choose a different, unique name for your new story bible (e.g. "${name} v2" or "${name}: Chapter 2"), or delete the existing one first.`);
+        if (confirm(`⚠️ A universe named "${name}" already exists in ClickHouse!\n\nWould you like to open the "Manage Existing Franchises" tab to view or delete it?`)) {
+          switchModalView('manage');
+        }
         return;
       }
 
@@ -732,83 +816,121 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
     loadAvailableUniverses();
   </script>
 
-  <!-- LORE BIBLE INGESTION MODAL -->
+  <!-- LORE BIBLE INGESTION & FRANCHISE MANAGER MODAL -->
   <div id="ingest-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
       
       <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
         <div class="flex items-center space-x-2.5">
-          <span class="text-xl">📥</span>
+          <span class="text-xl">📚</span>
           <div>
-            <h2 class="text-base font-bold text-white">Upload & Ingest Custom Franchise Lore</h2>
-            <p class="text-xs text-slate-400">Add your own cinematic universe or story bible to test with CanonGuard AI</p>
+            <h2 class="text-base font-bold text-white">Lore Bible & Franchise Manager</h2>
+            <p class="text-xs text-slate-400">Ingest custom cinematic lore or manage and delete existing franchise universes</p>
           </div>
         </div>
         <button onclick="closeIngestModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
       </div>
 
-      <!-- Modal Body -->
-      <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
-        
-        <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-          <span class="text-amber-400 font-bold">Quick Templates:</span>
-          <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition">⚡ CyberCity 2099</button>
-          <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition">🔮 Shadow Realm (Dark Fantasy)</button>
-        </div>
+      <!-- Navigation Tabs -->
+      <div class="flex border-b border-slate-800 bg-slate-950/40 px-6 pt-2 space-x-4">
+        <button id="modal-tab-ingest" onclick="switchModalView('ingest')" class="pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition">
+          <span>📥</span>
+          <span>Upload & Ingest Lore</span>
+        </button>
+        <button id="modal-tab-manage" onclick="switchModalView('manage')" class="pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition">
+          <span>📚</span>
+          <span>Manage Existing Franchises</span>
+          <span id="manage-franchises-count" class="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">0</span>
+        </button>
+      </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Franchise Universe Name</label>
-            <input id="ingest-univ-name" type="text" placeholder="e.g. CyberCity 2099" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium">
+      <!-- Tab View 1: Ingest Form -->
+      <div id="modal-view-ingest" class="flex flex-col flex-1 overflow-hidden">
+        <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
+          
+          <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+            <span class="text-amber-400 font-bold">Quick Templates:</span>
+            <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition">⚡ CyberCity 2099</button>
+            <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition">🔮 Shadow Realm (Dark Fantasy)</button>
           </div>
-          <div>
-            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Genre</label>
-            <input id="ingest-genre" type="text" placeholder="e.g. Cyberpunk / Noir" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
-          </div>
-        </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Era / Timeline Range</label>
-            <input id="ingest-era" type="text" placeholder="e.g. 2090–2105" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
-          </div>
-          <div>
-            <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Brief Description</label>
-            <input id="ingest-desc" type="text" placeholder="e.g. Dystopian megacorp city" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <div class="flex items-center space-x-2">
-              <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content</label>
-              <input type="file" id="lore-file-input" accept=".txt,.md,.json" class="hidden" onchange="handleLoreFileUpload(event)">
-              <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1">
-                <span>📁</span>
-                <span>Select File (.txt, .md, .json)</span>
-              </button>
-              <span id="lore-file-status" class="text-[10px] text-emerald-400 font-mono"></span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Franchise Universe Name</label>
+              <input id="ingest-univ-name" type="text" placeholder="e.g. CyberCity 2099" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium">
             </div>
-            <span class="text-[10px] text-slate-500">Supports JSON, Markdown, or plain story notes</span>
+            <div>
+              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Genre</label>
+              <input id="ingest-genre" type="text" placeholder="e.g. Cyberpunk / Noir" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            </div>
           </div>
-          <textarea id="ingest-content" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Era / Timeline Range</label>
+              <input id="ingest-era" type="text" placeholder="e.g. 2090–2105" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            </div>
+            <div>
+              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Brief Description</label>
+              <input id="ingest-desc" type="text" placeholder="e.g. Dystopian megacorp city" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center space-x-2">
+                <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content</label>
+                <input type="file" id="lore-file-input" accept=".txt,.md,.json" class="hidden" onchange="handleLoreFileUpload(event)">
+                <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1">
+                  <span>📁</span>
+                  <span>Select File (.txt, .md, .json)</span>
+                </button>
+                <span id="lore-file-status" class="text-[10px] text-emerald-400 font-mono"></span>
+              </div>
+              <span class="text-[10px] text-slate-500">Supports JSON, Markdown, or plain story notes</span>
+            </div>
+            <textarea id="ingest-content" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
 e.g.:
 Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)
 Relic: Neon Pulse Rifle (Destroyed in 2075)
 Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
+          </div>
+
         </div>
 
+        <!-- Ingest Footer -->
+        <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+          <span class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
+          <div class="flex items-center space-x-2">
+            <button onclick="closeIngestModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Cancel</button>
+            <button id="ingest-submit-btn" onclick="submitLoreIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5">
+              <span>⚡ Ingest into ClickHouse Engine</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
-        <span class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
-        <div class="flex items-center space-x-2">
-          <button onclick="closeIngestModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Cancel</button>
-          <button id="ingest-submit-btn" onclick="submitLoreIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5">
-            <span>⚡ Ingest into ClickHouse Engine</span>
-          </button>
+      <!-- Tab View 2: Manage Franchises -->
+      <div id="modal-view-manage" class="hidden flex flex-col flex-1 overflow-hidden">
+        <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
+          <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+            <div>
+              <h3 class="text-xs font-bold text-white">ClickHouse Canon Franchises</h3>
+              <p class="text-[11px] text-slate-400">Select an active universe or delete custom lore bibles with 1 click.</p>
+            </div>
+            <button onclick="switchModalView('ingest')" class="px-2.5 py-1 rounded bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 hover:border-amber-600 text-xs font-semibold flex items-center space-x-1 transition">
+              <span>+</span>
+              <span>Upload New Franchise</span>
+            </button>
+          </div>
+          <div id="existing-universes-list" class="space-y-2.5">
+            <!-- Dynamically populated by renderManageUniversesList() -->
+          </div>
+        </div>
+        <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+          <span class="text-[11px] text-slate-500 font-mono">Custom universes persist across server restarts</span>
+          <button onclick="closeIngestModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Close</button>
         </div>
       </div>
 

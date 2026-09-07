@@ -111,7 +111,7 @@ class ClickHouseEngine:
         # Find matching uid
         matched_uid = None
         for uid in self.universes:
-            if uid.lower() == universe_id.lower():
+            if uid.lower() == universe_id.lower() or self.universes[uid].get("name", "").strip().lower() == universe_id.strip().lower():
                 matched_uid = uid
                 break
         if not matched_uid or matched_uid in protected:
@@ -124,7 +124,52 @@ class ClickHouseEngine:
         self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != matched_uid]
         if self.active_universe_id == matched_uid:
             self.active_universe_id = "CHRONOVERSE"
+        self._save_custom_universes_to_disk()
         return True
+
+    def _save_custom_universes_to_disk(self):
+        """Saves non-core custom universes to disk so they survive server restarts."""
+        try:
+            import json
+            import os
+            db_dir = os.path.dirname(__file__)
+            path = os.path.join(db_dir, "custom_universes.json")
+            protected = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
+            data = {}
+            for uid, udata in self.universes.items():
+                if uid not in protected:
+                    data[uid] = {
+                        "metadata": udata,
+                        "characters": [c for c in self.characters if c.get("universe_id") == uid],
+                        "timeline_events": [e for e in self.timeline_events if e.get("universe_id") == uid],
+                        "relationships": [r for r in self.relationships if r.get("universe_id") == uid],
+                        "lore_rules": [rl for rl in self.lore_rules if rl.get("universe_id") == uid],
+                    }
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.warning(f"Failed to save custom universes to disk: {e}")
+
+    def _load_custom_universes_from_disk(self):
+        """Loads non-core custom universes from disk if present."""
+        try:
+            import json
+            import os
+            db_dir = os.path.dirname(__file__)
+            path = os.path.join(db_dir, "custom_universes.json")
+            if not os.path.exists(path):
+                return
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for uid, item in data.items():
+                if uid not in self.universes:
+                    self.universes[uid] = item.get("metadata", {})
+                    self.characters.extend(item.get("characters", []))
+                    self.timeline_events.extend(item.get("timeline_events", []))
+                    self.relationships.extend(item.get("relationships", []))
+                    self.lore_rules.extend(item.get("lore_rules", []))
+        except Exception as e:
+            logger.warning(f"Failed to load custom universes from disk: {e}")
 
     def ingest_custom_universe(
         self,
@@ -162,11 +207,18 @@ class ClickHouseEngine:
         for rule in lore_rules:
             rule["universe_id"] = universe_id
 
+        # Remove any previous records for this universe_id to avoid duplication
+        self.characters = [c for c in self.characters if c.get("universe_id") != universe_id]
+        self.timeline_events = [e for e in self.timeline_events if e.get("universe_id") != universe_id]
+        self.relationships = [r for r in self.relationships if r.get("universe_id") != universe_id]
+        self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != universe_id]
+
         self.characters.extend(characters)
         self.timeline_events.extend(timeline_events)
         self.relationships.extend(relationships)
         self.lore_rules.extend(lore_rules)
         self.active_universe_id = universe_id
+        self._save_custom_universes_to_disk()
         return self.universes[universe_id]
 
     def check_character_status(self, character_names: List[str], scene_year: int) -> Dict[str, Any]:

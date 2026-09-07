@@ -474,6 +474,9 @@ def seed_all_universes():
     ch_engine.relationships = all_rels
     ch_engine.lore_rules = all_rules
 
+    # Re-hydrate any user custom universes stored on disk
+    ch_engine._load_custom_universes_from_disk()
+
     print(f"✅ Loaded {len(ch_engine.universes)} Franchise Canons into ClickHouse Engine:")
     print(f"   1. {univ_chrono['name']} ({len(chrono_chars)} chars)")
     print(f"   2. {univ_galactic['name']} ({len(galactic_chars)} chars)")

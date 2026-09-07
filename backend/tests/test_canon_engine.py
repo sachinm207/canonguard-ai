@@ -183,6 +183,40 @@ def test_custom_lore_document_ingestion():
     # Restore ChronoVerse
     ch_engine.switch_universe("CHRONOVERSE")
 
+def test_custom_universe_deletion_and_protection():
+    """
+    Verify deleting custom universes works and core universes are protected.
+    """
+    from backend.app.db.clickhouse import ch_engine
+    
+    # 1. Ingest a temporary test universe
+    ch_engine.ingest_custom_universe(
+        universe_id="CUSTOM_TEMP_UNIVERSE",
+        name="Temporary Universe",
+        genre="Testing",
+        era="2026",
+        description="For deletion verification.",
+        characters=[{"name": "TempBot", "species": "AI", "birth_year": 2020, "death_year": 2025, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None}],
+        timeline_events=[],
+        relationships=[],
+        lore_rules=[]
+    )
+    assert "CUSTOM_TEMP_UNIVERSE" in ch_engine.universes
+    assert ch_engine.active_universe_id == "CUSTOM_TEMP_UNIVERSE"
+
+    # 2. Try deleting core universe (must fail)
+    assert ch_engine.delete_universe("CHRONOVERSE") is False
+    assert ch_engine.delete_universe("GALACTIC_IMPERIUM") is False
+    assert ch_engine.delete_universe("MYTHOS_REALM") is False
+
+    # 3. Delete custom universe
+    deleted = ch_engine.delete_universe("CUSTOM_TEMP_UNIVERSE")
+    assert deleted is True
+    assert "CUSTOM_TEMP_UNIVERSE" not in ch_engine.universes
+    # Active universe automatically reverts to ChronoVerse
+    assert ch_engine.active_universe_id == "CHRONOVERSE"
+    print("✅ Custom universe deletion & core protection verified.")
+
 if __name__ == "__main__":
     test_trap_1_cryogenic_stasis_violation()
     test_trap_2_destroyed_relic_violation()
@@ -191,4 +225,5 @@ if __name__ == "__main__":
     test_galactic_imperium_canon()
     test_mythos_realm_canon()
     test_custom_lore_document_ingestion()
-    print("\n🎉 ALL 7 MULTI-UNIVERSE & CUSTOM CANON INTEGRATION TESTS PASSED UNDER 20ms!")
+    test_custom_universe_deletion_and_protection()
+    print("\n🎉 ALL 8 MULTI-UNIVERSE & CANON LIFECYCLE TESTS PASSED UNDER 20ms!")
