@@ -455,10 +455,10 @@
       document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
       document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
       
-      // Toggle Delete button for custom universes
+      // Toggle Delete button for any active universe
       const delBtn = document.getElementById('btn-delete-universe');
       if (delBtn) {
-        if (universe && !['CHRONOVERSE', 'GALACTIC_IMPERIUM', 'MYTHOS_REALM'].includes(universe.id)) {
+        if (universe && universe.id && universe.id !== 'NONE') {
           delBtn.classList.remove('hidden');
           delBtn.title = `Delete "${universe.name}" from ClickHouse`;
         } else {
@@ -685,11 +685,7 @@
               ${!isActive 
                 ? `<button onclick="switchActiveUniverse('${u.id}'); closeIngestModal();" class="px-3 py-1.5 text-xs font-semibold rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
                 : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
-              ${!isCore 
-                ? `<button onclick="deleteUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-500 text-white border border-rose-500 shadow-md flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Permanently delete this custom franchise from ClickHouse"><span>🗑️</span><span>Delete Franchise</span></button>` 
-                : (isRoot 
-                    ? `<button disabled class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed flex items-center space-x-1" title="Root baseline canon is required as default engine fallback"><span>🔒</span><span>Default Root</span></button>`
-                    : `<button disabled class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed flex items-center space-x-1" title="Studio core benchmark canon is protected from deletion"><span>🔒</span><span>Core Canon</span></button>`)}
+              <button onclick="deleteUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-500 text-white border border-rose-500 shadow-md flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Permanently delete this franchise from ClickHouse"><span>🗑️</span><span>Delete</span></button>
             </div>
           </div>
         `;

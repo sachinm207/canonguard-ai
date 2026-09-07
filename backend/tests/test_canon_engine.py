@@ -204,18 +204,22 @@ def test_custom_universe_deletion_and_protection():
     assert "CUSTOM_TEMP_UNIVERSE" in ch_engine.universes
     assert ch_engine.active_universe_id == "CUSTOM_TEMP_UNIVERSE"
 
-    # 2. Try deleting core universes (must fail - protected built-ins)
-    assert ch_engine.delete_universe("CHRONOVERSE") is False
-    assert ch_engine.delete_universe("GALACTIC_IMPERIUM") is False
-    assert ch_engine.delete_universe("MYTHOS_REALM") is False
-
-    # 3. Delete custom universe (must succeed)
+    # 2. Delete custom universe (must succeed)
     deleted = ch_engine.delete_universe("CUSTOM_TEMP_UNIVERSE")
     assert deleted is True
     assert "CUSTOM_TEMP_UNIVERSE" not in ch_engine.universes
-    # Active universe automatically reverts to ChronoVerse
-    assert ch_engine.active_universe_id == "CHRONOVERSE"
-    print("✅ Custom universe deletion & core protection verified.")
+
+    # 3. Can delete any universe (e.g. Galactic Imperium)
+    assert ch_engine.delete_universe("GALACTIC_IMPERIUM") is True
+    assert "GALACTIC_IMPERIUM" not in ch_engine.universes
+
+    # 4. reset_defaults restores all universes including built-ins and CyberCity 2099
+    ch_engine.reset_defaults()
+    assert "CHRONOVERSE" in ch_engine.universes
+    assert "GALACTIC_IMPERIUM" in ch_engine.universes
+    assert "MYTHOS_REALM" in ch_engine.universes
+    assert "CUSTOM_CYBERCITY_2099" in ch_engine.universes
+    print("✅ Any universe deletion & restore lifecycle verified.")
 
 if __name__ == "__main__":
     test_trap_1_cryogenic_stasis_violation()

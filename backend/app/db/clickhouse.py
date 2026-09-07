@@ -66,14 +66,24 @@ class ClickHouseEngine:
         if not self.universes:
             from .seed_universes import seed_all_universes
             seed_all_universes()
-        return self.universes.get(self.active_universe_id, {
-            "id": self.active_universe_id,
-            "name": self.active_universe_id,
-            "default_year": 1982,
-            "default_location": "Berlin Safehouse",
-            "default_title": "Active_Script.fountain",
+        if not self.active_universe_id or self.active_universe_id not in self.universes:
+            rem = list(self.universes.keys())
+            self.active_universe_id = rem[0] if rem else None
+
+        if self.active_universe_id and self.active_universe_id in self.universes:
+            return self.universes[self.active_universe_id]
+
+        return {
+            "id": "NONE",
+            "name": "No Active Universe",
+            "genre": "None",
+            "era": "N/A",
+            "description": "All universes deleted. Upload a new lore bible or click Restore Defaults.",
+            "default_year": 2026,
+            "default_location": "None",
+            "default_title": "Untitled.fountain",
             "demo_traps": []
-        })
+        }
 
     def get_all_universes(self) -> List[Dict[str, Any]]:
         """Returns all loaded canons with active indicators."""
@@ -103,19 +113,23 @@ class ClickHouseEngine:
         return None
 
     def delete_universe(self, universe_id: str) -> bool:
-        """Deletes a custom franchise universe and purges its entities from memory. Built-in canons are protected."""
+        """Deletes any universe and purges its entities from memory."""
         if not self.universes:
             from .seed_universes import seed_all_universes
             seed_all_universes()
-        protected = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
         # Find matching uid
         matched_uid = None
         for uid in self.universes:
             if uid.lower() == universe_id.lower() or self.universes[uid].get("name", "").strip().lower() == universe_id.strip().lower():
                 matched_uid = uid
                 break
-        if not matched_uid or matched_uid in protected:
+        if not matched_uid:
             return False
+
+        if not hasattr(self, 'deleted_builtins'):
+            self.deleted_builtins = set()
+        if matched_uid in ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]:
+            self.deleted_builtins.add(matched_uid)
 
         del self.universes[matched_uid]
         self.characters = [c for c in self.characters if c.get("universe_id") != matched_uid]
@@ -123,7 +137,8 @@ class ClickHouseEngine:
         self.relationships = [r for r in self.relationships if r.get("universe_id") != matched_uid]
         self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != matched_uid]
         if self.active_universe_id == matched_uid:
-            self.active_universe_id = "CHRONOVERSE"
+            rem = list(self.universes.keys())
+            self.active_universe_id = rem[0] if rem else None
         self._save_custom_universes_to_disk()
         return True
 
@@ -132,6 +147,13 @@ class ClickHouseEngine:
         if not hasattr(self, 'deleted_builtins'):
             self.deleted_builtins = set()
         self.deleted_builtins.clear()
+        import os
+        path = os.path.join(os.path.dirname(__file__), "custom_universes.json")
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except Exception:
+            pass
         from .seed_universes import seed_all_universes
         seed_all_universes(force_reset=True)
         self.active_universe_id = "CHRONOVERSE"
