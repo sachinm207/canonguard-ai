@@ -114,6 +114,19 @@ def delete_universe(universe_id: str):
         "active_universe": ch_engine.get_active_universe()
     }
 
+class DeleteUniverseRequest(BaseModel):
+    universe_id: str
+
+@app.post("/api/universe/delete")
+def delete_universe_post(req: DeleteUniverseRequest):
+    """Deletes a custom franchise universe from ClickHouse (POST alternative)."""
+    return delete_universe(req.universe_id)
+
+@app.post("/api/universe/{universe_id}/delete")
+def delete_universe_path_post(universe_id: str):
+    """Deletes a custom franchise universe from ClickHouse (POST path alternative)."""
+    return delete_universe(universe_id)
+
 class IngestLoreDocumentRequest(BaseModel):
     universe_name: str
     genre: Optional[str] = "Custom Sci-Fi / Fantasy"

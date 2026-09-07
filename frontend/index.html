@@ -483,7 +483,15 @@
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+        let res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+        // Fallback to POST /api/universe/delete if DELETE method returns 404 or 405
+        if (res.status === 404 || res.status === 405) {
+          res = await fetch(`${API_BASE}/api/universe/delete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ universe_id: uid })
+          });
+        }
         const data = await res.json();
         if (res.ok && data.status === 'SUCCESS') {
           alert(`✅ Successfully deleted universe "${name}". Active universe reverted to ChronoVerse.`);
