@@ -139,7 +139,37 @@ You can test 3 completely different genres right out of the box using the **Univ
 
 ---
 
-## 📚 7. Plain-English Glossary (Jargon Demystified)
+## 🎬 7. Is CanonGuard a Script Writing Tool? How Does It Save & Work With Industry Standards?
+
+A common question is: **"Is this a script writing tool? If yes, how is the script saved, and how does it fit into the Hollywood pipeline?"**
+
+### 1. Is it a script writing tool?
+**Yes, but with a unique purpose!** 
+- CanonGuard AI is **not just a word processor**—it is a **Real-Time Continuity Intelligence Layer (a Co-Writer)**.
+- Think of standard script software (Final Draft, Highland, WriterDuet) like Microsoft Word: they format margins and check spelling, but they have **zero memory** of whether a character died in a movie 10 years ago.
+- CanonGuard AI provides the **continuity memory engine** that screenwriters, showrunners, and studio writers' rooms have never had before. You can write your scene directly inside CanonGuard's editor, OR write in your favorite tool and upload your draft to test for continuity plot holes in seconds.
+
+### 2. How is the script saved?
+CanonGuard AI provides **dual-layer saving** so you never lose your work:
+1. **1-Click Save / Export (`💾 Save / Export`):**
+   - Click the **`💾 Save / Export`** button in the editor toolbar.
+   - It instantly downloads your active script as an industry-standard `.fountain` file (e.g. `Cold_War_Requiem.fountain`) to your computer.
+2. **Instant Local Auto-Save (`localStorage`):**
+   - Every single keystroke, character name, and edit is continuously saved to your browser's local storage.
+   - Even if you accidentally refresh the page, close your browser tab, or lose internet connectivity, your script draft remains intact when you return!
+
+### 3. How is it compatible with Hollywood Industry Standards?
+CanonGuard AI was engineered around the **Fountain standard (`.fountain`)**:
+- **What is Fountain?** Created by Hollywood screenwriters John August (*Big Fish*, *Aladdin*) and Stu Maschwitz, Fountain is the universal, open-source plain-text standard for screenplays (like Markdown is for documentation).
+- **100% Interoperability (No Proprietary Lock-In):**
+  - Any `.fountain` file exported from CanonGuard AI can be opened directly in **Final Draft 12/13**, **Highland 2**, **Fade In**, **Slugline**, **WriterDuet**, or **Scrivener**.
+  - Industry software automatically converts the Fountain sluglines, character names, and parentheticals into standard Hollywood 12pt Courier screenplay format with proper pagination.
+- **Bi-Directional Import & Export:**
+  - You can write in **Final Draft**, export as `.fdx` or `.fountain`, click **`📂 Upload Script`** in CanonGuard to check for retcons, apply the 1-click **Auto-Patch**, and export it right back out to Final Draft!
+
+---
+
+## 📚 8. Plain-English Glossary (Jargon Demystified)
 
 Here is what all the industry and technical words mean in simple terms:
 

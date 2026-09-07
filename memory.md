@@ -33,7 +33,7 @@
   3. Data volume, capacity, and cost models for 50+ movies in ClickHouse (only ~25 MB compressed; $0.0006/mo storage, $0.12 one-time embedding cost).
   4. Real-world franchise ingestion workflows vs. real-time active scene drafting.
 - **2026-09-06:** Added Multi-Universe partitioning in ClickHouse with 3 pre-seeded canons (ChronoVerse, Galactic Imperium, Mythos Realm). Added screenplay file upload (`.fountain`, `.txt`, `.fdx`) and drag-and-drop. Added custom story bible ingestion dialog supporting JSON/Markdown world bibles. Expanded integration tests to 7/7 passing in < 0.4ms.
-- **2026-09-06:** Committed and pushed all source code and documentation to `https://github.com/sachinm207/canonguard-ai.git`.
+- **2026-09-08:** Rewrote studio guide and glossary in simple, plain English across `GUIDE.md` and in-app modal. Added 1-click `💾 Save / Export` to industry-standard `.fountain` format, local storage auto-persistence, and comprehensive documentation on industry pipeline compatibility (Final Draft, Highland 2, Fade In). Committed and pushed to GitHub.
 
 ---
 

@@ -135,9 +135,13 @@
         </div>
         <div class="flex items-center space-x-3 text-[11px]">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
-          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium">
+          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium" title="Upload a .fountain, .txt, or .fdx script">
             <span>📂</span>
             <span>Upload Script</span>
+          </button>
+          <button onclick="downloadScreenplay()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-emerald-500 transition flex items-center space-x-1 font-medium" title="Save and download screenplay in industry-standard .fountain format">
+            <span>💾</span>
+            <span>Save / Export</span>
           </button>
           <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">Auto-Lint Active (350ms)</span>
         </div>
@@ -286,6 +290,9 @@
 
     // Debounced Validation on Keystroke (350ms)
     textarea.addEventListener('input', () => {
+      try {
+        localStorage.setItem('canonguard_saved_script', textarea.value);
+      } catch (e) {}
       clearTimeout(debounceTimer);
       lintBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-spin"></span><span class="text-slate-400 font-mono text-[11px]">Validating...</span>`;
       debounceTimer = setTimeout(() => {
@@ -500,6 +507,40 @@
         }
       };
       reader.readAsText(file);
+    }
+
+    // --- SAVE & EXPORT SCREENPLAY (Industry-Standard .fountain / .txt) ---
+    function downloadScreenplay() {
+      const text = textarea.value;
+      if (!text.trim()) {
+        alert("The script editor is empty! Type some scene action or dialogue first.");
+        return;
+      }
+      let filename = document.getElementById('current-title-display').textContent.trim() || 'scene_script.fountain';
+      if (!filename.endsWith('.fountain') && !filename.endsWith('.txt')) {
+        filename += '.fountain';
+      }
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('canonguard_saved_script', text);
+        localStorage.setItem('canonguard_saved_title', filename);
+      } catch (e) {}
+
+      // Visual feedback
+      const badge = document.getElementById('lint-status-badge');
+      const prevHtml = badge.innerHTML;
+      badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Saved & Exported!</span>`;
+      setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
     }
 
     // Drag-and-drop on screenplay editor
@@ -754,6 +795,8 @@ Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
             <li><strong class="text-slate-100">Setting & Scene Year (1982):</strong> The "where" and "when" of your scene. The AI needs to know the year so it knows who is alive, who is frozen in ice, and what weapons exist at that time.</li>
             <li><strong class="text-slate-100">📂 Upload Script:</strong> Upload any script from your computer or just drag-and-drop a file directly onto the editor.</li>
             <li><strong class="text-slate-100">📥 Upload Lore Bible:</strong> Want to test your own book or game world? Click this to upload your custom characters, rules, and history!</li>
+            <li><strong class="text-slate-100">💾 Save / Export:</strong> Downloads your active script as an industry-standard <code class="text-emerald-300 font-mono">.fountain</code> file. You can open it in Final Draft, Highland 2, or Fade In without any proprietary lock-in.</li>
+            <li><strong class="text-slate-100">Auto-Save:</strong> All your typing is continuously auto-saved to your browser storage, so your draft is never lost even if you refresh.</li>
             <li><strong class="text-slate-100">Auto-Patch:</strong> Click this 1-click button on the right panel to automatically fix the mistake in your script with the AI's canonical suggestion.</li>
           </ul>
         </div>
