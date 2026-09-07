@@ -103,7 +103,7 @@ class ClickHouseEngine:
         return None
 
     def delete_universe(self, universe_id: str) -> bool:
-        """Deletes a custom universe and purges its entities from memory."""
+        """Deletes a custom franchise universe and purges its entities from memory. Built-in canons are protected."""
         if not self.universes:
             from .seed_universes import seed_all_universes
             seed_all_universes()
@@ -127,26 +127,43 @@ class ClickHouseEngine:
         self._save_custom_universes_to_disk()
         return True
 
+    def reset_defaults(self):
+        """Restores all built-in core universes and default custom universe."""
+        if not hasattr(self, 'deleted_builtins'):
+            self.deleted_builtins = set()
+        self.deleted_builtins.clear()
+        from .seed_universes import seed_all_universes
+        seed_all_universes(force_reset=True)
+        self.active_universe_id = "CHRONOVERSE"
+        self._save_custom_universes_to_disk()
+        return self.get_all_universes()
+
     def _save_custom_universes_to_disk(self):
-        """Saves non-core custom universes to disk so they survive server restarts."""
+        """Saves non-core custom universes and deleted builtin states to disk."""
         try:
             import json
             import os
             db_dir = os.path.dirname(__file__)
             path = os.path.join(db_dir, "custom_universes.json")
-            protected = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
-            data = {}
+            if not hasattr(self, 'deleted_builtins'):
+                self.deleted_builtins = set()
+            core = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
+            custom_dict = {}
             for uid, udata in self.universes.items():
-                if uid not in protected:
-                    data[uid] = {
+                if uid not in core:
+                    custom_dict[uid] = {
                         "metadata": udata,
                         "characters": [c for c in self.characters if c.get("universe_id") == uid],
                         "timeline_events": [e for e in self.timeline_events if e.get("universe_id") == uid],
                         "relationships": [r for r in self.relationships if r.get("universe_id") == uid],
                         "lore_rules": [rl for rl in self.lore_rules if rl.get("universe_id") == uid],
                     }
+            payload = {
+                "deleted_builtins": list(self.deleted_builtins),
+                "custom_universes": custom_dict
+            }
             with open(path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+                json.dump(payload, f, indent=2)
         except Exception as e:
             logger.warning(f"Failed to save custom universes to disk: {e}")
 
@@ -161,7 +178,24 @@ class ClickHouseEngine:
                 return
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            for uid, item in data.items():
+            
+            if not hasattr(self, 'deleted_builtins'):
+                self.deleted_builtins = set()
+
+            if "custom_universes" in data:
+                self.deleted_builtins = set(data.get("deleted_builtins", []))
+                for b in self.deleted_builtins:
+                    if b in self.universes:
+                        del self.universes[b]
+                    self.characters = [c for c in self.characters if c.get("universe_id") != b]
+                    self.timeline_events = [e for e in self.timeline_events if e.get("universe_id") != b]
+                    self.relationships = [r for r in self.relationships if r.get("universe_id") != b]
+                    self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != b]
+                custom_dict = data.get("custom_universes", {})
+            else:
+                custom_dict = data
+
+            for uid, item in custom_dict.items():
                 if uid not in self.universes:
                     self.universes[uid] = item.get("metadata", {})
                     self.characters.extend(item.get("characters", []))

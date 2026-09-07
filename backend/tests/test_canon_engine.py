@@ -204,12 +204,12 @@ def test_custom_universe_deletion_and_protection():
     assert "CUSTOM_TEMP_UNIVERSE" in ch_engine.universes
     assert ch_engine.active_universe_id == "CUSTOM_TEMP_UNIVERSE"
 
-    # 2. Try deleting core universe (must fail)
+    # 2. Try deleting core universes (must fail - protected built-ins)
     assert ch_engine.delete_universe("CHRONOVERSE") is False
     assert ch_engine.delete_universe("GALACTIC_IMPERIUM") is False
     assert ch_engine.delete_universe("MYTHOS_REALM") is False
 
-    # 3. Delete custom universe
+    # 3. Delete custom universe (must succeed)
     deleted = ch_engine.delete_universe("CUSTOM_TEMP_UNIVERSE")
     assert deleted is True
     assert "CUSTOM_TEMP_UNIVERSE" not in ch_engine.universes

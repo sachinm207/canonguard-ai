@@ -127,6 +127,16 @@ def delete_universe_path_post(universe_id: str):
     """Deletes a custom franchise universe from ClickHouse (POST path alternative)."""
     return delete_universe(universe_id)
 
+@app.post("/api/universe/reset-defaults")
+def reset_default_universes():
+    """Restores all default built-in canons and custom samples."""
+    universes = ch_engine.reset_defaults()
+    return {
+        "status": "SUCCESS",
+        "universes": universes,
+        "active_universe": ch_engine.get_active_universe()
+    }
+
 class IngestLoreDocumentRequest(BaseModel):
     universe_name: str
     genre: Optional[str] = "Custom Sci-Fi / Fantasy"

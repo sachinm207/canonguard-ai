@@ -12,7 +12,7 @@ def generate_pseudo_embedding(seed_text: str, dim: int = 768) -> List[float]:
     norm = np.linalg.norm(vec)
     return (vec / norm).tolist()
 
-def seed_all_universes():
+def seed_all_universes(force_reset: bool = False):
     """
     Seeds multiple distinct franchise universes into ClickHouse:
     1. The ChronoVerse (1900–2080) - Sci-Fi Time Travel & Espionage
@@ -475,7 +475,31 @@ def seed_all_universes():
     ch_engine.lore_rules = all_rules
 
     # Re-hydrate any user custom universes stored on disk
-    ch_engine._load_custom_universes_from_disk()
+    if not force_reset:
+        ch_engine._load_custom_universes_from_disk()
+
+    # Ensure sample custom universe CyberCity 2099 exists if no custom lore is present
+    custom_count = len([u for u in ch_engine.universes if u not in ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]])
+    if custom_count == 0:
+        ch_engine.ingest_custom_universe(
+            universe_id="CUSTOM_CYBERCITY_2099",
+            name="CyberCity 2099",
+            genre="Cyberpunk / Dystopian",
+            era="2090-2105",
+            description="High-tech low-life megacorp war with cybernetic neural engrams.",
+            characters=[
+                {"name": "Jax Vance", "species": "CYBORG", "birth_year": 2040, "death_year": 2085, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Nyx Shadow", "species": "HUMAN", "birth_year": 2065, "death_year": 2120, "status": "ALIVE", "stasis_start_year": None, "stasis_end_year": None}
+            ],
+            timeline_events=[],
+            relationships=[
+                {"subject_name": "Jax Vance", "predicate": "POSSESSES", "object_name": "Neon Pulse Rifle", "valid_from_year": 2060, "valid_to_year": 2075, "status": "DESTROYED"}
+            ],
+            lore_rules=[
+                {"category": "BIOLOGY", "entity_or_species": "Sector 4", "rule_statement": "Sector 4 is bathed in lethal neurotoxin gas without cybernetic respirators."}
+            ],
+            default_year=2095
+        )
 
     print(f"✅ Loaded {len(ch_engine.universes)} Franchise Canons into ClickHouse Engine:")
     print(f"   1. {univ_chrono['name']} ({len(chrono_chars)} chars)")
