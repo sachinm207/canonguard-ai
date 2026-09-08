@@ -1300,6 +1300,16 @@
             <span class="text-3xl block">📜</span>
             <div class="text-sm font-semibold text-slate-200">No Saved Scripts in this Project Yet</div>
             <p class="text-xs text-slate-400 max-w-md mx-auto">Write your scene in the editor and click <span class="text-emerald-300 font-bold">"Save to Project"</span>, or click <span class="text-sky-300 font-bold">"Import File"</span> to add screenplay files.</p>
+            <div class="flex items-center justify-center space-x-3 pt-3">
+              <button onclick="closeProjectScriptsModal(); textarea.focus();" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center space-x-1.5 cursor-pointer shadow-md">
+                <span>🎬</span>
+                <span>Open in Editor</span>
+              </button>
+              <button onclick="exportScreenplay()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white border border-slate-700 hover:border-sky-500 text-xs font-semibold transition flex items-center space-x-1.5 cursor-pointer shadow-sm">
+                <span>📥</span>
+                <span>Export .fountain</span>
+              </button>
+            </div>
           </div>
         `;
         return;
@@ -1314,8 +1324,8 @@
         const safeFn = escapeHtml(s.filename).replace(/'/g, "\\'");
         return `
           <div class="p-3.5 rounded-xl border ${isActive ? 'bg-indigo-950/30 border-indigo-500/70 shadow-md' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'} flex flex-col space-y-2.5 transition">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2 truncate mr-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center space-x-2.5 truncate mr-3 flex-1 min-w-[200px]">
                 <span class="text-base">${isActive ? '🎬' : '📄'}</span>
                 <div class="truncate">
                   <div class="text-xs font-bold text-white flex items-center space-x-2">
@@ -1325,15 +1335,16 @@
                   <div class="text-[11px] text-slate-400 font-mono truncate">${escapeHtml(s.filename)} • ${lineCount} lines ${s.updated_at ? `• Updated ${escapeHtml(s.updated_at)}` : ''}</div>
                 </div>
               </div>
-              <div class="flex items-center space-x-1.5 shrink-0">
-                <button onclick="loadScriptIntoEditor('${safeFn}')" class="px-2.5 py-1 rounded-lg ${isActive ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-emerald-700 hover:bg-emerald-600 text-white'} font-semibold text-xs transition flex items-center space-x-1 cursor-pointer" title="Open this script in the editor workspace">
+              <div class="flex items-center space-x-2 shrink-0">
+                <button onclick="loadScriptIntoEditor('${safeFn}')" class="px-3 py-1.5 rounded-lg ${isActive ? 'bg-indigo-600 hover:bg-indigo-500 ring-1 ring-indigo-400/50 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} font-bold text-xs transition flex items-center space-x-1.5 cursor-pointer shadow-sm" title="Open this script in the editor workspace">
                   <span>🎬</span>
                   <span>Open in Editor</span>
                 </button>
-                <button onclick="exportSavedScript('${safeFn}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition flex items-center space-x-1 cursor-pointer" title="Export this script to a file">
+                <button onclick="exportSavedScript('${safeFn}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-sky-300 hover:text-white border border-slate-700 hover:border-sky-500 text-xs font-semibold transition flex items-center space-x-1.5 cursor-pointer shadow-sm" title="Export this screenplay to a .fountain file">
                   <span>📥</span>
+                  <span>Export</span>
                 </button>
-                <button onclick="deleteScriptFromProject('${safeFn}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-800 text-xs transition flex items-center space-x-1 cursor-pointer" title="Delete this script draft">
+                <button onclick="deleteScriptFromProject('${safeFn}')" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-800 text-xs transition flex items-center space-x-1 cursor-pointer" title="Delete this script draft">
                   <span>🗑️</span>
                 </button>
               </div>
@@ -3220,14 +3231,22 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       <div class="px-6 py-3 border-b border-slate-800 bg-slate-950/40 flex items-center justify-between flex-wrap gap-2">
         <span id="project-scripts-summary-count" class="text-xs text-slate-400">0 scripts in this project</span>
         <div class="flex items-center space-x-2">
+          <button onclick="closeProjectScriptsModal(); textarea.focus();" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition text-xs font-bold flex items-center space-x-1.5 cursor-pointer shadow-sm" title="Return to editor workspace with currently open script">
+            <span>🎬</span>
+            <span>Open in Editor</span>
+          </button>
+          <button onclick="exportScreenplay()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-sky-300 hover:text-white border border-slate-700 hover:border-sky-500 transition text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm" title="Export current editor scene to a .fountain file">
+            <span>📥</span>
+            <span>Export</span>
+          </button>
           <button onclick="createNewBlankScriptInEditor()" class="px-3 py-1.5 rounded-lg bg-indigo-950 hover:bg-indigo-900 text-indigo-200 border border-indigo-700 transition text-xs font-semibold flex items-center space-x-1 cursor-pointer">
             <span>➕</span>
-            <span>New Blank Script</span>
+            <span>New Script</span>
           </button>
           <input type="file" id="modal-screenplay-import-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleModalScreenplayImport(event)">
           <button onclick="document.getElementById('modal-screenplay-import-input').click()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition text-xs font-semibold flex items-center space-x-1 cursor-pointer">
             <span>📂</span>
-            <span>Import File</span>
+            <span>Import</span>
           </button>
         </div>
       </div>
