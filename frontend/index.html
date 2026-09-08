@@ -59,65 +59,75 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col custom-scrollbar selection:bg-rose-500 selection:text-white">
 
-  <!-- TOP HEADER HUD -->
-  <header class="h-14 sm:h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-3 sm:px-4 lg:px-6 flex items-center justify-between sticky top-0 z-40 gap-2 sm:gap-4 overflow-x-auto custom-scrollbar">
-    <!-- LEFT: Brand & Logo -->
-    <div class="flex items-center space-x-3 shrink-0">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center shadow-md shadow-rose-950/50">
-        <span class="text-lg">🛡️</span>
-      </div>
-      <div>
-        <div class="flex items-center space-x-1.5">
-          <h1 class="font-extrabold text-sm sm:text-base tracking-wide bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">CANONGUARD AI</h1>
-          <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">ClickHouse</span>
+  <!-- TOP HEADER (2 ROWS: ZERO HORIZONTAL SCROLL) -->
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 divide-y divide-slate-800/70 shadow-lg">
+    
+    <!-- ROW 1: Studio Identity & Engine Telemetry -->
+    <div class="h-12 px-4 sm:px-6 flex items-center justify-between">
+      <!-- Left: Brand Logo & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center shadow-md shadow-rose-950/50">
+          <span class="text-base">🛡️</span>
         </div>
-        <p class="text-[11px] text-slate-400 hidden 2xl:block">Sub-20ms Cinematic Continuity & Retcon Engine</p>
+        <div class="flex items-center space-x-2">
+          <h1 class="font-extrabold text-sm sm:text-base tracking-wide bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">CANONGUARD AI</h1>
+          <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">ClickHouse Track</span>
+          <span class="text-slate-600 hidden md:inline">|</span>
+          <p class="text-xs text-slate-400 hidden md:block">Sub-20ms Cinematic Franchise Continuity & Retcon Engine</p>
+        </div>
+      </div>
+
+      <!-- Right: ClickHouse Telemetry & Guide Modal -->
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 bg-slate-950/80 border border-slate-800 rounded-full px-3 py-1">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-xs font-mono text-slate-300">ClickHouse Engine: <strong class="text-emerald-400" id="engine-status">ONLINE (< 20ms)</strong></span>
+          <div class="h-3 w-px bg-slate-800 mx-0.5"></div>
+          <span class="text-xs text-slate-400 hidden sm:inline">Last Query:</span>
+          <span class="font-mono text-xs font-bold text-amber-400" id="hud-latency">0.64 ms</span>
+        </div>
+        <button onclick="openGuideModal()" class="px-3 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1.5 shadow-sm cursor-pointer" title="Studio Guide & Glossary">
+          <span>📖</span>
+          <span>Guide</span>
+        </button>
       </div>
     </div>
 
-    <!-- CENTER HUD: ClickHouse Performance & Universe Select (No redundant archive button) -->
-    <div class="hidden md:flex items-center space-x-2.5 lg:space-x-4 bg-slate-950/70 border border-slate-800/80 rounded-full px-3.5 py-1 shrink-0">
-      <div class="flex items-center space-x-1.5">
-        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-        <span class="text-xs font-mono text-slate-300">ClickHouse: <strong class="text-emerald-400" id="engine-status">ONLINE</strong></span>
+    <!-- ROW 2: Franchise Canon Selector & Interactive Retcon Traps HUD -->
+    <div class="h-11 px-4 sm:px-6 flex items-center justify-between bg-slate-950/50">
+      <!-- Left: Active Canon Universe Dropdown & Franchise Library Hub -->
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-semibold text-slate-400 flex items-center space-x-1">
+            <span>🌌</span>
+            <span>Canon Universe:</span>
+          </span>
+          <select id="universe-select" onchange="switchActiveUniverse(this.value)" class="bg-slate-900 border border-slate-700 text-sky-400 text-xs font-semibold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono cursor-pointer hover:border-slate-600 transition shadow-inner max-w-[260px] truncate">
+            <option value="CHRONOVERSE">ChronoVerse (1900–2080)</option>
+            <option value="GALACTIC_IMPERIUM">Galactic Imperium (2100–3200)</option>
+            <option value="MYTHOS_REALM">Mythos Realm (Age of Legends)</option>
+          </select>
+        </div>
+        <button onclick="openFranchiseHub('active')" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-xs font-bold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-2 shadow-sm cursor-pointer" title="Franchise Library: Active Canons, Archived Lore & Ingestion">
+          <span>📚</span>
+          <span>Franchise Library</span>
+          <span id="hub-active-count" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-mono" title="Active Canons">0</span>
+          <span id="hub-archived-count" class="hidden px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono" title="Archived Canons">📦 0</span>
+        </button>
       </div>
-      <div class="h-3 w-px bg-slate-800"></div>
-      <div class="flex items-center space-x-1.5">
-        <span class="text-xs text-slate-400 hidden lg:inline">Latency:</span>
-        <span class="font-mono text-xs font-bold text-amber-400" id="hud-latency">0.64 ms</span>
-      </div>
-      <div class="h-3 w-px bg-slate-800"></div>
-      <div class="flex items-center space-x-1.5">
-        <span class="text-xs text-slate-400">Canon:</span>
-        <select id="universe-select" onchange="switchActiveUniverse(this.value)" class="bg-slate-900 border border-slate-700 text-sky-400 text-xs font-semibold rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono cursor-pointer hover:border-slate-600 transition max-w-[140px] sm:max-w-[180px] lg:max-w-[220px] truncate">
-          <option value="CHRONOVERSE">ChronoVerse (1900–2080)</option>
-          <option value="GALACTIC_IMPERIUM">Galactic Imperium (2100–3200)</option>
-          <option value="MYTHOS_REALM">Mythos Realm (Age of Legends)</option>
-        </select>
+
+      <!-- Right: Interactive Retcon Traps -->
+      <div id="traps-container" class="flex items-center space-x-2">
+        <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1">
+          <span>⚡</span>
+          <span>Interactive Traps:</span>
+        </span>
+        <button onclick="loadTrap(1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer">Trap 1 (Stasis)</button>
+        <button onclick="loadTrap(2)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer">Trap 2 (Relic)</button>
+        <button onclick="loadTrap(3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer">Trap 3 (Bio)</button>
       </div>
     </div>
 
-    <!-- RIGHT HUD: Single Franchise Library Hub, Guide & Traps -->
-    <div class="flex items-center space-x-2 shrink-0">
-      <button onclick="openFranchiseHub('active')" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-xs font-bold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1.5 shadow-sm shrink-0" title="Franchise Library: Active Canons, Archived Lore & Ingestion">
-        <span>📚</span>
-        <span class="hidden sm:inline">Franchise Library</span>
-        <span class="sm:hidden">Library</span>
-        <span id="hub-active-count" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-mono" title="Active Canons">0</span>
-        <span id="hub-archived-count" class="hidden px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono" title="Archived Canons">📦 0</span>
-      </button>
-      <button onclick="openGuideModal()" class="px-2.5 py-1 rounded bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1 shadow-sm shrink-0" title="Studio Guide">
-        <span>📖</span>
-        <span class="hidden sm:inline">Guide</span>
-      </button>
-      <div class="h-4 w-px bg-slate-800 shrink-0"></div>
-      <div id="traps-container" class="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
-        <span class="text-xs text-slate-400 mr-0.5 hidden xl:inline">Traps:</span>
-        <button onclick="loadTrap(1)" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer shrink-0">Trap 1</button>
-        <button onclick="loadTrap(2)" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer shrink-0">Trap 2</button>
-        <button onclick="loadTrap(3)" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer shrink-0">Trap 3</button>
-      </div>
-    </div>
   </header>
 
   <!-- MAIN WORKSPACE -->
@@ -539,16 +549,21 @@
     function renderTraps(traps) {
       const container = document.getElementById('traps-container');
       if (!container) return;
-      container.innerHTML = `<span class="text-xs text-slate-400 mr-0.5 hidden xl:inline">Traps:</span>`;
+      container.innerHTML = `
+        <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1">
+          <span>⚡</span>
+          <span class="hidden sm:inline">Interactive Traps:</span>
+          <span class="sm:hidden">Traps:</span>
+        </span>
+      `;
       if (!traps || traps.length === 0) {
         container.innerHTML += `<span class="text-[11px] text-slate-500 font-mono">None</span>`;
         return;
       }
       traps.forEach((trap, idx) => {
         const btn = document.createElement('button');
-        btn.className = "px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer shrink-0";
-        const shortName = trap.title ? trap.title.replace(/\s*\([^)]*\)/, '') : `Trap ${idx + 1}`;
-        btn.innerHTML = `<span class="hidden 2xl:inline">${escapeHtml(trap.title || shortName)}</span><span class="2xl:hidden">${escapeHtml(shortName)}</span>`;
+        btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer";
+        btn.textContent = trap.title || `Trap ${idx + 1}`;
         btn.title = `${trap.title || `Trap ${idx + 1}`} - ${trap.location || ''} (${trap.year || ''})`;
         btn.onclick = () => {
           document.getElementById('current-year-display').textContent = trap.year || 1982;
