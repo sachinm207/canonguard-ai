@@ -371,9 +371,10 @@
     </aside>
   </main>
 
-  <!-- JAVASCRIPT APP LOGIC -->
   <script>
-    const API_BASE = window.location.origin;
+    const API_BASE = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:') && !window.location.origin.includes(':5500') && !window.location.origin.includes(':3000'))
+      ? window.location.origin 
+      : 'http://localhost:8005';
     let debounceTimer = null;
     let activeValidationResult = null;
     let isCustomScriptActive = false;
@@ -429,9 +430,20 @@
         const firstSlug = slugMatch[1].trim();
         const slugEl = document.getElementById('editor-slug-display');
         if (slugEl) slugEl.textContent = firstSlug;
-        const yrMatch = firstSlug.match(/\b(19\d\d|20\d\d|21\d\d)\b/);
+        const yrMatch = firstSlug.match(/\b(1\d{3}|2\d{3})\b/);
         if (yrMatch) {
-          document.getElementById('current-year-display').textContent = yrMatch[1];
+          const yrEl = document.getElementById('current-year-display');
+          if (yrEl) yrEl.textContent = yrMatch[1];
+        }
+        if (firstSlug.includes('-')) {
+          const parts = firstSlug.split('-');
+          if (parts.length >= 2) {
+            const parsedLoc = parts[0].replace(/^(?:INT\.|EXT\.)\s*/i, '').trim();
+            if (parsedLoc) {
+              const locEl = document.getElementById('current-setting-display');
+              if (locEl) locEl.textContent = parsedLoc;
+            }
+          }
         }
       }
 
@@ -457,8 +469,9 @@
         activeValidationResult = data;
 
         // Update Latency HUD
-        hudLatency.textContent = `${data.query_latency_ms} ms (DB) | ${clientLatency} ms (E2E)`;
-        cardLatency.textContent = `${data.query_latency_ms} ms`;
+        if (hudLatency) {
+          hudLatency.textContent = `${data.query_latency_ms} ms (DB) | ${clientLatency} ms (E2E)`;
+        }
 
         if (data.status === 'RETCON_DETECTED' && data.violations.length > 0) {
           renderViolations(text, data.violations, data.mitigations);
