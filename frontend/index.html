@@ -95,22 +95,20 @@
           <option value="GALACTIC_IMPERIUM">Galactic Imperium (2100–3200)</option>
           <option value="MYTHOS_REALM">Mythos Realm (Age of Legends)</option>
         </select>
-        <button id="btn-delete-universe" onclick="deleteActiveCustomUniverse()" class="hidden px-2 py-1 rounded bg-rose-950/80 hover:bg-rose-900 text-xs font-semibold text-rose-300 border border-rose-800/60 hover:border-rose-500 transition shadow-sm flex items-center space-x-1" title="Delete this custom universe from ClickHouse">
-          <span>🗑️</span>
-          <span class="hidden sm:inline">Delete</span>
+        <button id="btn-archive-universe" onclick="archiveActiveCustomUniverse()" class="hidden px-2 py-1 rounded bg-amber-950/80 hover:bg-amber-900 text-xs font-semibold text-amber-300 border border-amber-800/60 hover:border-amber-500 transition shadow-sm flex items-center space-x-1" title="Archive this universe to cold storage">
+          <span>📦</span>
+          <span class="hidden sm:inline">Archive</span>
         </button>
       </div>
     </div>
 
-    <!-- RIGHT HUD: Trap Shortcuts, Guide & Ingestion Mode -->
+    <!-- RIGHT HUD: Single Franchise Library Hub, Guide & Traps -->
     <div class="flex items-center space-x-2.5">
-      <button onclick="openIngestModal('ingest')" class="px-2.5 py-1 rounded bg-amber-950/70 hover:bg-amber-900 text-xs font-semibold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1.5 shadow-sm" title="Upload a new story bible or lore document">
-        <span>📥</span>
-        <span>Upload Lore Bible</span>
-      </button>
-      <button onclick="openIngestModal('manage')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 hover:border-slate-500 transition flex items-center space-x-1.5 shadow-sm" title="View, switch, or delete existing franchises">
+      <button onclick="openFranchiseHub('active')" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-xs font-bold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-2 shadow-sm" title="Franchise Library: Active Canons, Archived Lore & Ingestion">
         <span>📚</span>
-        <span class="hidden sm:inline">Manage Franchises</span>
+        <span>Franchise Library</span>
+        <span id="hub-active-count" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-mono" title="Active Canons">0</span>
+        <span id="hub-archived-count" class="hidden px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono" title="Archived Canons">📦 0</span>
       </button>
       <button onclick="openGuideModal()" class="px-2.5 py-1 rounded bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1.5 shadow-sm">
         <span>📖</span>
@@ -401,6 +399,8 @@
 
     let currentUniverseMetadata = null;
     let allUniversesList = [];
+    let allArchivedUniversesList = [];
+    let expandedLoreDetails = new Set();
 
     // --- MULTI-UNIVERSE MANAGEMENT ---
     async function loadAvailableUniverses() {
@@ -421,9 +421,8 @@
         });
 
         applyUniverseToUI(currentUniverseMetadata);
-        const countBadge = document.getElementById('manage-franchises-count');
-        if (countBadge) countBadge.textContent = allUniversesList.length;
-        renderManageUniversesList();
+        renderActiveUniversesList();
+        await loadArchivedUniverses();
       } catch (err) {
         console.error("Failed to load universes:", err);
       }
@@ -440,7 +439,7 @@
         if (data.status === 'SUCCESS') {
           currentUniverseMetadata = data.active_universe;
           applyUniverseToUI(currentUniverseMetadata);
-          renderManageUniversesList();
+          renderActiveUniversesList();
           // Re-validate current script
           validateScript(textarea.value);
         }
@@ -455,14 +454,14 @@
       document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
       document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
       
-      // Toggle Delete button for any active universe
-      const delBtn = document.getElementById('btn-delete-universe');
-      if (delBtn) {
+      // Toggle Archive button for any active universe
+      const archiveBtn = document.getElementById('btn-archive-universe');
+      if (archiveBtn) {
         if (universe && universe.id && universe.id !== 'NONE') {
-          delBtn.classList.remove('hidden');
-          delBtn.title = `Delete "${universe.name}" from ClickHouse`;
+          archiveBtn.classList.remove('hidden');
+          archiveBtn.title = `Archive "${universe.name}" to cold storage`;
         } else {
-          delBtn.classList.add('hidden');
+          archiveBtn.classList.add('hidden');
         }
       }
 
@@ -478,35 +477,79 @@
       }
     }
 
-    async function deleteUniverseById(uid, name) {
-      if (!confirm(`Are you sure you want to permanently delete custom universe "${name}" from ClickHouse?\n\nThis will remove all characters, timeline events, and rules associated with this franchise.`)) {
+    async function archiveUniverseById(uid, name) {
+      if (!confirm(`📦 Move franchise "${name}" to Cold Storage Archive?\n\nIts full lore bible, character roster, rules, and relics will be preserved safely. You can inspect all lore anytime or restore it back to active ClickHouse memory with 1 click.`)) {
         return;
       }
       try {
-        let res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}`, { method: 'DELETE' });
-        // Fallback to POST /api/universe/delete if DELETE method returns 404 or 405
-        if (res.status === 404 || res.status === 405) {
-          res = await fetch(`${API_BASE}/api/universe/delete`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ universe_id: uid })
-          });
-        }
+        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}/archive`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ universe_id: uid })
+        });
         const data = await res.json();
         if (res.ok && data.status === 'SUCCESS') {
-          alert(`✅ Successfully deleted universe "${name}". Active universe reverted to ChronoVerse.`);
           await loadAvailableUniverses();
+          switchHubView('archived');
+          alert(`📦 Successfully archived "${name}" to cold storage!\n\nYou can inspect its full lore or restore it anytime.`);
         } else {
-          alert(`⚠️ Could not delete universe: ${data.detail || JSON.stringify(data)}`);
+          alert(`⚠️ Archive failed: ${data.detail || JSON.stringify(data)}`);
         }
       } catch (err) {
-        alert(`Error deleting universe: ${err.message}`);
+        alert(`Error archiving universe: ${err.message}`);
       }
     }
 
-    async function deleteActiveCustomUniverse() {
+    async function archiveActiveCustomUniverse() {
       if (!currentUniverseMetadata) return;
-      await deleteUniverseById(currentUniverseMetadata.id, currentUniverseMetadata.name);
+      await archiveUniverseById(currentUniverseMetadata.id, currentUniverseMetadata.name);
+    }
+
+    async function restoreUniverseById(uid, name) {
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}/restore`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ universe_id: uid })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'SUCCESS') {
+          await loadAvailableUniverses();
+          switchHubView('active');
+          alert(`♻️ Restored "${name}" to active ClickHouse memory!\n\nIt is now the active canon for script validation.`);
+        } else {
+          alert(`⚠️ Restore failed: ${data.detail || JSON.stringify(data)}`);
+        }
+      } catch (err) {
+        alert(`Error restoring universe: ${err.message}`);
+      }
+    }
+
+    async function purgeArchivedUniverseById(uid, name) {
+      if (!confirm(`⚠️ Permanently purge archived universe "${name}" from disk?\n\nThis cannot be undone.`)) {
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/archived/${encodeURIComponent(uid)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'SUCCESS') {
+          await loadArchivedUniverses();
+        } else {
+          alert(`⚠️ Delete failed: ${data.detail || JSON.stringify(data)}`);
+        }
+      } catch (err) {
+        alert(`Error deleting archived universe: ${err.message}`);
+      }
+    }
+
+    async function deleteUniverseById(uid, name) {
+      return archiveUniverseById(uid, name);
+    }
+
+    async function deleteActiveCustomUniverse() {
+      return archiveActiveCustomUniverse();
     }
 
     function renderTraps(traps) {
@@ -613,44 +656,110 @@
       }
     });
 
-    // --- CUSTOM LORE BIBLE INGESTION & FRANCHISE MANAGER ---
-    function openIngestModal(view = 'ingest') {
-      document.getElementById('ingest-modal').classList.remove('hidden');
-      switchModalView(view);
+    // --- FRANCHISE LIBRARY & ARCHIVE LORE HUB ---
+    function openFranchiseHub(view = 'active') {
+      const modal = document.getElementById('franchise-hub-modal') || document.getElementById('ingest-modal');
+      if (modal) modal.classList.remove('hidden');
+      switchHubView(view);
+      loadArchivedUniverses();
     }
-    function closeIngestModal() {
-      document.getElementById('ingest-modal').classList.add('hidden');
+    function closeFranchiseHub() {
+      const modal = document.getElementById('franchise-hub-modal') || document.getElementById('ingest-modal');
+      if (modal) modal.classList.add('hidden');
     }
+    // Backward compatibility aliases
+    function openIngestModal(view = 'ingest') { openFranchiseHub(view); }
+    function closeIngestModal() { closeFranchiseHub(); }
+    function switchModalView(view) { switchHubView(view); }
 
-    function switchModalView(view) {
+    function switchHubView(view) {
+      const tabActive = document.getElementById('modal-tab-active');
+      const tabArchived = document.getElementById('modal-tab-archived');
       const tabIngest = document.getElementById('modal-tab-ingest');
-      const tabManage = document.getElementById('modal-tab-manage');
+      const viewActive = document.getElementById('modal-view-active');
+      const viewArchived = document.getElementById('modal-view-archived');
       const viewIngest = document.getElementById('modal-view-ingest');
-      const viewManage = document.getElementById('modal-view-manage');
-      if (!viewIngest || !viewManage) return;
 
-      if (view === 'manage') {
-        tabIngest.className = "pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition";
-        tabManage.className = "pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition";
-        viewIngest.classList.add('hidden');
-        viewManage.classList.remove('hidden');
-        renderManageUniversesList();
-      } else {
-        tabManage.className = "pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition";
-        tabIngest.className = "pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition";
-        viewManage.classList.add('hidden');
+      if (!viewActive || !viewArchived || !viewIngest) return;
+
+      const inactiveTab = "pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition";
+      const activeTab = "pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition";
+
+      tabActive.className = inactiveTab;
+      tabArchived.className = inactiveTab;
+      tabIngest.className = inactiveTab;
+
+      viewActive.classList.add('hidden');
+      viewArchived.classList.add('hidden');
+      viewIngest.classList.add('hidden');
+
+      if (view === 'archived') {
+        tabArchived.className = activeTab;
+        viewArchived.classList.remove('hidden');
+        renderArchivedUniversesList();
+      } else if (view === 'ingest') {
+        tabIngest.className = activeTab;
         viewIngest.classList.remove('hidden');
+      } else { // 'active' or default
+        tabActive.className = activeTab;
+        viewActive.classList.remove('hidden');
+        renderActiveUniversesList();
       }
     }
 
-    function renderManageUniversesList() {
-      const container = document.getElementById('existing-universes-list');
-      const countBadge = document.getElementById('manage-franchises-count');
-      if (countBadge) countBadge.textContent = allUniversesList.length;
+    async function loadArchivedUniverses() {
+      try {
+        const res = await fetch(`${API_BASE}/api/universes/archived`);
+        const data = await res.json();
+        allArchivedUniversesList = data.universes || [];
+        updateFranchiseHubBadges();
+        renderArchivedUniversesList();
+      } catch (err) {
+        console.error("Failed to load archived universes:", err);
+      }
+    }
+
+    function updateFranchiseHubBadges() {
+      const activeCountEl = document.getElementById('hub-active-count');
+      const archivedCountEl = document.getElementById('hub-archived-count');
+      const tabActiveBadge = document.getElementById('tab-active-count');
+      const tabArchivedBadge = document.getElementById('tab-archived-count');
+
+      const actCount = allUniversesList.length;
+      const archCount = allArchivedUniversesList.length;
+
+      if (activeCountEl) activeCountEl.textContent = `${actCount} Active`;
+      if (tabActiveBadge) tabActiveBadge.textContent = actCount;
+
+      if (archivedCountEl) {
+        if (archCount > 0) {
+          archivedCountEl.textContent = `📦 ${archCount} Archived`;
+          archivedCountEl.classList.remove('hidden');
+        } else {
+          archivedCountEl.classList.add('hidden');
+        }
+      }
+      if (tabArchivedBadge) tabArchivedBadge.textContent = archCount;
+    }
+
+    function toggleLoreDetails(uid) {
+      if (expandedLoreDetails.has(uid)) {
+        expandedLoreDetails.delete(uid);
+      } else {
+        expandedLoreDetails.add(uid);
+      }
+      renderArchivedUniversesList();
+    }
+
+    function renderActiveUniversesList() {
+      const container = document.getElementById('active-universes-list') || document.getElementById('existing-universes-list');
+      const tabBadge = document.getElementById('tab-active-count');
+      if (tabBadge) tabBadge.textContent = allUniversesList.length;
+      updateFranchiseHubBadges();
       if (!container) return;
 
       if (!allUniversesList || allUniversesList.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No franchises found in ClickHouse engine.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs bg-slate-950/40 rounded-xl border border-slate-800">No active franchises in ClickHouse engine memory. Restore defaults or ingest a new story bible.</div>`;
         return;
       }
 
@@ -669,7 +778,7 @@
                   ? `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 border border-slate-700">🛡️ Default Root Canon</span>` 
                   : (isCore 
                       ? `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/80">🎬 Studio Canon</span>` 
-                      : `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-950/80 text-amber-300 border border-amber-800/80">✨ Custom User Lore</span>`)}
+                      : `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-950/80 text-amber-300 border border-amber-800/80">✨ Custom Lore</span>`)}
                 ${isActive ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-700">● Active</span>` : ''}
               </div>
               <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(u.description || 'No description provided.')}</p>
@@ -683,10 +792,153 @@
             </div>
             <div class="flex items-center space-x-2 self-end sm:self-center shrink-0">
               ${!isActive 
-                ? `<button onclick="switchActiveUniverse('${u.id}'); closeIngestModal();" class="px-3 py-1.5 text-xs font-semibold rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
-                : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
-              <button onclick="deleteUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-500 text-white border border-rose-500 shadow-md flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Permanently delete this franchise from ClickHouse"><span>🗑️</span><span>Delete</span></button>
+                ? `<button onclick="switchActiveUniverse('${u.id}'); closeFranchiseHub();" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
+                : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
+              <button onclick="archiveUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 hover:border-amber-500 shadow-sm flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Safely move this franchise into cold storage archive">
+                <span>📦</span>
+                <span>Archive</span>
+              </button>
             </div>
+          </div>
+        `;
+      }).join('');
+    }
+    function renderManageUniversesList() { renderActiveUniversesList(); }
+
+    function renderArchivedUniversesList() {
+      const container = document.getElementById('archived-universes-list');
+      const tabBadge = document.getElementById('tab-archived-count');
+      if (tabBadge) tabBadge.textContent = allArchivedUniversesList.length;
+      updateFranchiseHubBadges();
+      if (!container) return;
+
+      if (!allArchivedUniversesList || allArchivedUniversesList.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 text-xs bg-slate-950/40 rounded-xl border border-dashed border-slate-800 space-y-2">
+            <span class="text-3xl block mb-1">📦</span>
+            <strong class="text-white text-sm block">No Franchises Currently in Cold Storage</strong>
+            <p class="text-slate-400 max-w-md mx-auto">When you click <strong class="text-amber-300">📦 Archive</strong> on any franchise in Active Canons, its complete lore bible, character roster, rules, and relics will be safely preserved here. You can inspect all data or restore it back to active memory anytime with 1 click.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = allArchivedUniversesList.map(u => {
+        const safeName = escapeHtml(u.name);
+        const attrName = safeName.replace(/'/g, "\\'");
+        const isExpanded = expandedLoreDetails.has(u.id);
+        const chars = u.characters_full || [];
+        const rules = u.lore_rules_full || [];
+        const relics = u.relationships_full || [];
+
+        return `
+          <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-950/80 transition hover:border-slate-700 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1 flex-1">
+                <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                  <span class="text-sm font-bold text-white">${safeName}</span>
+                  <span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-950/60 text-amber-300 border border-amber-800/50">📦 Cold Storage</span>
+                  <span class="text-[10px] text-slate-500 font-mono">Archived: ${escapeHtml(u.archived_at || '')}</span>
+                </div>
+                <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(u.description || 'No description provided.')}</p>
+                <div class="flex items-center space-x-3 text-[11px] text-slate-400 font-mono flex-wrap">
+                  <span>Genre: <strong class="text-slate-300">${escapeHtml(u.genre || 'Sci-Fi')}</strong></span>
+                  <span>•</span>
+                  <span>Era: <strong class="text-slate-300">${escapeHtml(u.era || 'N/A')}</strong></span>
+                  <span>•</span>
+                  <span><strong class="text-amber-400">${u.characters_count || 0}</strong> characters</span>
+                  <span>•</span>
+                  <span><strong class="text-sky-400">${u.rules_count || 0}</strong> rules</span>
+                  <span>•</span>
+                  <span><strong class="text-indigo-400">${relics.length}</strong> relics</span>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 self-end sm:self-center shrink-0">
+                <button onclick="toggleLoreDetails('${u.id}')" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg ${isExpanded ? 'bg-slate-700 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'} border border-slate-700 hover:border-slate-500 transition cursor-pointer flex items-center space-x-1" title="Inspect character roster, rules, and relics">
+                  <span>${isExpanded ? '🔼' : '👁️'}</span>
+                  <span>${isExpanded ? 'Hide Lore' : 'View Lore Details'}</span>
+                </button>
+                <button onclick="restoreUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-500 shadow-sm flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Rehydrate this franchise into active ClickHouse memory">
+                  <span>♻️</span>
+                  <span>Restore to Active</span>
+                </button>
+                <button onclick="purgeArchivedUniverseById('${u.id}', '${attrName}')" class="p-1.5 text-xs rounded-lg bg-slate-900 hover:bg-rose-950 text-slate-500 hover:text-rose-300 border border-slate-800 hover:border-rose-800 transition cursor-pointer" title="Permanently delete from disk">
+                  <span>🗑️</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Expandable Lore Details Accordion -->
+            ${isExpanded ? `
+              <div class="pt-3 border-t border-slate-800 space-y-3 bg-slate-900/60 p-3 rounded-lg animate-in fade-in duration-150">
+                <!-- Characters Roster -->
+                <div>
+                  <h4 class="text-xs font-bold text-amber-300 mb-1.5 flex items-center space-x-1.5">
+                    <span>👥</span>
+                    <span>Archived Character Roster (${chars.length}):</span>
+                  </h4>
+                  ${chars.length > 0 ? `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      ${chars.map(c => `
+                        <div class="p-2 rounded bg-slate-950/80 border border-slate-800 text-[11px] space-y-0.5">
+                          <div class="flex items-center justify-between">
+                            <strong class="text-white">${escapeHtml(c.name)}</strong>
+                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                              c.status === 'ALIVE' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' :
+                              c.status === 'DEAD' ? 'bg-rose-950 text-rose-300 border border-rose-800' :
+                              'bg-amber-950 text-amber-300 border border-amber-800'
+                            }">${c.status || 'ALIVE'}</span>
+                          </div>
+                          <div class="text-slate-400">Lifespan: ${c.birth_year || '?'}${c.death_year ? ` – ${c.death_year}` : (c.stasis_start_year ? ` (Stasis: ${c.stasis_start_year}–${c.stasis_end_year})` : ' (Current)')}</div>
+                          <div class="text-slate-500 text-[10px]">Powers: ${(c.powers || []).join(', ') || 'Custom'} • Planet: ${escapeHtml(c.home_planet || 'Earth')}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : `<p class="text-slate-500 italic text-[11px]">No character records found.</p>`}
+                </div>
+
+                <!-- Lore Rules & Invariants -->
+                <div>
+                  <h4 class="text-xs font-bold text-sky-300 mb-1.5 flex items-center space-x-1.5">
+                    <span>⚖️</span>
+                    <span>Absolute Lore Invariants & Rules (${rules.length}):</span>
+                  </h4>
+                  ${rules.length > 0 ? `
+                    <div class="space-y-1">
+                      ${rules.map(r => `
+                        <div class="p-1.5 rounded bg-slate-950/80 border border-slate-800 text-[11px] flex items-start space-x-2">
+                          <span class="px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800 text-[9px] font-mono shrink-0">${escapeHtml(r.category || 'PHYSICS')}</span>
+                          <span class="text-slate-300">${escapeHtml(r.rule_statement || '')}</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : `<p class="text-slate-500 italic text-[11px]">No specific lore rules recorded.</p>`}
+                </div>
+
+                <!-- Relics & Possessions -->
+                ${relics.length > 0 ? `
+                  <div>
+                    <h4 class="text-xs font-bold text-indigo-300 mb-1.5 flex items-center space-x-1.5">
+                      <span>🏺</span>
+                      <span>Relics & Artifacts (${relics.length}):</span>
+                    </h4>
+                    <div class="flex flex-wrap gap-1.5">
+                      ${relics.map(rel => `
+                        <span class="px-2 py-0.5 rounded bg-indigo-950/70 border border-indigo-800/60 text-indigo-200 text-[10px]">
+                          ${escapeHtml(rel.object_name)} (${rel.status === 'DESTROYED' ? `Destroyed in ${rel.valid_to_year}` : 'Active'})
+                        </span>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
+                <div class="pt-2 flex justify-end">
+                  <button onclick="restoreUniverseById('${u.id}', '${attrName}')" class="px-3 py-1 text-xs font-bold rounded bg-emerald-700 hover:bg-emerald-600 text-white flex items-center space-x-1">
+                    <span>♻️ Restore This Canon to Active ClickHouse Memory</span>
+                  </button>
+                </div>
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
@@ -702,7 +954,6 @@
         if (res.ok && data.status === 'SUCCESS') {
           alert("✅ Successfully restored all default studio franchises!");
           await loadAvailableUniverses();
-          renderManageUniversesList();
         } else {
           alert(`⚠️ Reset failed: ${data.detail || JSON.stringify(data)}`);
         }
@@ -843,37 +1094,91 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
     loadAvailableUniverses();
   </script>
 
-  <!-- LORE BIBLE INGESTION & FRANCHISE MANAGER MODAL -->
-  <div id="ingest-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+  <!-- FRANCHISE LIBRARY & LORE HUB MODAL -->
+  <div id="franchise-hub-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
       
       <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
         <div class="flex items-center space-x-2.5">
           <span class="text-xl">📚</span>
           <div>
-            <h2 class="text-base font-bold text-white">Lore Bible & Franchise Manager</h2>
-            <p class="text-xs text-slate-400">Ingest custom cinematic lore or manage and delete existing franchise universes</p>
+            <h2 class="text-base font-bold text-white">Franchise Library & Lore Hub</h2>
+            <p class="text-xs text-slate-400">Active In-Memory Canons, Cold-Storage Lore Archive & Custom Lore Bible Ingestion</p>
           </div>
         </div>
-        <button onclick="closeIngestModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+        <button onclick="closeFranchiseHub()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
       </div>
 
-      <!-- Navigation Tabs -->
+      <!-- Navigation Tabs (3 Tabs) -->
       <div class="flex border-b border-slate-800 bg-slate-950/40 px-6 pt-2 space-x-4">
-        <button id="modal-tab-ingest" onclick="switchModalView('ingest')" class="pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition">
-          <span>📥</span>
-          <span>Upload & Ingest Lore</span>
-        </button>
-        <button id="modal-tab-manage" onclick="switchModalView('manage')" class="pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition">
+        <button id="modal-tab-active" onclick="switchHubView('active')" class="pb-2.5 text-xs font-bold text-amber-400 border-b-2 border-amber-500 flex items-center space-x-1.5 transition">
           <span>📚</span>
-          <span>Manage Existing Franchises</span>
-          <span id="manage-franchises-count" class="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">0</span>
+          <span>Active Canons</span>
+          <span id="tab-active-count" class="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">0</span>
+        </button>
+        <button id="modal-tab-archived" onclick="switchHubView('archived')" class="pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition">
+          <span>📦</span>
+          <span>Archived Canons</span>
+          <span id="tab-archived-count" class="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">0</span>
+        </button>
+        <button id="modal-tab-ingest" onclick="switchHubView('ingest')" class="pb-2.5 text-xs font-bold text-slate-400 hover:text-white border-b-2 border-transparent hover:border-slate-600 flex items-center space-x-1.5 transition">
+          <span>📥</span>
+          <span>Upload Lore Bible</span>
         </button>
       </div>
 
-      <!-- Tab View 1: Ingest Form -->
-      <div id="modal-view-ingest" class="flex flex-col flex-1 overflow-hidden">
+      <!-- Tab View 1: Active Canons -->
+      <div id="modal-view-active" class="flex flex-col flex-1 overflow-hidden">
+        <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
+          <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+            <div>
+              <h3 class="text-xs font-bold text-white">ClickHouse Active Memory Canons</h3>
+              <p class="text-[11px] text-slate-400">Canons immediately available for real-time script validation. Archive any universe to move it to cold storage.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="resetDefaultUniverses()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-500 text-xs font-semibold flex items-center space-x-1 transition" title="Restore all default built-in canons">
+                <span>🔄</span>
+                <span>Restore Defaults</span>
+              </button>
+              <button onclick="switchHubView('ingest')" class="px-2.5 py-1 rounded bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 hover:border-amber-600 text-xs font-semibold flex items-center space-x-1 transition">
+                <span>+</span>
+                <span>Upload New</span>
+              </button>
+            </div>
+          </div>
+          <div id="active-universes-list" class="space-y-2.5">
+            <!-- Dynamically populated by renderActiveUniversesList() -->
+          </div>
+        </div>
+        <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+          <span class="text-[11px] text-slate-500 font-mono">Archived universes preserve all characters & rules and can be restored anytime</span>
+          <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Close</button>
+        </div>
+      </div>
+
+      <!-- Tab View 2: Archived Canons -->
+      <div id="modal-view-archived" class="hidden flex flex-col flex-1 overflow-hidden">
+        <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
+          <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+            <div>
+              <h3 class="text-xs font-bold text-white">Cold-Storage Archived Franchises</h3>
+              <p class="text-[11px] text-slate-400">All characters, rules, and relics safely preserved. Inspect complete lore rosters or restore to active memory with 1 click.</p>
+            </div>
+            <span class="text-[11px] font-mono text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2.5 py-1 rounded">📦 Persistent Cold Storage</span>
+          </div>
+          <div id="archived-universes-list" class="space-y-2.5">
+            <!-- Dynamically populated by renderArchivedUniversesList() -->
+          </div>
+        </div>
+        <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+          <span class="text-[11px] text-slate-500 font-mono">Restoring rehydrates full lore immediately into ClickHouse columnar memory</span>
+          <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Close</button>
+        </div>
+      </div>
+
+      <!-- Tab View 3: Ingest Form -->
+      <div id="modal-view-ingest" class="hidden flex flex-col flex-1 overflow-hidden">
         <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
           
           <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-3 rounded-lg border border-slate-800">
@@ -930,40 +1235,11 @@ Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
         <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
           <span class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
           <div class="flex items-center space-x-2">
-            <button onclick="closeIngestModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Cancel</button>
+            <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Cancel</button>
             <button id="ingest-submit-btn" onclick="submitLoreIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5">
               <span>⚡ Ingest into ClickHouse Engine</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      <!-- Tab View 2: Manage Franchises -->
-      <div id="modal-view-manage" class="hidden flex flex-col flex-1 overflow-hidden">
-        <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
-          <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-            <div>
-              <h3 class="text-xs font-bold text-white">ClickHouse Canon Franchises</h3>
-              <p class="text-[11px] text-slate-400">Select an active universe or delete custom lore bibles with 1 click.</p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <button onclick="resetDefaultUniverses()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-500 text-xs font-semibold flex items-center space-x-1 transition" title="Restore all default built-in canons">
-                <span>🔄</span>
-                <span>Restore Defaults</span>
-              </button>
-              <button onclick="switchModalView('ingest')" class="px-2.5 py-1 rounded bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 hover:border-amber-600 text-xs font-semibold flex items-center space-x-1 transition">
-                <span>+</span>
-                <span>Upload New Franchise</span>
-              </button>
-            </div>
-          </div>
-          <div id="existing-universes-list" class="space-y-2.5">
-            <!-- Dynamically populated by renderManageUniversesList() -->
-          </div>
-        </div>
-        <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
-          <span class="text-[11px] text-slate-500 font-mono">Custom universes persist across server restarts</span>
-          <button onclick="closeIngestModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Close</button>
         </div>
       </div>
 
@@ -1015,7 +1291,8 @@ Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
             <li><strong class="text-slate-100">Cold War Requiem.fountain:</strong> The file name of your script. <code class="text-sky-300 font-mono">.fountain</code> is the free standard format screenwriters use to type scripts without expensive software.</li>
             <li><strong class="text-slate-100">Setting & Scene Year (1982):</strong> The "where" and "when" of your scene. The AI needs to know the year so it knows who is alive, who is frozen in ice, and what weapons exist at that time.</li>
             <li><strong class="text-slate-100">📂 Upload Script:</strong> Upload any script from your computer or just drag-and-drop a file directly onto the editor.</li>
-            <li><strong class="text-slate-100">📥 Upload Lore Bible:</strong> Want to test your own book or game world? Click this to upload your custom characters, rules, and history!</li>
+            <li><strong class="text-slate-100">📚 Franchise Library:</strong> Open the Franchise Library to switch active canons, archive old story worlds to cold storage, inspect preserved character rosters & rules, or ingest new lore bibles into ClickHouse.</li>
+            <li><strong class="text-slate-100">📦 Archive & Restore:</strong> Safely preserve custom franchises in persistent cold storage without losing lore data. Inspect complete rosters & rules anytime or restore them back to active ClickHouse memory in 1 click!</li>
             <li><strong class="text-slate-100">💾 Save / Export:</strong> Downloads your active script as an industry-standard <code class="text-emerald-300 font-mono">.fountain</code> file. You can open it in Final Draft, Highland 2, or Fade In without any proprietary lock-in.</li>
             <li><strong class="text-slate-100">Auto-Save:</strong> All your typing is continuously auto-saved to your browser storage, so your draft is never lost even if you refresh.</li>
             <li><strong class="text-slate-100">Auto-Patch:</strong> Click this 1-click button on the right panel to automatically fix the mistake in your script with the AI's canonical suggestion.</li>

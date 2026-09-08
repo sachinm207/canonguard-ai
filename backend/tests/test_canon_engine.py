@@ -221,6 +221,58 @@ def test_custom_universe_deletion_and_protection():
     assert "CUSTOM_CYBERCITY_2099" in ch_engine.universes
     print("✅ Any universe deletion & restore lifecycle verified.")
 
+def test_archive_and_restore_lifecycle():
+    """
+    Verify archiving a universe moves it to cold storage, preserves its lore details,
+    and restoring it rehydrates all characters, rules, and relics back into active ClickHouse memory.
+    """
+    from backend.app.db.clickhouse import ch_engine
+
+    # Ensure clean state
+    ch_engine.reset_defaults()
+    assert "CUSTOM_CYBERCITY_2099" in ch_engine.universes
+    
+    # 1. Archive CyberCity 2099
+    success = ch_engine.archive_universe("CUSTOM_CYBERCITY_2099")
+    assert success is True
+    assert "CUSTOM_CYBERCITY_2099" not in ch_engine.universes
+
+    # 2. Inspect archived universes
+    archived_list = ch_engine.get_archived_universes()
+    archived_ids = [a["id"] for a in archived_list]
+    assert "CUSTOM_CYBERCITY_2099" in archived_ids
+
+    # Find the archived entry and check full lore details
+    target_archived = next(a for a in archived_list if a["id"] == "CUSTOM_CYBERCITY_2099")
+    assert target_archived["name"] == "CyberCity 2099"
+    assert target_archived["characters_count"] >= 2
+    assert target_archived["rules_count"] >= 1
+    assert any(c["name"] == "Jax Vance" for c in target_archived["characters_full"])
+
+    # 3. Restore back to active memory
+    restored = ch_engine.restore_archived_universe("CUSTOM_CYBERCITY_2099")
+    assert restored is True
+    assert "CUSTOM_CYBERCITY_2099" in ch_engine.universes
+    assert ch_engine.active_universe_id == "CUSTOM_CYBERCITY_2099"
+
+    # Verify characters are back in active memory
+    active_chars = [c for c in ch_engine.characters if c.get("universe_id") == "CUSTOM_CYBERCITY_2099"]
+    assert len(active_chars) >= 2
+    assert any(c["name"] == "Jax Vance" for c in active_chars)
+
+    # 4. Verify validation works with restored universe
+    from backend.app.agents.orchestrator import orchestrator
+    res = orchestrator.validate_screenplay_stream(
+        text="Jax Vance walks into Sector 4 in 2095 holding the Neon Pulse Rifle.",
+        screenplay_title="Neon Shadows",
+        fallback_year=2095
+    )
+    assert res.status == "RETCON_DETECTED"
+    print(f"✅ Archive, Inspect & Restore Lifecycle Verified! Caught retcon in {res.query_latency_ms}ms after restore.")
+
+    # Revert to ChronoVerse
+    ch_engine.switch_universe("CHRONOVERSE")
+
 if __name__ == "__main__":
     test_trap_1_cryogenic_stasis_violation()
     test_trap_2_destroyed_relic_violation()
@@ -230,4 +282,5 @@ if __name__ == "__main__":
     test_mythos_realm_canon()
     test_custom_lore_document_ingestion()
     test_custom_universe_deletion_and_protection()
-    print("\n🎉 ALL 8 MULTI-UNIVERSE & CANON LIFECYCLE TESTS PASSED UNDER 20ms!")
+    test_archive_and_restore_lifecycle()
+    print("\n🎉 ALL 9 MULTI-UNIVERSE, ARCHIVE & RESTORE TESTS PASSED UNDER 20ms!")

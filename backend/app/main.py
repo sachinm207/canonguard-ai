@@ -99,6 +99,66 @@ def switch_universe(req: SwitchUniverseRequest):
     logger.info(f"Switched active universe to {active['name']} ({req.universe_id})")
     return {"status": "SUCCESS", "active_universe": active}
 
+@app.get("/api/universes/archived")
+def get_archived_universes():
+    """Returns all archived universes with lore roster and rule details."""
+    archived = ch_engine.get_archived_universes()
+    return {
+        "total": len(archived),
+        "universes": archived
+    }
+
+class ArchiveUniverseRequest(BaseModel):
+    universe_id: str
+
+@app.post("/api/universe/archive")
+def archive_universe_post(req: ArchiveUniverseRequest):
+    """Archives an active universe into the cold lore repository."""
+    success = ch_engine.archive_universe(req.universe_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Universe '{req.universe_id}' not found.")
+    return {
+        "status": "SUCCESS",
+        "archived_universe_id": req.universe_id,
+        "active_universe": ch_engine.get_active_universe()
+    }
+
+@app.post("/api/universe/{universe_id}/archive")
+def archive_universe_path_post(universe_id: str):
+    """Archives an active universe into the cold lore repository (path param)."""
+    return archive_universe_post(ArchiveUniverseRequest(universe_id=universe_id))
+
+class RestoreUniverseRequest(BaseModel):
+    universe_id: str
+
+@app.post("/api/universe/restore")
+def restore_universe_post(req: RestoreUniverseRequest):
+    """Restores an archived universe back into active ClickHouse engine memory."""
+    success = ch_engine.restore_archived_universe(req.universe_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Archived universe '{req.universe_id}' not found.")
+    return {
+        "status": "SUCCESS",
+        "restored_universe_id": req.universe_id,
+        "active_universe": ch_engine.get_active_universe()
+    }
+
+@app.post("/api/universe/{universe_id}/restore")
+def restore_universe_path_post(universe_id: str):
+    """Restores an archived universe back into active ClickHouse engine memory (path param)."""
+    return restore_universe_post(RestoreUniverseRequest(universe_id=universe_id))
+
+@app.delete("/api/universe/archived/{universe_id}")
+def delete_archived_universe(universe_id: str):
+    """Permanently purges an archived universe."""
+    success = ch_engine.delete_archived_universe(universe_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Archived universe '{universe_id}' not found.")
+    return {
+        "status": "SUCCESS",
+        "deleted_universe_id": universe_id
+    }
+
 @app.delete("/api/universe/{universe_id}")
 def delete_universe(universe_id: str):
     """Deletes a custom franchise universe from ClickHouse."""

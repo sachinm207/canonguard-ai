@@ -142,11 +142,129 @@ class ClickHouseEngine:
         self._save_custom_universes_to_disk()
         return True
 
+    def archive_universe(self, universe_id: str) -> bool:
+        """Moves an active universe into the archived lore repository."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        matched_uid = None
+        for uid in self.universes:
+            if uid.lower() == universe_id.lower() or self.universes[uid].get("name", "").strip().lower() == universe_id.strip().lower():
+                matched_uid = uid
+                break
+        if not matched_uid:
+            return False
+
+        if not hasattr(self, 'archived_universes'):
+            self.archived_universes = {}
+        if not hasattr(self, 'deleted_builtins'):
+            self.deleted_builtins = set()
+
+        # Extract entities for archiving
+        u_chars = [c for c in self.characters if c.get("universe_id") == matched_uid]
+        u_events = [e for e in self.timeline_events if e.get("universe_id") == matched_uid]
+        u_rels = [r for r in self.relationships if r.get("universe_id") == matched_uid]
+        u_rules = [rl for rl in self.lore_rules if rl.get("universe_id") == matched_uid]
+
+        from datetime import datetime
+        self.archived_universes[matched_uid] = {
+            "metadata": dict(self.universes[matched_uid]),
+            "characters": u_chars,
+            "timeline_events": u_events,
+            "relationships": u_rels,
+            "lore_rules": u_rules,
+            "archived_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        if matched_uid in ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]:
+            self.deleted_builtins.add(matched_uid)
+
+        del self.universes[matched_uid]
+        self.characters = [c for c in self.characters if c.get("universe_id") != matched_uid]
+        self.timeline_events = [e for e in self.timeline_events if e.get("universe_id") != matched_uid]
+        self.relationships = [r for r in self.relationships if r.get("universe_id") != matched_uid]
+        self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != matched_uid]
+
+        if self.active_universe_id == matched_uid:
+            rem = list(self.universes.keys())
+            self.active_universe_id = rem[0] if rem else None
+
+        self._save_custom_universes_to_disk()
+        return True
+
+    def restore_archived_universe(self, universe_id: str) -> bool:
+        """Restores an archived universe back into active ClickHouse engine memory."""
+        if not hasattr(self, 'archived_universes'):
+            self.archived_universes = {}
+        matched_uid = None
+        for uid in self.archived_universes:
+            if uid.lower() == universe_id.lower() or self.archived_universes[uid].get("metadata", {}).get("name", "").strip().lower() == universe_id.strip().lower():
+                matched_uid = uid
+                break
+        if not matched_uid:
+            return False
+
+        archived_item = self.archived_universes.pop(matched_uid)
+        meta = archived_item.get("metadata", {})
+        self.universes[matched_uid] = meta
+        
+        # Remove any lingering entities first
+        self.characters = [c for c in self.characters if c.get("universe_id") != matched_uid]
+        self.timeline_events = [e for e in self.timeline_events if e.get("universe_id") != matched_uid]
+        self.relationships = [r for r in self.relationships if r.get("universe_id") != matched_uid]
+        self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != matched_uid]
+
+        self.characters.extend(archived_item.get("characters", []))
+        self.timeline_events.extend(archived_item.get("timeline_events", []))
+        self.relationships.extend(archived_item.get("relationships", []))
+        self.lore_rules.extend(archived_item.get("lore_rules", []))
+
+        self.active_universe_id = matched_uid
+        if hasattr(self, 'deleted_builtins'):
+            self.deleted_builtins.discard(matched_uid)
+
+        self._save_custom_universes_to_disk()
+        return True
+
+    def get_archived_universes(self) -> List[Dict[str, Any]]:
+        """Returns all archived universes with complete lore preview."""
+        if not hasattr(self, 'archived_universes'):
+            self.archived_universes = {}
+        result = []
+        for uid, item in self.archived_universes.items():
+            meta = dict(item.get("metadata", {}))
+            meta["archived_at"] = item.get("archived_at", "Unknown")
+            meta["characters_count"] = len(item.get("characters", []))
+            meta["rules_count"] = len(item.get("lore_rules", []))
+            meta["characters_full"] = item.get("characters", [])
+            meta["lore_rules_full"] = item.get("lore_rules", [])
+            meta["relationships_full"] = item.get("relationships", [])
+            result.append(meta)
+        return result
+
+    def delete_archived_universe(self, universe_id: str) -> bool:
+        """Permanently purges an archived universe from archive repository and disk."""
+        if not hasattr(self, 'archived_universes'):
+            self.archived_universes = {}
+        matched_uid = None
+        for uid in self.archived_universes:
+            if uid.lower() == universe_id.lower() or self.archived_universes[uid].get("metadata", {}).get("name", "").strip().lower() == universe_id.strip().lower():
+                matched_uid = uid
+                break
+        if not matched_uid:
+            return False
+        del self.archived_universes[matched_uid]
+        self._save_custom_universes_to_disk()
+        return True
+
     def reset_defaults(self):
         """Restores all built-in core universes and default custom universe."""
         if not hasattr(self, 'deleted_builtins'):
             self.deleted_builtins = set()
         self.deleted_builtins.clear()
+        if not hasattr(self, 'archived_universes'):
+            self.archived_universes = {}
+        self.archived_universes.clear()
         import os
         path = os.path.join(os.path.dirname(__file__), "custom_universes.json")
         try:
@@ -161,7 +279,7 @@ class ClickHouseEngine:
         return self.get_all_universes()
 
     def _save_custom_universes_to_disk(self):
-        """Saves non-core custom universes and deleted builtin states to disk."""
+        """Saves non-core custom universes, archived universes, and deleted builtin states to disk."""
         try:
             import json
             import os
@@ -169,6 +287,8 @@ class ClickHouseEngine:
             path = os.path.join(db_dir, "custom_universes.json")
             if not hasattr(self, 'deleted_builtins'):
                 self.deleted_builtins = set()
+            if not hasattr(self, 'archived_universes'):
+                self.archived_universes = {}
             core = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
             custom_dict = {}
             for uid, udata in self.universes.items():
@@ -182,7 +302,8 @@ class ClickHouseEngine:
                     }
             payload = {
                 "deleted_builtins": list(self.deleted_builtins),
-                "custom_universes": custom_dict
+                "custom_universes": custom_dict,
+                "archived_universes": self.archived_universes
             }
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(payload, f, indent=2)
@@ -190,7 +311,7 @@ class ClickHouseEngine:
             logger.warning(f"Failed to save custom universes to disk: {e}")
 
     def _load_custom_universes_from_disk(self):
-        """Loads non-core custom universes from disk if present."""
+        """Loads non-core custom universes and archived universes from disk if present."""
         try:
             import json
             import os
@@ -203,6 +324,10 @@ class ClickHouseEngine:
             
             if not hasattr(self, 'deleted_builtins'):
                 self.deleted_builtins = set()
+            if not hasattr(self, 'archived_universes'):
+                self.archived_universes = {}
+
+            self.archived_universes = data.get("archived_universes", {})
 
             if "custom_universes" in data:
                 self.deleted_builtins = set(data.get("deleted_builtins", []))
@@ -218,7 +343,7 @@ class ClickHouseEngine:
                 custom_dict = data
 
             for uid, item in custom_dict.items():
-                if uid not in self.universes:
+                if uid not in self.universes and uid not in self.archived_universes:
                     self.universes[uid] = item.get("metadata", {})
                     self.characters.extend(item.get("characters", []))
                     self.timeline_events.extend(item.get("timeline_events", []))
