@@ -170,10 +170,6 @@
         </div>
         <div class="flex items-center space-x-1.5 md:space-x-2 text-[11px] shrink-0">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
-          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Open an existing screenplay file (.fountain or .txt) in the editor">
-            <span>📂</span>
-            <span>Open in Editor</span>
-          </button>
           <button onclick="openProjectScriptsModal()" id="btn-project-scripts" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1 font-medium cursor-pointer shadow-sm" title="View, load, or manage saved screenplay scenes for this story world">
             <span>📜</span>
             <span>Project Scripts</span>
@@ -182,10 +178,6 @@
           <button onclick="saveCurrentScriptToProject()" class="px-2.5 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700 hover:border-emerald-500 transition flex items-center space-x-1 font-semibold cursor-pointer shadow-sm" title="Save this screenplay into the active project database so you can explore and reload it anytime">
             <span>💾</span>
             <span>Save to Project</span>
-          </button>
-          <button onclick="exportScreenplay()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Export this screenplay to a .fountain file on your computer">
-            <span>📥</span>
-            <span>Export .fountain</span>
           </button>
           <button onclick="clearScriptEditor()" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700 transition flex items-center space-x-1 font-medium cursor-pointer" title="Clear the editor to write a brand new scene">
             <span>🧹</span>
