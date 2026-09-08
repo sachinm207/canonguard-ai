@@ -154,11 +154,15 @@
         </div>
         <div class="flex items-center space-x-3 text-[11px]">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
-          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium" title="Upload a .fountain, .txt, or .fdx script">
+          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Upload a .fountain, .txt, or .fdx script">
             <span>📂</span>
             <span>Upload Script</span>
           </button>
-          <button onclick="downloadScreenplay()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-emerald-500 transition flex items-center space-x-1 font-medium" title="Save and download screenplay in industry-standard .fountain format">
+          <button onclick="clearScriptEditor()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700 transition flex items-center space-x-1 font-medium cursor-pointer" title="Clear screenplay editor to start writing a fresh blank scene">
+            <span>🧹</span>
+            <span>Clear Script</span>
+          </button>
+          <button onclick="downloadScreenplay()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-emerald-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Save and download screenplay in industry-standard .fountain format">
             <span>💾</span>
             <span>Save / Export</span>
           </button>
@@ -171,7 +175,7 @@
         <div class="w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-xl shadow-2xl p-8 flex flex-col space-y-4">
           
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <span class="font-screenplay text-sm text-slate-400 tracking-wider">INT. BERLIN SAFEHOUSE - NIGHT - 1982</span>
+            <span id="editor-slug-display" class="font-screenplay text-sm text-slate-400 tracking-wider">INT. BERLIN SAFEHOUSE - NIGHT - 1982</span>
             <span class="text-xs text-slate-500">Fountain Format</span>
           </div>
 
@@ -329,6 +333,22 @@
         return;
       }
 
+      // Auto-detect Fountain scene slug heading from text if present
+      const slugMatch = text.match(/(?:^|\n)\s*((?:INT\.|EXT\.)[^\n\r]+)/i);
+      if (slugMatch) {
+        const firstSlug = slugMatch[1].trim();
+        const slugEl = document.getElementById('editor-slug-display');
+        if (slugEl) slugEl.textContent = firstSlug;
+        const yrMatch = firstSlug.match(/\b(19\d\d|20\d\d|21\d\d)\b/);
+        if (yrMatch) {
+          document.getElementById('current-year-display').textContent = yrMatch[1];
+        }
+      }
+
+      const activeYear = parseInt(document.getElementById('current-year-display').textContent.trim(), 10) || (currentUniverseMetadata ? currentUniverseMetadata.default_year : 1982) || 1982;
+      const activeLoc = document.getElementById('current-setting-display').textContent.trim() || (currentUniverseMetadata ? currentUniverseMetadata.default_location : "Earth") || "Earth";
+      const activeTitle = document.getElementById('current-title-display').textContent.trim() || (currentUniverseMetadata ? currentUniverseMetadata.default_title : "Screenplay") || "Screenplay";
+
       try {
         const start = performance.now();
         const res = await fetch(`${API_BASE}/api/validate-scene`, {
@@ -336,9 +356,9 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text: text,
-            scene_year: 1982,
-            location: "Berlin",
-            screenplay_title: "Cold War Requiem"
+            scene_year: activeYear,
+            location: activeLoc,
+            screenplay_title: activeTitle
           })
         });
 
@@ -495,9 +515,17 @@
     function applyUniverseToUI(universe) {
       if (!universe) return;
       if (!isCustomScriptActive) {
-        document.getElementById('current-year-display').textContent = universe.default_year || 1982;
-        document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
-        document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
+        const yr = universe.default_year || 1982;
+        const loc = universe.default_location || "Earth";
+        const title = universe.default_title || `${(universe.name || 'Screenplay').replace(/[^a-zA-Z0-9_]/g, '_')}.fountain`;
+        document.getElementById('current-year-display').textContent = yr;
+        document.getElementById('current-setting-display').textContent = loc;
+        document.getElementById('current-title-display').textContent = title;
+        
+        const slugEl = document.getElementById('editor-slug-display');
+        if (slugEl) {
+          slugEl.textContent = `INT. ${loc.toUpperCase()} - ${yr}`;
+        }
       }
       // Render dynamic traps or disabled custom script state
       renderTraps(universe.demo_traps || []);
@@ -508,9 +536,26 @@
           if (universe.demo_traps && universe.demo_traps.length > 0) {
             textarea.value = universe.demo_traps[0].script;
             validateScript(textarea.value);
+          } else {
+            // For custom universes without built-in demo traps, clear out old demo text so writer starts fresh!
+            textarea.value = "";
+            validateScript("");
           }
         }
       }
+    }
+
+    function clearScriptEditor() {
+      textarea.value = '';
+      isCustomScriptActive = false;
+      const slugEl = document.getElementById('editor-slug-display');
+      if (slugEl && currentUniverseMetadata) {
+        const loc = (currentUniverseMetadata.default_location || "Earth").toUpperCase();
+        const yr = currentUniverseMetadata.default_year || 1982;
+        slugEl.textContent = `INT. ${loc} - ${yr}`;
+      }
+      validateScript('');
+      textarea.focus();
     }
 
     async function archiveUniverseById(uid, name) {
