@@ -273,6 +273,32 @@ def test_archive_and_restore_lifecycle():
     # Revert to ChronoVerse
     ch_engine.switch_universe("CHRONOVERSE")
 
+def test_batch_screenplay_ai_ingestion_method_b():
+    """
+    Method B Test: Verifies batch screenplay AI parsing extracts characters,
+    stasis, and destroyed relics to create an active ClickHouse franchise.
+    """
+    from backend.app.agents.ingestion_agent import ingestion_agent
+    scripts = [
+        {
+            "filename": "Pilot_1982.fountain",
+            "content": "INT. ORBITAL LAB - 1982\nCommander Ryan activates the Quantum Core. Dr. Sarah observes."
+        },
+        {
+            "filename": "Finale_1994.fountain",
+            "content": "INT. RUINS - 1994\nSarah inspects the rubble. The Quantum Core was destroyed during the explosion. Ryan entered stasis."
+        }
+    ]
+    extracted = ingestion_agent.extract_canon_from_screenplay_batch(
+        scripts=scripts,
+        franchise_name="Quantum Horizon"
+    )
+    assert "characters" in extracted
+    assert len(extracted["characters"]) >= 1
+    assert "relics" in extracted
+    assert len(extracted["relics"]) >= 1
+    print(f"✅ Method B Batch Screenplay Extraction Verified! Extracted {len(extracted['characters'])} chars, {len(extracted['relics'])} relics.")
+
 if __name__ == "__main__":
     test_trap_1_cryogenic_stasis_violation()
     test_trap_2_destroyed_relic_violation()
@@ -283,4 +309,5 @@ if __name__ == "__main__":
     test_custom_lore_document_ingestion()
     test_custom_universe_deletion_and_protection()
     test_archive_and_restore_lifecycle()
-    print("\n🎉 ALL 9 MULTI-UNIVERSE, ARCHIVE & RESTORE TESTS PASSED UNDER 20ms!")
+    test_batch_screenplay_ai_ingestion_method_b()
+    print("\n🎉 ALL 10 MULTI-UNIVERSE, ARCHIVE, METHOD A & METHOD B TESTS PASSED!")

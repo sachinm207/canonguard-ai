@@ -1218,6 +1218,199 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       }
     }
 
+    let currentIngestMode = 'bible'; // 'bible' (Method A) | 'scripts' (Method B)
+    let loadedBatchScriptFiles = []; // array of { filename, content }
+
+    function switchIngestMode(mode) {
+      currentIngestMode = mode;
+      const btnBible = document.getElementById('btn-ingest-mode-bible');
+      const btnScripts = document.getElementById('btn-ingest-mode-scripts');
+      const panelBible = document.getElementById('panel-ingest-bible');
+      const panelScripts = document.getElementById('panel-ingest-scripts');
+      const submitBtn = document.getElementById('ingest-submit-btn');
+      const footerNote = document.getElementById('ingest-footer-note');
+
+      if (mode === 'bible') {
+        if (btnBible) {
+          btnBible.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 bg-amber-950/90 text-amber-300 border border-amber-700/80 shadow-sm cursor-pointer";
+        }
+        if (btnScripts) {
+          btnScripts.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 text-slate-400 hover:text-white border border-transparent cursor-pointer";
+        }
+        if (panelBible) panelBible.classList.remove('hidden');
+        if (panelScripts) panelScripts.classList.add('hidden');
+        if (submitBtn) {
+          submitBtn.className = "px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5 cursor-pointer shadow-sm";
+          submitBtn.innerHTML = `<span>⚡ Ingest into ClickHouse Engine</span>`;
+        }
+        if (footerNote) {
+          footerNote.textContent = "Seeds instantly into ClickHouse columnar memory";
+        }
+      } else {
+        if (btnBible) {
+          btnBible.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 text-slate-400 hover:text-white border border-transparent cursor-pointer";
+        }
+        if (btnScripts) {
+          btnScripts.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 bg-purple-950/90 text-purple-300 border border-purple-700/80 shadow-sm cursor-pointer";
+        }
+        if (panelBible) panelBible.classList.add('hidden');
+        if (panelScripts) panelScripts.classList.remove('hidden');
+        if (submitBtn) {
+          submitBtn.className = "px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 font-bold text-white transition flex items-center space-x-1.5 cursor-pointer shadow-sm";
+          submitBtn.innerHTML = `<span>🚀 Auto-Extract Canon with Gemini AI</span>`;
+        }
+        if (footerNote) {
+          footerNote.textContent = "Gemini 2.5 Flash extracts temporal facts directly from screenplay scenes";
+        }
+      }
+    }
+
+    async function handleBatchScriptFiles(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      loadedBatchScriptFiles = [];
+      let combined = "";
+
+      for (const file of files) {
+        const text = await file.text();
+        loadedBatchScriptFiles.push({ filename: file.name, content: text });
+        combined += `\n--- SCREENPLAY: ${file.name} ---\n${text}\n`;
+      }
+
+      const badge = document.getElementById('batch-files-count-badge');
+      if (badge) {
+        badge.textContent = `📁 ${files.length} file${files.length > 1 ? 's' : ''} loaded`;
+        badge.classList.remove('hidden');
+      }
+
+      const textarea = document.getElementById('batch-scripts-content');
+      if (textarea) textarea.value = combined.trim();
+
+      // Pre-fill universe name if empty
+      const univInput = document.getElementById('ingest-univ-name');
+      if (univInput && !univInput.value.trim() && files[0]) {
+        univInput.value = files[0].name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      }
+    }
+
+    function loadSampleScriptBatch() {
+      const ep1 = `--- S01E01: The Genesis Anomaly (1982) ---
+INT. BERLIN VAULT - 1982
+Commander Ryan activates the Quantum Drive. The blue chronal field pulses across the room.
+DR. SARAH
+Ryan, you cannot initialize the drive within three miles of a residential zone. The temporal feedback will sever the timeline.
+Ryan ignores the warning and locks the Quantum Drive into the primary chamber.`;
+
+      const ep2 = `--- S01E08: The Geneva Cataclysm (1994) ---
+INT. GENEVA RUINS - 1994
+Smoke rises from the collapsed research bunker. Sarah sifts through the carbonized rubble.
+She finds the fractured chassis of the Quantum Drive, its crystal core split in two.
+DR. SARAH
+(into radio)
+Command, the Quantum Drive was completely destroyed during the breach. There is nothing left to salvage.
+GENERAL VANCE (O.S.)
+And Ryan?
+DR. SARAH
+Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed until the year 2040.`;
+
+      loadedBatchScriptFiles = [
+        { filename: "S01E01_The_Genesis_Anomaly.fountain", content: ep1 },
+        { filename: "S01E08_The_Geneva_Cataclysm.fountain", content: ep2 }
+      ];
+
+      const textarea = document.getElementById('batch-scripts-content');
+      if (textarea) textarea.value = `${ep1}\n\n${ep2}`;
+
+      const univInput = document.getElementById('ingest-univ-name');
+      if (univInput) univInput.value = "The Quantum Horizon";
+
+      const genreInput = document.getElementById('ingest-genre');
+      if (genreInput) genreInput.value = "Sci-Fi / Espionage & Time Paradox";
+
+      const eraInput = document.getElementById('ingest-era');
+      if (eraInput) eraInput.value = "1980–2045";
+
+      const descInput = document.getElementById('ingest-desc');
+      if (descInput) descInput.value = "A clandestine Cold War quantum experiments franchise spanning 1982 to 2040.";
+
+      const badge = document.getElementById('batch-files-count-badge');
+      if (badge) {
+        badge.textContent = `📁 2 sample episodes loaded`;
+        badge.classList.remove('hidden');
+      }
+    }
+
+    async function submitActiveIngestion() {
+      if (currentIngestMode === 'scripts') {
+        return submitBatchScreenplayIngestion();
+      } else {
+        return submitLoreIngestion();
+      }
+    }
+
+    async function submitBatchScreenplayIngestion() {
+      const name = document.getElementById('ingest-univ-name').value.trim();
+      const genre = document.getElementById('ingest-genre').value.trim();
+      const era = document.getElementById('ingest-era').value.trim();
+      const desc = document.getElementById('ingest-desc').value.trim();
+      const rawText = document.getElementById('batch-scripts-content').value.trim();
+
+      if (!name) {
+        alert("Please enter a Franchise Universe Name.");
+        return;
+      }
+
+      let payloadScripts = loadedBatchScriptFiles;
+      if (!payloadScripts || payloadScripts.length === 0) {
+        if (!rawText) {
+          alert("Please upload at least one screenplay file or paste script text.");
+          return;
+        }
+        payloadScripts = [{ filename: "Screenplay_Archive.fountain", content: rawText }];
+      } else if (rawText) {
+        // Update content in case user edited textarea
+        payloadScripts = [{ filename: "Combined_Screenplays.fountain", content: rawText }];
+      }
+
+      const duplicate = allUniversesList.find(u => u.name.trim().toLowerCase() === name.toLowerCase());
+      if (duplicate) {
+        alert(`⚠️ A universe named "${name}" already exists in ClickHouse!\nPlease choose a unique name or delete the existing universe first.`);
+        return;
+      }
+
+      const btn = document.getElementById('ingest-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin mr-1">🤖</span> Gemini AI Analyzing ${payloadScripts.length} Screenplay(s)...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/ingest-from-screenplays`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            universe_name: name,
+            genre: genre,
+            era: era,
+            description: desc,
+            scripts: payloadScripts
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.status === 'SUCCESS') {
+          alert(`🎉 Gemini AI Successfully Built Canon for "${name}"!\n\n• Processed: ${data.scripts_processed || 1} Screenplay(s)\n• Extracted Characters: ${data.characters_ingested}\n• Extracted Relics: ${data.relics_ingested}\n• Extracted Lore Rules: ${data.rules_ingested}\n• Milestones: ${data.events_ingested || 0}\n\nSwitched active canon to "${name}"!`);
+          closeFranchiseHub();
+          await loadAvailableUniverses();
+        } else {
+          alert(`⚠️ AI Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`);
+        }
+      } catch (err) {
+        alert("Error ingesting screenplays: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>🚀 Auto-Extract Canon with Gemini AI</span>`;
+      }
+    }
+
     function switchTab(tab) {
       if (tab === 'lore') {
         const univ = currentUniverseMetadata ? currentUniverseMetadata.name : 'Active Universe';
@@ -1342,10 +1535,17 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       <div id="modal-view-ingest" class="hidden flex flex-col flex-1 overflow-hidden">
         <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
           
-          <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-            <span class="text-amber-400 font-bold">Quick Templates:</span>
-            <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition">⚡ CyberCity 2099</button>
-            <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition">🔮 Shadow Realm (Dark Fantasy)</button>
+          <!-- Ingestion Method Switcher: Method A vs Method B -->
+          <div class="flex items-center p-1 bg-slate-950 border border-slate-800 rounded-xl space-x-1">
+            <button id="btn-ingest-mode-bible" onclick="switchIngestMode('bible')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 bg-amber-950/90 text-amber-300 border border-amber-700/80 shadow-sm cursor-pointer">
+              <span>📖</span>
+              <span>Method A: Direct Story Bible</span>
+            </button>
+            <button id="btn-ingest-mode-scripts" onclick="switchIngestMode('scripts')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 text-slate-400 hover:text-white border border-transparent cursor-pointer">
+              <span>🎬</span>
+              <span>Method B: Batch Screenplay Catalog</span>
+              <span class="px-1.5 py-0.2 rounded-full bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono">Gemini AI</span>
+            </button>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -1370,12 +1570,18 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
             </div>
           </div>
 
-          <div>
-            <div class="flex items-center justify-between mb-1">
+          <!-- PANEL A: Direct Story Bible -->
+          <div id="panel-ingest-bible" class="space-y-3">
+            <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-amber-400 font-bold">Quick Templates:</span>
+              <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition cursor-pointer">⚡ CyberCity 2099</button>
+              <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition cursor-pointer">🔮 Shadow Realm (Dark Fantasy)</button>
+            </div>
+            <div class="flex items-center justify-between">
               <div class="flex items-center space-x-2">
                 <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content</label>
                 <input type="file" id="lore-file-input" accept=".txt,.md,.json" class="hidden" onchange="handleLoreFileUpload(event)">
-                <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1">
+                <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1 cursor-pointer">
                   <span>📁</span>
                   <span>Select File (.txt, .md, .json)</span>
                 </button>
@@ -1383,21 +1589,61 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
               </div>
               <span class="text-[10px] text-slate-500">Supports JSON, Markdown, or plain story notes</span>
             </div>
-            <textarea id="ingest-content" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
+            <textarea id="ingest-content" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
 e.g.:
 Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)
 Relic: Neon Pulse Rifle (Destroyed in 2075)
 Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
           </div>
 
+          <!-- PANEL B: Screenplay Batch Catalog Extractor (Method B) -->
+          <div id="panel-ingest-scripts" class="hidden space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-purple-950/30 p-3 rounded-lg border border-purple-800/60">
+              <div>
+                <span class="text-xs font-bold text-purple-300 flex items-center space-x-1">
+                  <span>🤖</span>
+                  <span>Gemini AI Screenplay Catalog Extractor</span>
+                </span>
+                <p class="text-[11px] text-slate-400">Upload multiple past scripts or load sample batch. Gemini automatically discovers characters, stasis dates, destroyed relics & universe rules.</p>
+              </div>
+              <button onclick="loadSampleScriptBatch()" class="px-3 py-1 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 hover:border-purple-500 transition text-xs font-bold shrink-0 flex items-center space-x-1 cursor-pointer shadow-sm">
+                <span>⚡</span>
+                <span>Load Sample Script Batch (2 Ep.)</span>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <label class="block text-[11px] uppercase font-bold text-slate-400">Screenplay Archive Files</label>
+                <input type="file" id="batch-script-files" accept=".fountain,.txt,.fdx" multiple class="hidden" onchange="handleBatchScriptFiles(event)">
+                <button onclick="document.getElementById('batch-script-files').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-purple-500 transition text-[11px] flex items-center space-x-1 cursor-pointer">
+                  <span>📂</span>
+                  <span>Select Multiple Script Files</span>
+                </button>
+                <span id="batch-files-count-badge" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono hidden">0 files</span>
+              </div>
+              <span class="text-[10px] text-slate-500">Select multiple .fountain, .txt, or .fdx files</span>
+            </div>
+
+            <textarea id="batch-scripts-content" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none custom-scrollbar" placeholder="Paste or drop multiple past screenplay scripts here...
+Example format:
+--- S01E01: The Genesis Anomaly (1982) ---
+INT. ORBITAL STATION - 1982
+Commander Ryan activates the Quantum Drive. Dr. Sarah warns him...
+
+--- S01E08: The Geneva Cataclysm (1994) ---
+INT. GENEVA RUINS - 1994
+Sarah holds the shattered pieces. The Quantum Drive was completely destroyed in 1994..."></textarea>
+          </div>
+
         </div>
 
         <!-- Ingest Footer -->
         <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
-          <span class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
+          <span id="ingest-footer-note" class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
           <div class="flex items-center space-x-2">
-            <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">Cancel</button>
-            <button id="ingest-submit-btn" onclick="submitLoreIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5">
+            <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer">Cancel</button>
+            <button id="ingest-submit-btn" onclick="submitActiveIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5 cursor-pointer shadow-sm">
               <span>⚡ Ingest into ClickHouse Engine</span>
             </button>
           </div>

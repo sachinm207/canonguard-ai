@@ -12,6 +12,7 @@ from .db.seed_chronoverse import seed_chronoverse_data
 from .agents.orchestrator import orchestrator, ValidationResponse
 from .agents.mitigation_agent import MitigationOption
 from .agents.causal_agent import ContradictionViolation
+from .agents.ingestion_agent import ingestion_agent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("canonguard.api")
@@ -385,6 +386,130 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
         "characters_ingested": len(characters),
         "relics_ingested": len(relationships),
         "rules_ingested": len(rules)
+    }
+
+class ScriptFilePayload(BaseModel):
+    filename: str
+    content: str
+
+class IngestFromScreenplaysRequest(BaseModel):
+    universe_name: str
+    genre: Optional[str] = None
+    era: Optional[str] = None
+    description: Optional[str] = None
+    scripts: List[ScriptFilePayload]
+
+@app.post("/api/universe/ingest-from-screenplays")
+def ingest_from_screenplays(req: IngestFromScreenplaysRequest):
+    """
+    Method B: Uses Gemini AI to analyze a catalog/batch of past screenplays,
+    automatically extracts the temporal timeline, characters (lifespans, stasis),
+    relics (creation, destruction dates), and hard universe invariants, and seeds
+    them directly into ClickHouse as an active Studio Franchise.
+    """
+    import re
+    import uuid
+
+    if not req.scripts:
+        raise HTTPException(status_code=400, detail="No screenplay scripts provided.")
+
+    # Prevent duplicate universe names
+    existing = ch_engine.find_universe_by_name(req.universe_name)
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail=f"A universe named '{req.universe_name}' already exists (ID: {existing['id']}). Please choose a unique name or delete the existing universe first."
+        )
+
+    clean_name = re.sub(r'[^A-Z0-9]', '_', req.universe_name.upper())[:15].strip('_')
+    uid = f"CUSTOM_{clean_name}_{str(uuid.uuid4())[:4]}"
+
+    scripts_dicts = [{"filename": s.filename, "content": s.content} for s in req.scripts]
+    
+    # Run AI Ingestion Agent extraction (Gemini 2.5 Flash + fallback)
+    extracted = ingestion_agent.extract_canon_from_screenplay_batch(
+        scripts=scripts_dicts,
+        franchise_name=req.universe_name,
+        user_genre=req.genre,
+        user_era=req.era
+    )
+
+    characters = []
+    for c in extracted.get("characters", []):
+        characters.append({
+            "character_id": str(uuid.uuid4()),
+            "name": c.get("name", "Unknown"),
+            "aliases": c.get("aliases", []),
+            "species": c.get("species", "HUMAN"),
+            "birth_year": c.get("birth_year", 1950),
+            "death_year": c.get("death_year"),
+            "status": c.get("status", "ALIVE").upper(),
+            "stasis_start_year": c.get("stasis_start_year"),
+            "stasis_end_year": c.get("stasis_end_year"),
+            "home_planet": c.get("home_planet", "Earth"),
+            "powers": c.get("powers", ["Extracted Lore Role"])
+        })
+
+    relationships = []
+    for r in extracted.get("relics", []):
+        dest_yr = r.get("destruction_year") or 2000
+        relationships.append({
+            "relationship_id": str(uuid.uuid4()),
+            "subject_name": req.universe_name,
+            "predicate": "POSSESSES",
+            "object_name": r.get("name", "Relic"),
+            "valid_from_year": r.get("valid_from_year", 1900),
+            "valid_to_year": dest_yr,
+            "status": r.get("status", "DESTROYED").upper(),
+            "source_media": f"Screenplay Batch ({len(req.scripts)} scripts)"
+        })
+
+    rules = []
+    for rule in extracted.get("rules", []):
+        stmt = rule.get("rule_statement") or str(rule)
+        rules.append({
+            "rule_id": str(uuid.uuid4()),
+            "category": rule.get("category", "PHYSICS"),
+            "entity_or_species": rule.get("entity_or_species", req.universe_name),
+            "rule_statement": stmt,
+            "canon_tier": "ABSOLUTE"
+        })
+
+    events = []
+    for ev in extracted.get("timeline_events", []):
+        events.append({
+            "event_id": str(uuid.uuid4()),
+            "title": ev.get("event_summary", "Milestone"),
+            "year": ev.get("year", 1982),
+            "location": ev.get("location", "Main Base"),
+            "canon_tier": "PRIMARY",
+            "media_type": "SCRIPT_CATALOG",
+            "description": ev.get("event_summary", "")
+        })
+
+    universe_metadata = ch_engine.ingest_custom_universe(
+        universe_id=uid,
+        name=req.universe_name,
+        genre=extracted.get("genre") or req.genre or "Sci-Fi / Space Opera",
+        era=extracted.get("era") or req.era or "Legacy Timeline",
+        description=extracted.get("description") or req.description or f"AI-extracted canon from {len(req.scripts)} screenplay scripts.",
+        characters=characters,
+        timeline_events=events,
+        relationships=relationships,
+        lore_rules=rules,
+        default_year=extracted.get("default_year", 1982),
+        default_location=extracted.get("default_location", "Main Base")
+    )
+
+    logger.info(f"Method B: Ingested {len(req.scripts)} screenplays into '{req.universe_name}' ({uid}) via AI: {len(characters)} chars, {len(relationships)} relics, {len(rules)} rules.")
+    return {
+        "status": "SUCCESS",
+        "universe": universe_metadata,
+        "characters_ingested": len(characters),
+        "relics_ingested": len(relationships),
+        "rules_ingested": len(rules),
+        "events_ingested": len(events),
+        "scripts_processed": len(req.scripts)
     }
 
 class ScreenplayUploadRequest(BaseModel):
