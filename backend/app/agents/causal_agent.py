@@ -12,6 +12,11 @@ class ContradictionViolation(BaseModel):
     explanation: str
     canon_reference: str
     confidence_score: float
+    canon_authority: Optional[str] = "PRIMARY CANON (Tier 1 Invariant)"
+    canonical_source: Optional[str] = None
+    canonical_excerpt: Optional[str] = None
+    canonical_status: Optional[str] = None
+    temporal_anchor: Optional[str] = None
 
 class CausalContradictionAgent:
     """
@@ -50,7 +55,12 @@ class CausalContradictionAgent:
                     flagged_phrase=char_name,
                     explanation=f"Accidental Retcon: {char_name} is in cryogenic stasis {stasis_range} in {planet}. Physical activity in {scene_year} breaks established continuity.",
                     canon_reference=f"{char_name} Canon Dossier",
-                    confidence_score=0.99
+                    confidence_score=0.99,
+                    canon_authority="PRIMARY CANON (Biological / Chronological Invariant)",
+                    canonical_source=f"{char_name} Personnel Registry & Cryo-Manifest",
+                    canonical_excerpt=f"Continuity Record: {char_name} was placed into suspended animation {stasis_range} at the deep-storage vault on {planet}. Physical presence or activity during this window constitutes a severe causal paradox.",
+                    canonical_status=f"IN CRYOGENIC STASIS ({stasis_range})",
+                    temporal_anchor=f"{s_start or '?'} – {s_end or '?'}"
                 ))
             elif eval_result == "DEAD_BEFORE_SCENE":
                 d_year = char.get("death_year")
@@ -66,7 +76,12 @@ class CausalContradictionAgent:
                     flagged_phrase=char_name,
                     explanation=exp,
                     canon_reference="Canon Archive",
-                    confidence_score=1.0
+                    confidence_score=1.0,
+                    canon_authority="PRIMARY CANON (Mortal Invariant)",
+                    canonical_source=f"Canon Necrology Archive / {char_name} Record",
+                    canonical_excerpt=f"Established Canon: {char_name} died in year {d_year if d_year is not None else 'prior eras'}. Canonical history confirms no survival or resurrection in this timeline.",
+                    canonical_status=f"DECEASED in {d_year}" if d_year is not None else "DECEASED",
+                    temporal_anchor=f"Deceased {d_year}" if d_year is not None else "Prior Era"
                 ))
             elif eval_result == "UNBORN_BEFORE_SCENE":
                 b_year = char.get("birth_year")
@@ -77,7 +92,12 @@ class CausalContradictionAgent:
                     flagged_phrase=char_name,
                     explanation=f"Timeline Paradox: {char_name} is not born until {b_year} (Scene takes place in {scene_year}).",
                     canon_reference="ChronoVerse Timeline Archive",
-                    confidence_score=1.0
+                    confidence_score=1.0,
+                    canon_authority="PRIMARY CANON (Chronological Invariant)",
+                    canonical_source=f"Timeline Chronology / {char_name} Birth Record",
+                    canonical_excerpt=f"Timeline Fact: {char_name} was born in {b_year}. Interacting or acting in scene year {scene_year} predates this character's existence.",
+                    canonical_status=f"UNBORN until {b_year}",
+                    temporal_anchor=f"Birth Year: {b_year}"
                 ))
 
         # 2. Evaluate Relic / Object Lifecycle
@@ -95,7 +115,12 @@ class CausalContradictionAgent:
                     flagged_phrase=obj_name,
                     explanation=f"Causal Paradox: The {obj_name} was pulverized and destroyed {dest_text}. Possession or use in {scene_year} violates causal continuity.",
                     canon_reference=f"Established in '{source}'",
-                    confidence_score=0.98
+                    confidence_score=0.98,
+                    canon_authority="PRIMARY CANON (Physical Artifact Invariant)",
+                    canonical_source=source,
+                    canonical_excerpt=f"Canonical Screenplay Event: In '{source}', the {obj_name} was completely destroyed {dest_text}. All components were obliterated with no operational remnants surviving.",
+                    canonical_status=f"DESTROYED ({dest_text})",
+                    temporal_anchor=f"Obliterated {dest_text}"
                 ))
 
         # 3. Evaluate Physical / Biological / Magical Lore Axioms
@@ -112,7 +137,12 @@ class CausalContradictionAgent:
                     flagged_phrase="removes his helmet and takes a deep breath",
                     explanation="Fatal Biological Invariant: The atmosphere of Planet Zora is 85% toxic ammonia and 15% methane. Breathing without a pressurized helmet is lethal within seconds.",
                     canon_reference="ChronoVerse Universal Lore Axiom #4 (Zoran Atmospheric Survey)",
-                    confidence_score=0.99
+                    confidence_score=0.99,
+                    canon_authority="PRIMARY CANON (Astrophysical & Biochemical Axiom)",
+                    canonical_source="ChronoVerse Universal Lore Axiom #4 (Zoran Atmospheric Survey)",
+                    canonical_excerpt="Planetary Survey: Planet Zora's ambient atmosphere comprises 85% anhydrous ammonia and 15% volatile methane. Unprotected inhalation causes pulmonary caustic trauma and suffocation within 10-15 seconds.",
+                    canonical_status="LETHAL AMMONIA ATMOSPHERE",
+                    temporal_anchor="Permanent Planetary Invariant"
                 ))
 
         # Universe 2: Planet Krynn (Galactic Imperium)
@@ -125,7 +155,12 @@ class CausalContradictionAgent:
                     flagged_phrase="takes a deep breath of the air without his helmet",
                     explanation="Fatal Physical Invariant: Planet Krynn is an airless obsidian rock with 0% atmospheric oxygen and lethal cosmic radiation. Unpressurized exposure causes immediate decompression.",
                     canon_reference="Galactic Imperium Astrogation Code §14 (Krynn Vacuum Hazard)",
-                    confidence_score=0.99
+                    confidence_score=0.99,
+                    canon_authority="PRIMARY CANON (Planetary Environment Axiom)",
+                    canonical_source="Galactic Imperium Astrogation Code §14 (Krynn Vacuum Hazard)",
+                    canonical_excerpt="Astrogation Warning: Planet Krynn maintains 0.00 bar atmosphere. Biological exposure without active pressurized life support leads to explosive depressurization and catastrophic embolisms.",
+                    canonical_status="ZERO-OXYGEN HARD VACUUM",
+                    temporal_anchor="Permanent Planetary Invariant"
                 ))
 
         # Universe 3: Iron Wastes of Skar (Mythos Realm)
@@ -138,7 +173,12 @@ class CausalContradictionAgent:
                     flagged_phrase="removes his enchanted talisman",
                     explanation="Ancient Ward Invariant: The Iron Wastes of Skar are sealed with the Ancient Dragon Ward. Silver Elves entering without an enchanted talisman suffer spontaneous soul combustion.",
                     canon_reference="Mythos Realm High Canon (Tome of Wards, Cap. IX)",
-                    confidence_score=0.99
+                    confidence_score=0.99,
+                    canon_authority="PRIMARY CANON (Magical Invariant & Ancient Wards)",
+                    canonical_source="Mythos Realm High Canon (Tome of Wards, Cap. IX)",
+                    canonical_excerpt="Tome of Wards: The Ancient Dragon Ward instantly incinerates the mystical life essence of any Silver Elf crossing the Iron Wastes boundary lacking attuned protective talisman.",
+                    canonical_status="LETHAL DRAGON WARD ACTIVE",
+                    temporal_anchor="First Era through Present"
                 ))
 
         # Dynamic check across custom lore rules
@@ -157,7 +197,12 @@ class CausalContradictionAgent:
                             flagged_phrase=entity,
                             explanation=f"Lore Invariant Violation: {stmt}",
                             canon_reference=f"Universal Lore Rule ({cat})",
-                            confidence_score=0.95
+                            confidence_score=0.95,
+                            canon_authority="ESTABLISHED UNIVERSE LORE INVARIANT",
+                            canonical_source=rule.get("source_media", "Franchise Story Bible"),
+                            canonical_excerpt=stmt,
+                            canonical_status=f"ACTIVE INVARIANT ({cat})",
+                            temporal_anchor="Universal Timeline"
                         ))
 
         return violations

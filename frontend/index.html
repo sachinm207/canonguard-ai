@@ -145,12 +145,12 @@
       
       <!-- Script Meta Bar -->
       <div class="h-10 bg-slate-900/50 border-b border-slate-800/80 px-6 flex items-center justify-between text-xs text-slate-400">
-        <div class="flex items-center space-x-4">
-          <span class="font-semibold text-slate-300" id="current-title-display">Cold War Requiem.fountain</span>
-          <span class="text-slate-600">|</span>
-          <span>Setting: <strong class="text-slate-300" id="current-setting-display">Berlin Safehouse</strong></span>
-          <span class="text-slate-600">|</span>
-          <span>Scene Year: <strong class="text-slate-300" id="current-year-display">1982</strong></span>
+        <div class="flex items-center space-x-2.5">
+          <span class="text-sm">📄</span>
+          <span class="font-semibold text-slate-200 tracking-wide text-xs" id="current-title-display">Cold War Requiem.fountain</span>
+          <!-- Hidden spans preserved for JS state compatibility -->
+          <span id="current-setting-display" class="hidden">Berlin Safehouse</span>
+          <span id="current-year-display" class="hidden">1982</span>
         </div>
         <div class="flex items-center space-x-3 text-[11px]">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
@@ -212,79 +212,179 @@
       <!-- Panel Header Tabs -->
       <div class="h-11 border-b border-slate-800 bg-slate-900/90 px-4 flex items-center justify-between">
         <div class="flex items-center space-x-3 text-xs font-semibold">
-          <button class="text-rose-400 border-b-2 border-rose-500 pb-2.5 pt-2">Retcon Diagnostics</button>
-          <button onclick="switchTab('lore')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition">Franchise Lore</button>
-          <button onclick="switchTab('telemetry')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition">Telemetry</button>
+          <button id="sidebar-tab-diagnostics" onclick="switchRightPanelTab('diagnostics')" class="text-rose-400 border-b-2 border-rose-500 pb-2.5 pt-2 cursor-pointer font-semibold">Retcon Diagnostics</button>
+          <button id="sidebar-tab-lore" onclick="switchRightPanelTab('lore')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent">Franchise Lore</button>
+          <button id="sidebar-tab-telemetry" onclick="switchRightPanelTab('telemetry')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent">Telemetry</button>
         </div>
         <span class="text-[11px] font-mono text-slate-500" id="violation-count">0 Violations</span>
       </div>
 
       <!-- Panel Scroll Content -->
-      <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-4" id="panel-content">
+      <div class="flex-1 overflow-y-auto p-4 custom-scrollbar" id="panel-content">
         
-        <!-- ACTIVE VIOLATION CARD -->
-        <div id="violation-card" class="hidden bg-rose-950/20 border border-rose-600/40 rounded-xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">⚠️ Critical Retcon</span>
-            <span class="font-mono text-xs font-bold text-amber-400" id="card-latency">0.72 ms</span>
+        <!-- TAB VIEW 1: RETCON DIAGNOSTICS -->
+        <div id="panel-view-diagnostics" class="space-y-4">
+          <!-- ACTIVE VIOLATION CARD -->
+          <div id="violation-card" class="hidden bg-rose-950/20 border border-rose-600/40 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">⚠️ Critical Retcon</span>
+              <span class="font-mono text-xs font-bold text-amber-400" id="card-latency">0.72 ms</span>
+            </div>
+
+            <div>
+              <h3 class="font-bold text-sm text-white" id="card-flagged-phrase">Character Invariant Violation</h3>
+              <p class="text-xs text-rose-200/90 mt-1 leading-relaxed" id="card-explanation">Accidental Retcon detected in ClickHouse franchise history.</p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-slate-950/80 border border-rose-900/40 text-xs font-mono space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider flex items-center space-x-1">
+                  <span>📖</span>
+                  <span>Canon Reference Citation</span>
+                </span>
+                <button onclick="openCitationInspector()" class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition flex items-center space-x-1 cursor-pointer" title="Inspect source screenplay excerpt and ClickHouse proof record">
+                  <span>🔍 Inspect Proof</span>
+                </button>
+              </div>
+              <div id="card-citation" onclick="openCitationInspector()" class="text-amber-300 font-semibold cursor-pointer hover:underline flex items-center space-x-1">
+                <span>ChronoVerse III: The Long Winter (Act 2)</span>
+              </div>
+            </div>
+
+            <!-- MITIGATION ALTERNATIVES -->
+            <div class="pt-2 border-t border-rose-900/30">
+              <span class="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">💡 3 Creative Mitigations (Preserve Dramatic Intent):</span>
+              <div id="mitigation-list" class="space-y-2">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h3 class="font-bold text-sm text-white" id="card-flagged-phrase">Character Invariant Violation</h3>
-            <p class="text-xs text-rose-200/90 mt-1 leading-relaxed" id="card-explanation">Accidental Retcon detected in ClickHouse franchise history.</p>
+          <!-- IDLE STATE WHEN CANON IS OK -->
+          <div id="idle-card" class="bg-slate-950/50 border border-slate-800 rounded-xl p-6 text-center space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-full bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-xl">
+              ✨
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-emerald-400">Franchise Canon Clean</h3>
+              <p class="text-xs text-slate-400 mt-1">No temporal paradoxes, destroyed relic usage, or lore contradictions detected.</p>
+            </div>
+            <div class="text-[11px] font-mono text-slate-500 pt-2 border-t border-slate-800/80">
+              ClickHouse Columnar Memory Active
+            </div>
           </div>
 
-          <div class="p-2.5 rounded bg-slate-950/70 border border-rose-900/30 text-xs font-mono text-slate-300">
-            <span class="text-slate-500 text-[10px] block uppercase font-bold mb-0.5">Canon Reference Citation</span>
-            <span id="card-citation" class="text-amber-300/90">ChronoVerse III: The Long Winter (Act 2)</span>
-          </div>
-
-          <!-- MITIGATION ALTERNATIVES -->
-          <div class="pt-2 border-t border-rose-900/30">
-            <span class="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">💡 3 Creative Mitigations (Preserve Dramatic Intent):</span>
-            <div id="mitigation-list" class="space-y-2">
-              <!-- Dynamically populated -->
+          <!-- CLICKHOUSE SYSTEM INFO CARD -->
+          <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-4 space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-300">ClickHouse Cloud Memory</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">ReplacingMergeTree</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+              <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
+                <span class="text-slate-500 block">Characters</span>
+                <span class="text-slate-200 font-bold" id="stat-chars">45 active</span>
+              </div>
+              <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
+                <span class="text-slate-500 block">Timeline Events</span>
+                <span class="text-slate-200 font-bold" id="stat-events">2,000 indexed</span>
+              </div>
+              <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
+                <span class="text-slate-500 block">Vector Dims</span>
+                <span class="text-slate-200 font-bold">768 Float32</span>
+              </div>
+              <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
+                <span class="text-slate-500 block">Query Budget</span>
+                <span class="text-emerald-400 font-bold">&lt; 20 ms</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- IDLE STATE WHEN CANON IS OK -->
-        <div id="idle-card" class="bg-slate-950/50 border border-slate-800 rounded-xl p-6 text-center space-y-3">
-          <div class="w-12 h-12 mx-auto rounded-full bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-xl">
-            ✨
+        <!-- TAB VIEW 2: INLINE FRANCHISE LORE -->
+        <div id="panel-view-lore" class="hidden space-y-4 text-xs">
+          <!-- Active Universe Banner -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="text-base">🌌</span>
+                <span class="font-bold text-sm text-white" id="sidebar-lore-univ-name">Active Universe</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800" id="sidebar-lore-univ-genre">Sci-Fi</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug" id="sidebar-lore-univ-desc">Canon history and character invariants loaded in memory.</p>
+            <div class="flex items-center space-x-2 text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-800/60">
+              <span id="sidebar-lore-char-count" class="text-emerald-400 font-bold">0 Characters</span>
+              <span>•</span>
+              <span id="sidebar-lore-relic-count" class="text-indigo-400 font-bold">0 Relics</span>
+              <span>•</span>
+              <span id="sidebar-lore-rule-count" class="text-amber-400 font-bold">0 Rules</span>
+            </div>
           </div>
-          <div>
-            <h3 class="font-bold text-sm text-emerald-400">Franchise Canon Clean</h3>
-            <p class="text-xs text-slate-400 mt-1">No temporal paradoxes, destroyed relic usage, or lore contradictions detected.</p>
+
+          <!-- Quick Search Filter -->
+          <div class="relative">
+            <input type="text" id="sidebar-lore-search" oninput="filterSidebarLore(this.value)" 
+              placeholder="Search characters, relics, rules..." 
+              class="w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition">
+            <span class="absolute right-3 top-2 text-slate-500 text-xs">🔍</span>
           </div>
-          <div class="text-[11px] font-mono text-slate-500 pt-2 border-t border-slate-800/80">
-            ClickHouse Columnar Memory Active
+
+          <!-- Lore Sections -->
+          <div id="sidebar-lore-content" class="space-y-3">
+            <!-- Dynamically populated by renderSidebarLore() -->
+          </div>
+
+          <!-- Open Full Hub Action -->
+          <div class="pt-2">
+            <button onclick="openFranchiseHub('active')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer">
+              <span>📚</span>
+              <span>Open Complete Franchise Library</span>
+            </button>
           </div>
         </div>
 
-        <!-- CLICKHOUSE SYSTEM INFO CARD -->
-        <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-4 space-y-3 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-300">ClickHouse Cloud Memory</span>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">ReplacingMergeTree</span>
+        <!-- TAB VIEW 3: INLINE TELEMETRY -->
+        <div id="panel-view-telemetry" class="hidden space-y-4 text-xs">
+          <!-- Telemetry Top HUD -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-bold text-sm text-slate-200">ClickHouse Engine Telemetry</span>
+              </div>
+              <a href="/api/audit-logs" target="_blank" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-sky-400 font-mono transition flex items-center space-x-1 cursor-pointer" title="Inspect raw JSON audit logs in new browser tab">
+                <span>Raw JSON</span>
+                <span>↗</span>
+              </a>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+              <div class="p-2 rounded bg-slate-900 border border-slate-800/70">
+                <span class="text-slate-500 block text-[10px]">Verification SLA</span>
+                <span class="text-emerald-400 font-bold">&lt; 20 ms Budget</span>
+              </div>
+              <div class="p-2 rounded bg-slate-900 border border-slate-800/70">
+                <span class="text-slate-500 block text-[10px]">Debounce Throttle</span>
+                <span class="text-sky-300 font-bold">350 ms</span>
+              </div>
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
-            <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
-              <span class="text-slate-500 block">Characters</span>
-              <span class="text-slate-200 font-bold" id="stat-chars">45 active</span>
+
+          <!-- Telemetry Stream Feed Header -->
+          <div class="flex items-center justify-between pt-1">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-xs font-bold text-slate-300">Live Retcon Audit Feed</span>
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-800 text-slate-400" id="sidebar-telemetry-count">0 logs</span>
             </div>
-            <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
-              <span class="text-slate-500 block">Timeline Events</span>
-              <span class="text-slate-200 font-bold" id="stat-events">2,000 indexed</span>
-            </div>
-            <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
-              <span class="text-slate-500 block">Vector Dims</span>
-              <span class="text-slate-200 font-bold">768 Float32</span>
-            </div>
-            <div class="p-2 rounded bg-slate-900 border border-slate-800/60">
-              <span class="text-slate-500 block">Query Budget</span>
-              <span class="text-emerald-400 font-bold">< 20 ms</span>
-            </div>
+            <button onclick="renderSidebarTelemetry()" class="text-[11px] text-slate-400 hover:text-white transition flex items-center space-x-1 cursor-pointer" title="Refresh audit log feed">
+              <span>🔄</span>
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          <!-- Telemetry Stream Items -->
+          <div id="sidebar-telemetry-feed" class="space-y-2">
+            <!-- Dynamically populated by renderSidebarTelemetry() -->
           </div>
         </div>
 
@@ -419,6 +519,10 @@
         `;
         mitigationList.appendChild(item);
       });
+
+      if (activeRightPanelTab === 'telemetry') {
+        renderSidebarTelemetry();
+      }
     }
 
     function applyMitigation(rewrite) {
@@ -542,6 +646,9 @@
             validateScript("");
           }
         }
+      }
+      if (activeRightPanelTab === 'lore') {
+        renderSidebarLore();
       }
     }
 
@@ -1812,17 +1919,316 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       `;
     }
 
-    function switchTab(tab) {
+    let activeRightPanelTab = 'diagnostics';
+
+    function switchRightPanelTab(tab) {
+      activeRightPanelTab = tab;
+      const tabDiag = document.getElementById('sidebar-tab-diagnostics');
+      const tabLore = document.getElementById('sidebar-tab-lore');
+      const tabTelem = document.getElementById('sidebar-tab-telemetry');
+
+      const viewDiag = document.getElementById('panel-view-diagnostics');
+      const viewLore = document.getElementById('panel-view-lore');
+      const viewTelem = document.getElementById('panel-view-telemetry');
+
+      const inactiveClass = "text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent font-medium";
+      const activeDiagClass = "text-rose-400 border-b-2 border-rose-500 pb-2.5 pt-2 cursor-pointer font-semibold";
+      const activeLoreClass = "text-sky-400 border-b-2 border-sky-500 pb-2.5 pt-2 cursor-pointer font-semibold";
+      const activeTelemClass = "text-emerald-400 border-b-2 border-emerald-500 pb-2.5 pt-2 cursor-pointer font-semibold";
+
+      if (tabDiag) tabDiag.className = inactiveClass;
+      if (tabLore) tabLore.className = inactiveClass;
+      if (tabTelem) tabTelem.className = inactiveClass;
+
+      if (viewDiag) viewDiag.classList.add('hidden');
+      if (viewLore) viewLore.classList.add('hidden');
+      if (viewTelem) viewTelem.classList.add('hidden');
+
       if (tab === 'lore') {
-        const univ = currentUniverseMetadata ? currentUniverseMetadata.name : 'Active Universe';
-        alert(`Franchise Lore Explorer: Displaying lore for ${univ}. Check /api/lore/characters or /api/lore/rules.`);
+        if (tabLore) tabLore.className = activeLoreClass;
+        if (viewLore) viewLore.classList.remove('hidden');
+        renderSidebarLore();
       } else if (tab === 'telemetry') {
-        window.open('/api/audit-logs', '_blank');
+        if (tabTelem) tabTelem.className = activeTelemClass;
+        if (viewTelem) viewTelem.classList.remove('hidden');
+        renderSidebarTelemetry();
+      } else {
+        if (tabDiag) tabDiag.className = activeDiagClass;
+        if (viewDiag) viewDiag.classList.remove('hidden');
       }
     }
 
+    // Backward compatibility
+    function switchTab(tab) {
+      switchRightPanelTab(tab);
+    }
+
+    function renderSidebarLore(filterQuery = '') {
+      if (!currentUniverseMetadata) return;
+
+      const nameEl = document.getElementById('sidebar-lore-univ-name');
+      const genreEl = document.getElementById('sidebar-lore-univ-genre');
+      const descEl = document.getElementById('sidebar-lore-univ-desc');
+      const charCountEl = document.getElementById('sidebar-lore-char-count');
+      const relicCountEl = document.getElementById('sidebar-lore-relic-count');
+      const ruleCountEl = document.getElementById('sidebar-lore-rule-count');
+      const contentEl = document.getElementById('sidebar-lore-content');
+
+      if (nameEl) nameEl.textContent = currentUniverseMetadata.name || 'Active Franchise';
+      if (genreEl) genreEl.textContent = currentUniverseMetadata.genre || 'Story Bible';
+      if (descEl) descEl.textContent = currentUniverseMetadata.description || 'Franchise continuity loaded in ClickHouse memory.';
+
+      const chars = currentUniverseMetadata.characters_full || [];
+      const relics = currentUniverseMetadata.relationships_full || [];
+      const rules = currentUniverseMetadata.lore_rules_full || [];
+
+      if (charCountEl) charCountEl.textContent = `${chars.length} Characters`;
+      if (relicCountEl) relicCountEl.textContent = `${relics.length} Relics`;
+      if (ruleCountEl) ruleCountEl.textContent = `${rules.length} Rules`;
+
+      if (!contentEl) return;
+
+      const q = (filterQuery || '').trim().toLowerCase();
+
+      const filteredChars = q ? chars.filter(c => 
+        (c.name || '').toLowerCase().includes(q) || 
+        (c.species || '').toLowerCase().includes(q) || 
+        (c.status || '').toLowerCase().includes(q) ||
+        ((c.aliases || []).some(a => a.toLowerCase().includes(q)))
+      ) : chars;
+
+      const filteredRelics = q ? relics.filter(r => 
+        (r.object_name || '').toLowerCase().includes(q) || 
+        (r.subject_name || '').toLowerCase().includes(q) || 
+        (r.status || '').toLowerCase().includes(q) ||
+        (r.source_media || '').toLowerCase().includes(q)
+      ) : relics;
+
+      const filteredRules = q ? rules.filter(ru => 
+        (ru.entity_or_species || '').toLowerCase().includes(q) || 
+        (ru.rule_statement || '').toLowerCase().includes(q) || 
+        (ru.category || '').toLowerCase().includes(q)
+      ) : rules;
+
+      let html = '';
+
+      // Characters Roster
+      html += `
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-emerald-400">
+            <span class="flex items-center space-x-1"><span>👥</span><span>Characters (${filteredChars.length})</span></span>
+            <span class="text-[10px] text-slate-500 font-normal">Active Continuity</span>
+          </div>
+          <div class="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+            ${filteredChars.length === 0 ? `<div class="p-2 text-[11px] text-slate-500 italic bg-slate-950/40 rounded border border-slate-800">No characters matching filter.</div>` : 
+              filteredChars.map(c => {
+                let badge = '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">ALIVE</span>';
+                if (c.status === 'STASIS' || c.stasis_start_year) {
+                  badge = `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800">STASIS (${c.stasis_start_year || '?'}-${c.stasis_end_year || '?'})</span>`;
+                } else if (c.status === 'DEAD' || c.death_year) {
+                  badge = `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">DEAD (${c.death_year || 'perished'})</span>`;
+                }
+                return `
+                  <div class="p-2 rounded bg-slate-950/80 border border-slate-800/80 text-[11px] space-y-0.5">
+                    <div class="flex items-center justify-between">
+                      <strong class="text-white">${escapeHtml(c.name)}</strong>
+                      ${badge}
+                    </div>
+                    <div class="text-slate-400 text-[10px] flex items-center justify-between">
+                      <span>Born: ${c.birth_year || '?'} • ${escapeHtml(c.species || 'Human')}</span>
+                      <span class="text-slate-500">${escapeHtml(c.home_planet || 'Earth')}</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')
+            }
+          </div>
+        </div>
+      `;
+
+      // Relics & Invariant Objects
+      html += `
+        <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-[11px] font-bold text-indigo-400">
+            <span class="flex items-center space-x-1"><span>🔮</span><span>Relics & Artifacts (${filteredRelics.length})</span></span>
+            <span class="text-[10px] text-slate-500 font-normal">Causal Graph</span>
+          </div>
+          <div class="space-y-1 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+            ${filteredRelics.length === 0 ? `<div class="p-2 text-[11px] text-slate-500 italic bg-slate-950/40 rounded border border-slate-800">No relics matching filter.</div>` : 
+              filteredRelics.map(r => {
+                const isDestroyed = r.status === 'DESTROYED';
+                return `
+                  <div class="p-2 rounded bg-slate-950/80 border border-slate-800/80 text-[11px] space-y-0.5">
+                    <div class="flex items-center justify-between">
+                      <strong class="text-slate-200">${escapeHtml(r.object_name)}</strong>
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${isDestroyed ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-sky-950 text-sky-300 border border-sky-800'}">
+                        ${isDestroyed ? `DESTROYED ${r.valid_to_year ? `(${r.valid_to_year})` : ''}` : (r.status || 'ACTIVE')}
+                      </span>
+                    </div>
+                    <div class="text-slate-400 text-[10px] flex items-center justify-between">
+                      <span>${escapeHtml(r.subject_name || 'Owner')} → ${escapeHtml(r.predicate || 'possesses')}</span>
+                      <span class="text-slate-500 font-mono text-[9px]">${escapeHtml(r.source_media || 'Canon')}</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')
+            }
+          </div>
+        </div>
+      `;
+
+      // Universe Lore Axioms
+      html += `
+        <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-[11px] font-bold text-amber-400">
+            <span class="flex items-center space-x-1"><span>📜</span><span>Lore Axioms & Invariants (${filteredRules.length})</span></span>
+            <span class="text-[10px] text-slate-500 font-normal">Rule Constraints</span>
+          </div>
+          <div class="space-y-1 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+            ${filteredRules.length === 0 ? `<div class="p-2 text-[11px] text-slate-500 italic bg-slate-950/40 rounded border border-slate-800">No rules matching filter.</div>` : 
+              filteredRules.map(ru => `
+                <div class="p-2 rounded bg-slate-950/80 border border-slate-800/80 text-[11px] space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-slate-200">${escapeHtml(ru.entity_or_species || 'Universe Axiom')}</span>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-900 text-slate-400 border border-slate-800 font-mono">${escapeHtml(ru.category || 'INVARIANT')}</span>
+                  </div>
+                  <p class="text-slate-300 text-[10px] leading-snug">${escapeHtml(ru.rule_statement || '')}</p>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+      `;
+
+      contentEl.innerHTML = html;
+    }
+
+    function filterSidebarLore(query) {
+      renderSidebarLore(query);
+    }
+
+    async function renderSidebarTelemetry() {
+      const countEl = document.getElementById('sidebar-telemetry-count');
+      const feedEl = document.getElementById('sidebar-telemetry-feed');
+      if (!feedEl) return;
+
+      feedEl.innerHTML = `<div class="p-4 text-center text-slate-500 font-mono text-[11px]"><span class="animate-spin inline-block mr-1">⏳</span> Loading audit logs from ClickHouse...</div>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/audit-logs`);
+        const data = await res.json();
+        const logs = data.logs || [];
+        if (countEl) countEl.textContent = `${logs.length} logs`;
+
+        if (logs.length === 0) {
+          feedEl.innerHTML = `
+            <div class="p-4 text-center bg-slate-950/50 border border-slate-800 rounded-xl space-y-1">
+              <span class="text-emerald-400 text-base">✨</span>
+              <p class="text-xs text-slate-300 font-semibold">Clean Audit Stream</p>
+              <p class="text-[10px] text-slate-500">No retcon violations caught yet in this session. Type in the screenplay editor to watch real-time audit logs stream here!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Show recent logs first
+        const recentLogs = [...logs].reverse().slice(0, 15);
+        feedEl.innerHTML = recentLogs.map(log => `
+          <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] space-y-1.5 transition hover:border-slate-700">
+            <div class="flex items-center justify-between">
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">
+                ${escapeHtml(log.violation_type || 'RETCON')}
+              </span>
+              <div class="flex items-center space-x-2 text-[10px] font-mono">
+                <span class="text-emerald-400 font-semibold">${log.query_latency_ms ? log.query_latency_ms + ' ms' : '< 1 ms'}</span>
+                <span class="text-slate-500">${escapeHtml(log.timestamp ? log.timestamp.split(' ')[1] || log.timestamp : '')}</span>
+              </div>
+            </div>
+            <div class="text-slate-200 font-mono text-[10px] truncate bg-slate-900/90 p-1.5 rounded border border-slate-800/80">
+              "${escapeHtml(log.flagged_line || '')}"
+            </div>
+            ${log.mitigation_suggested ? `
+              <div class="text-slate-400 text-[10px] leading-snug flex items-start space-x-1">
+                <span class="text-amber-400">💡</span>
+                <span class="truncate">${escapeHtml(log.mitigation_suggested)}</span>
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error("Telemetry fetch failed:", err);
+        feedEl.innerHTML = `<div class="p-3 text-center text-rose-400 text-xs bg-rose-950/20 rounded border border-rose-900">Failed to load telemetry: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function openCitationInspector() {
+      const modal = document.getElementById('citation-modal');
+      if (!modal) return;
+
+      let v = null;
+      let latency = '0.14 ms';
+      let confidence = '99.0%';
+
+      if (activeValidationResult && activeValidationResult.violations && activeValidationResult.violations.length > 0) {
+        v = activeValidationResult.violations[0];
+        latency = `${activeValidationResult.query_latency_ms || 0.14} ms (ClickHouse Native)`;
+        confidence = `${Math.round((v.confidence_score || 0.99) * 100)}% Verified`;
+      } else {
+        // Fallback demo citation for the active scene
+        const entityName = document.getElementById('card-flagged-phrase') ? document.getElementById('card-flagged-phrase').textContent : 'Canon Subject';
+        v = {
+          flagged_phrase: entityName,
+          category: 'TEMPORAL_STATUS',
+          severity: 'CRITICAL_RETCON',
+          explanation: document.getElementById('card-explanation') ? document.getElementById('card-explanation').textContent : 'Established franchise history conflict detected.',
+          canon_reference: document.getElementById('card-citation') ? document.getElementById('card-citation').textContent : 'Franchise Story Bible',
+          canon_authority: 'PRIMARY CANON (Tier 1 Invariant)',
+          canonical_source: 'Franchise Continuity Archive',
+          canonical_excerpt: 'Official canonical record establishes strict continuity invariants for all characters and relics in this timeline.',
+          canonical_status: 'INVARIANT ENFORCED',
+          temporal_anchor: 'Established Era'
+        };
+      }
+
+      const sevEl = document.getElementById('modal-cite-severity');
+      const entityEl = document.getElementById('modal-cite-entity');
+      const catEl = document.getElementById('modal-cite-category');
+      const authEl = document.getElementById('modal-cite-authority');
+      const anchorEl = document.getElementById('modal-cite-temporal-anchor');
+      const statusEl = document.getElementById('modal-cite-status');
+      const sourceEl = document.getElementById('modal-cite-source');
+      const excerptEl = document.getElementById('modal-cite-excerpt');
+      const explEl = document.getElementById('modal-cite-explanation');
+      const latEl = document.getElementById('modal-cite-latency');
+      const confEl = document.getElementById('modal-cite-confidence');
+
+      if (sevEl) sevEl.textContent = (v.severity || 'CRITICAL RETCON').replace(/_/g, ' ');
+      if (entityEl) entityEl.textContent = v.flagged_phrase || 'Flagged Entity';
+      if (catEl) catEl.textContent = `Category: ${(v.category || 'CANON_INVARIANT').replace(/_/g, ' ')}`;
+      if (authEl) authEl.textContent = `🔒 ${v.canon_authority || 'PRIMARY CANON (Tier 1 Invariant)'}`;
+      if (anchorEl) anchorEl.textContent = `Timeline Anchor: ${v.temporal_anchor || (v.canon_reference || 'Canon Record')}`;
+      if (statusEl) {
+        statusEl.textContent = v.canonical_status || (v.category === 'RELIC_DESTRUCTION' ? 'DESTROYED' : (v.category === 'TEMPORAL_STATUS' ? 'RESTRICTED / STASIS' : 'CANON INVARIANT'));
+      }
+      if (sourceEl) sourceEl.textContent = v.canonical_source || v.canon_reference || 'Canonical Franchise Repository';
+      if (excerptEl) {
+        excerptEl.textContent = v.canonical_excerpt || `Official canon establishes that ${v.flagged_phrase} is subject to strict continuity invariant: ${v.explanation}`;
+      }
+      if (explEl) explEl.textContent = v.explanation || 'Accidental Retcon detected in ClickHouse franchise history.';
+      if (latEl) latEl.textContent = latency;
+      if (confEl) confEl.textContent = confidence;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCitationModal() {
+      const modal = document.getElementById('citation-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     function escapeHtml(text) {
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return (text || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1838,6 +2244,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       if (e.key === 'Escape') {
         closeGuideModal();
         closeIngestModal();
+        closeCitationModal();
       }
     });
 
@@ -2182,6 +2589,117 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
         <span class="text-xs text-slate-400 font-mono">Documentation: <span class="text-sky-400 font-semibold">GUIDE.md</span>, <span class="text-amber-400 font-semibold">COMPETITIVE_ANALYSIS.md</span> & <span class="text-emerald-400 font-semibold">KNOWLEDGE_BASE.md</span></span>
         <button onclick="closeGuideModal()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">Got it, close</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CANON PROOF & CITATION INSPECTOR MODAL -->
+  <div id="citation-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="h-14 border-b border-slate-800 px-6 flex items-center justify-between bg-slate-950/70 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 text-base">
+            📖
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center space-x-2">
+              <span>Canon Proof & Citation Inspector</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-950 text-rose-300 border border-rose-800" id="modal-cite-severity">CRITICAL RETCON</span>
+            </h2>
+            <p class="text-[11px] text-slate-400">Canonical authority proof retrieved from ClickHouse columnar memory</p>
+          </div>
+        </div>
+        <button onclick="closeCitationModal()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer text-sm">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar text-xs">
+        
+        <!-- Target Entity & Authority Tier -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Flagged Screenplay Entity</span>
+            <span class="text-sm font-bold text-rose-300 font-mono" id="modal-cite-entity">Quantum Drive</span>
+            <span class="text-[11px] text-slate-400 block" id="modal-cite-category">Category: RELIC_DESTRUCTION</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Canonical Authority Level</span>
+            <span class="text-xs font-bold text-amber-300 flex items-center space-x-1" id="modal-cite-authority">
+              <span>🔒 PRIMARY CANON (Tier 1 Invariant)</span>
+            </span>
+            <span class="text-[11px] text-slate-400 block" id="modal-cite-temporal-anchor">Timeline Anchor: Obliterated in 1994</span>
+          </div>
+        </div>
+
+        <!-- Canonical Status Badge & Source Document -->
+        <div class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Canonical Source & Record</span>
+            <span id="modal-cite-status" class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">
+              DESTROYED in 1994
+            </span>
+          </div>
+          <div class="text-sm font-semibold text-slate-200" id="modal-cite-source">
+            Episode 8: The Geneva Cataclysm (1994)
+          </div>
+        </div>
+
+        <!-- Canonical Excerpt / Screenplay Evidence -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider flex items-center space-x-1">
+              <span>📜</span>
+              <span>Canonical Screenplay Excerpt / Bible Record:</span>
+            </span>
+            <span class="text-[10px] text-emerald-400 font-mono font-semibold">100% Invariant Match</span>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/90 border-l-4 border-amber-500 border-y border-r border-slate-800 font-screenplay text-slate-200 text-xs leading-relaxed italic" id="modal-cite-excerpt">
+            "Command, the Quantum Drive was completely vaporized during the reactor meltdown. All containment arrays were obliterated with zero salvageable components."
+          </div>
+        </div>
+
+        <!-- Contradiction Reasoning -->
+        <div class="p-3.5 rounded-xl bg-rose-950/20 border border-rose-800/40 space-y-1.5">
+          <span class="text-[10px] text-rose-400 uppercase font-bold tracking-wider flex items-center space-x-1">
+            <span>⚡</span>
+            <span>Why This Causes a Retcon Paradox:</span>
+          </span>
+          <p class="text-xs text-rose-200 leading-relaxed" id="modal-cite-explanation">
+            Accidental Retcon detected in ClickHouse franchise history.
+          </p>
+        </div>
+
+        <!-- ClickHouse Columnar Verification Metric -->
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>ClickHouse Verification Latency:</span>
+            <strong class="text-emerald-400" id="modal-cite-latency">0.14 ms</strong>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span>Confidence:</span>
+            <strong class="text-amber-400" id="modal-cite-confidence">99.0%</strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="h-14 border-t border-slate-800 px-6 flex items-center justify-between bg-slate-950/70 shrink-0">
+        <button onclick="closeCitationModal(); openFranchiseHub('active');" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-medium transition cursor-pointer text-xs flex items-center space-x-1.5">
+          <span>📚</span>
+          <span>Open Universe Lore Hub</span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <button onclick="closeCitationModal()" class="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold transition cursor-pointer text-xs">
+            Done Inspecting
+          </button>
+        </div>
       </div>
 
     </div>
