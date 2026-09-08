@@ -1,5 +1,6 @@
 import pytest
 from backend.app.db.seed_chronoverse import seed_chronoverse_data
+from backend.app.db.clickhouse import ch_engine
 from backend.app.agents.orchestrator import orchestrator
 
 # Ensure data is seeded
@@ -299,6 +300,33 @@ def test_batch_screenplay_ai_ingestion_method_b():
     assert len(extracted["relics"]) >= 1
     print(f"✅ Method B Batch Screenplay Extraction Verified! Extracted {len(extracted['characters'])} chars, {len(extracted['relics'])} relics.")
 
+def test_universe_script_saving_and_deletion():
+    """Verifies that screenplays can be saved and deleted directly from a universe's source_scripts."""
+    universe_id = "CHRONOVERSE"
+    scripts = ch_engine.save_script_to_universe(
+        universe_id=universe_id,
+        filename="Chronoverse_Test_Scene.fountain",
+        content="INT. BERLIN SAFEHOUSE - NIGHT - 1982\nElena waits in the shadows.",
+        title="Chronoverse Test Scene"
+    )
+    assert any(s["filename"] == "Chronoverse_Test_Scene.fountain" for s in scripts)
+    
+    # Save an update to the same script
+    scripts = ch_engine.save_script_to_universe(
+        universe_id=universe_id,
+        filename="Chronoverse_Test_Scene.fountain",
+        content="INT. BERLIN SAFEHOUSE - NIGHT - 1982\nElena checks her chronograph.",
+        title="Chronoverse Test Scene (Revised)"
+    )
+    matching = next(s for s in scripts if s["filename"] == "Chronoverse_Test_Scene.fountain")
+    assert matching["title"] == "Chronoverse Test Scene (Revised)"
+    assert "chronograph" in matching["content"]
+    
+    # Delete script
+    scripts = ch_engine.delete_script_from_universe(universe_id, "Chronoverse_Test_Scene.fountain")
+    assert not any(s["filename"] == "Chronoverse_Test_Scene.fountain" for s in scripts)
+    print("✅ Universe Script Saving and Deletion Verified!")
+
 if __name__ == "__main__":
     test_trap_1_cryogenic_stasis_violation()
     test_trap_2_destroyed_relic_violation()
@@ -310,4 +338,5 @@ if __name__ == "__main__":
     test_custom_universe_deletion_and_protection()
     test_archive_and_restore_lifecycle()
     test_batch_screenplay_ai_ingestion_method_b()
-    print("\n🎉 ALL 10 MULTI-UNIVERSE, ARCHIVE, METHOD A & METHOD B TESTS PASSED!")
+    test_universe_script_saving_and_deletion()
+    print("\n🎉 ALL 11 MULTI-UNIVERSE, ARCHIVE, METHOD A, METHOD B & SCRIPT MANAGEMENT TESTS PASSED!")

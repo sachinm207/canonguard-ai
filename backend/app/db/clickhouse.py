@@ -324,6 +324,7 @@ class ClickHouseEngine:
                 self.archived_universes = {}
             core = ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]
             custom_dict = {}
+            core_scripts = {}
             for uid, udata in self.universes.items():
                 if uid not in core:
                     custom_dict[uid] = {
@@ -333,9 +334,13 @@ class ClickHouseEngine:
                         "relationships": [r for r in self.relationships if r.get("universe_id") == uid],
                         "lore_rules": [rl for rl in self.lore_rules if rl.get("universe_id") == uid],
                     }
+                else:
+                    if udata.get("source_scripts"):
+                        core_scripts[uid] = udata.get("source_scripts")
             payload = {
                 "deleted_builtins": list(self.deleted_builtins),
                 "custom_universes": custom_dict,
+                "core_scripts": core_scripts,
                 "archived_universes": self.archived_universes
             }
             with open(path, "w", encoding="utf-8") as f:
@@ -344,7 +349,7 @@ class ClickHouseEngine:
             logger.warning(f"Failed to save custom universes to disk: {e}")
 
     def _load_custom_universes_from_disk(self):
-        """Loads non-core custom universes and archived universes from disk if present."""
+        """Loads non-core custom universes, core scripts, and archived universes from disk if present."""
         try:
             import json
             import os
@@ -375,6 +380,11 @@ class ClickHouseEngine:
             else:
                 custom_dict = data
 
+            core_scripts = data.get("core_scripts", {})
+            for uid, scripts in core_scripts.items():
+                if uid in self.universes and scripts:
+                    self.universes[uid]["source_scripts"] = scripts
+
             for uid, item in custom_dict.items():
                 if uid not in self.archived_universes:
                     self.universes[uid] = item.get("metadata", {})
@@ -389,6 +399,53 @@ class ClickHouseEngine:
                     self.lore_rules.extend(item.get("lore_rules", []))
         except Exception as e:
             logger.warning(f"Failed to load custom universes from disk: {e}")
+
+    def save_script_to_universe(self, universe_id: str, filename: str, content: str, title: Optional[str] = None) -> List[Dict[str, str]]:
+        """Saves or updates a screenplay in a universe's source_scripts."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        target = self.find_universe_by_name(universe_id)
+        if not target:
+            target = self.universes.get(universe_id)
+        if not target:
+            return []
+        
+        scripts = target.setdefault("source_scripts", [])
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        
+        # Check if a script with this filename already exists
+        existing = next((s for s in scripts if s.get("filename") == filename), None)
+        if existing:
+            existing["content"] = content
+            if title:
+                existing["title"] = title
+            existing["updated_at"] = timestamp
+        else:
+            scripts.append({
+                "filename": filename,
+                "title": title or filename,
+                "content": content,
+                "updated_at": timestamp
+            })
+        self._save_custom_universes_to_disk()
+        return scripts
+
+    def delete_script_from_universe(self, universe_id: str, filename: str) -> List[Dict[str, str]]:
+        """Deletes a screenplay from a universe's source_scripts."""
+        if not self.universes:
+            from .seed_universes import seed_all_universes
+            seed_all_universes()
+        target = self.find_universe_by_name(universe_id)
+        if not target:
+            target = self.universes.get(universe_id)
+        if not target:
+            return []
+        
+        target["source_scripts"] = [s for s in target.get("source_scripts", []) if s.get("filename") != filename]
+        self._save_custom_universes_to_disk()
+        return target["source_scripts"]
 
     def ingest_custom_universe(
         self,

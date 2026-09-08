@@ -579,6 +579,54 @@ def get_universe_scripts(universe_id: str):
         "raw_document": target.get("raw_document", "")
     }
 
+class SaveScriptRequest(BaseModel):
+    filename: str
+    content: str
+    title: Optional[str] = None
+
+@app.post("/api/universe/{universe_id}/save-script")
+def save_universe_script(universe_id: str, req: SaveScriptRequest):
+    """Saves or updates a screenplay in the specified universe's source scripts."""
+    target = ch_engine.find_universe_by_name(universe_id)
+    if not target:
+        target = ch_engine.universes.get(universe_id)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found.")
+    
+    clean_fn = req.filename.strip()
+    if not clean_fn.endswith('.fountain') and not clean_fn.endswith('.txt'):
+        clean_fn += '.fountain'
+        
+    scripts = ch_engine.save_script_to_universe(
+        target.get("id"),
+        filename=clean_fn,
+        content=req.content,
+        title=req.title.strip() if req.title else None
+    )
+    return {
+        "status": "success",
+        "universe_id": target.get("id"),
+        "filename": clean_fn,
+        "scripts": scripts
+    }
+
+@app.delete("/api/universe/{universe_id}/scripts/{filename:path}")
+def delete_universe_script(universe_id: str, filename: str):
+    """Deletes a screenplay from the specified universe's source scripts."""
+    target = ch_engine.find_universe_by_name(universe_id)
+    if not target:
+        target = ch_engine.universes.get(universe_id)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found.")
+    
+    scripts = ch_engine.delete_script_from_universe(target.get("id"), filename.strip())
+    return {
+        "status": "success",
+        "universe_id": target.get("id"),
+        "filename": filename,
+        "scripts": scripts
+    }
+
 class ScreenplayUploadRequest(BaseModel):
     content: str
     filename: Optional[str] = "Screenplay.fountain"

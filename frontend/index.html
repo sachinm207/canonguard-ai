@@ -116,9 +116,9 @@
             <option value="MYTHOS_REALM">Mythos Realm (Fantasy & Magic)</option>
           </select>
         </div>
-        <button onclick="openFranchiseHub('active')" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-xs font-bold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-2 shadow-sm cursor-pointer" title="Story Worlds Library: Manage worlds, view characters, or add new movie lore">
+        <button onclick="openFranchiseHub('active')" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-xs font-bold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-2 shadow-sm cursor-pointer" title="Story Library / Create New: Manage worlds, view characters, or add new movie lore">
           <span>📚</span>
-          <span>Story Worlds Library</span>
+          <span>Story Library / Create New</span>
           
           <span id="hub-active-count" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-mono" title="Active Worlds">0</span>
           <span id="hub-archived-count" class="hidden px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono" title="Saved Worlds">📦 0</span>
@@ -159,34 +159,40 @@
     <section class="flex-1 flex flex-col border-r border-slate-800 bg-slate-950">
       
       <!-- Script Meta Bar -->
-      <div class="h-10 bg-slate-900/50 border-b border-slate-800/80 px-6 flex items-center justify-between text-xs text-slate-400">
-        <div class="flex items-center space-x-2.5">
+      <div class="h-10 bg-slate-900/50 border-b border-slate-800/80 px-4 md:px-6 flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center space-x-2 truncate mr-2">
           <span class="text-sm">📄</span>
-          <span class="font-semibold text-slate-200 tracking-wide text-xs" id="current-title-display">Cold War Requiem.fountain</span>
+          <span class="font-semibold text-slate-200 tracking-wide text-xs cursor-pointer hover:text-amber-300 transition truncate" id="current-title-display" title="Click to rename script file" onclick="renameCurrentScript()">Cold War Requiem.fountain</span>
+          <span class="text-[10px] text-slate-500 hover:text-slate-300 cursor-pointer" onclick="renameCurrentScript()" title="Rename script file">✏️</span>
           <!-- Hidden spans preserved for JS state compatibility -->
           <span id="current-setting-display" class="hidden">Berlin Safehouse</span>
           <span id="current-year-display" class="hidden">1982</span>
         </div>
-        <div class="flex items-center space-x-3 text-[11px]">
+        <div class="flex items-center space-x-1.5 md:space-x-2 text-[11px] shrink-0">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
-          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Open an existing script file (.fountain or .txt)">
+          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Import an existing script file (.fountain or .txt) into the editor">
             <span>📂</span>
-            <span>Open Script</span>
-            
+            <span>Import</span>
           </button>
-          <button onclick="clearScriptEditor()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700 transition flex items-center space-x-1 font-medium cursor-pointer" title="Clear the editor to write a brand new scene">
-            <span>🧹</span>
-            <span>Clear Text</span>
-            
+          <button onclick="openProjectScriptsModal()" id="btn-project-scripts" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1 font-medium cursor-pointer shadow-sm" title="View, load, or manage saved screenplay scenes for this story world">
+            <span>📜</span>
+            <span>Project Scripts</span>
+            <span id="project-scripts-count-badge" class="px-1.5 py-0.2 rounded-full bg-amber-950 text-amber-300 font-mono text-[10px] border border-amber-800">0</span>
           </button>
-          <button onclick="downloadScreenplay()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-emerald-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Download your screenplay to your computer">
+          <button onclick="saveCurrentScriptToProject()" class="px-2.5 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700 hover:border-emerald-500 transition flex items-center space-x-1 font-semibold cursor-pointer shadow-sm" title="Save this screenplay into the active project database so you can explore and reload it anytime">
             <span>💾</span>
-            <span>Save Script</span>
-            
+            <span>Save to Project</span>
           </button>
-          <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center space-x-1">
-            <span>🟢 Live Checker: On</span>
-            
+          <button onclick="exportScreenplay()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Export this screenplay to a .fountain file on your computer">
+            <span>📥</span>
+            <span>Export .fountain</span>
+          </button>
+          <button onclick="clearScriptEditor()" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700 transition flex items-center space-x-1 font-medium cursor-pointer" title="Clear the editor to write a brand new scene">
+            <span>🧹</span>
+            <span>Clear</span>
+          </button>
+          <span class="hidden sm:flex px-2 py-1 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 items-center space-x-1">
+            <span>🟢 Live: On</span>
           </span>
         </div>
       </div>
@@ -362,7 +368,7 @@
           <div class="pt-2">
             <button onclick="openFranchiseHub('active')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer">
               <span>📚</span>
-              <span>Open Story Worlds Library</span>
+              <span>Open Story Library / Create New</span>
             </button>
           </div>
         </div>
@@ -1070,38 +1076,327 @@
       reader.readAsText(file);
     }
 
-    // --- SAVE & EXPORT SCREENPLAY (Industry-Standard .fountain / .txt) ---
-    function downloadScreenplay() {
+    // --- SCRIPT TITLE RENAMING ---
+    function renameCurrentScript() {
+      const titleEl = document.getElementById('current-title-display');
+      const current = titleEl ? titleEl.textContent.trim() : 'Screenplay.fountain';
+      const newTitle = prompt("Rename script file:", current);
+      if (newTitle && newTitle.trim()) {
+        let clean = newTitle.trim();
+        if (!clean.endsWith('.fountain') && !clean.endsWith('.txt')) {
+          clean += '.fountain';
+        }
+        if (titleEl) titleEl.textContent = clean;
+      }
+    }
+
+    // --- SAVE TO PROJECT (Stores in universe database for exploration anytime) ---
+    async function saveCurrentScriptToProject() {
       const text = textarea.value;
       if (!text.trim()) {
         alert("The script editor is empty! Type some scene action or dialogue first.");
         return;
       }
-      let filename = document.getElementById('current-title-display').textContent.trim() || 'scene_script.fountain';
-      if (!filename.endsWith('.fountain') && !filename.endsWith('.txt')) {
-        filename += '.fountain';
+      if (!currentUniverseId) {
+        alert("Please select or open an active story world first.");
+        return;
       }
+      let currentFilename = document.getElementById('current-title-display').textContent.trim() || 'scene_script.fountain';
+      const promptName = prompt("Save screenplay to active story world as filename:", currentFilename);
+      if (!promptName || !promptName.trim()) return; // User cancelled
+
+      let cleanName = promptName.trim();
+      if (!cleanName.endsWith('.fountain') && !cleanName.endsWith('.txt')) {
+        cleanName += '.fountain';
+      }
+      const title = cleanName.replace(/\.(fountain|txt)$/i, '').replace(/_/g, ' ');
+
+      const badge = document.getElementById('lint-status-badge');
+      const prevHtml = badge ? badge.innerHTML : '';
+      if (badge) {
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span><span class="text-amber-300 font-mono text-[11px]">Saving...</span>`;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/${currentUniverseId}/save-script`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: cleanName,
+            title: title,
+            content: text
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (currentUniverseMetadata) {
+            currentUniverseMetadata.source_scripts = data.scripts || [];
+          }
+          document.getElementById('current-title-display').textContent = cleanName;
+          updateProjectScriptsCountBadge();
+          if (activeRightPanelTab === 'lore') renderSidebarLore();
+
+          if (badge) {
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Saved to Project!</span>`;
+            setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
+          }
+        } else {
+          alert("Failed to save script to project.");
+          if (badge) badge.innerHTML = prevHtml;
+        }
+      } catch (err) {
+        console.error("Save script error:", err);
+        alert("Error saving script to project: " + err.message);
+        if (badge) badge.innerHTML = prevHtml;
+      }
+    }
+
+    // --- EXPORT SCREENPLAY (Local File Download) ---
+    function exportScreenplay() {
+      const text = textarea.value;
+      if (!text.trim()) {
+        alert("The script editor is empty! Type some scene action or dialogue first.");
+        return;
+      }
+      let currentFilename = document.getElementById('current-title-display').textContent.trim() || 'scene_script.fountain';
+      const exportName = prompt("Export script to local file name:", currentFilename);
+      if (!exportName || !exportName.trim()) return; // User cancelled
+
+      let cleanName = exportName.trim();
+      if (!cleanName.endsWith('.fountain') && !cleanName.endsWith('.txt')) {
+        cleanName += '.fountain';
+      }
+
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = cleanName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      // Save to localStorage
-      try {
-        localStorage.setItem('canonguard_saved_script', text);
-        localStorage.setItem('canonguard_saved_title', filename);
-      } catch (e) {}
-
-      // Visual feedback
       const badge = document.getElementById('lint-status-badge');
-      const prevHtml = badge.innerHTML;
-      badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Saved & Exported!</span>`;
-      setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
+      const prevHtml = badge ? badge.innerHTML : '';
+      if (badge) {
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Exported ${cleanName}!</span>`;
+        setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
+      }
+    }
+
+    // Keep downloadScreenplay as alias for backwards compatibility
+    function downloadScreenplay() {
+      exportScreenplay();
+    }
+
+    // --- PROJECT SCRIPTS MANAGEMENT MODAL ---
+    function updateProjectScriptsCountBadge() {
+      const badge = document.getElementById('project-scripts-count-badge');
+      const count = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) ? currentUniverseMetadata.source_scripts.length : 0;
+      if (badge) {
+        badge.textContent = count;
+      }
+      const sidebarScriptsCount = document.getElementById('sidebar-scripts-count');
+      if (sidebarScriptsCount) {
+        sidebarScriptsCount.textContent = `${count} script${count === 1 ? '' : 's'}`;
+      }
+    }
+
+    async function openProjectScriptsModal() {
+      const modal = document.getElementById('project-scripts-modal');
+      if (!modal) return;
+      
+      const uniNameEl = document.getElementById('project-scripts-modal-universe-name');
+      if (uniNameEl) {
+        uniNameEl.textContent = (currentUniverseMetadata && currentUniverseMetadata.name) ? currentUniverseMetadata.name : (currentUniverseId || 'Active Project');
+      }
+
+      await ensureUniverseScriptsLoaded(currentUniverseId);
+      renderProjectScriptsList();
+      modal.classList.remove('hidden');
+    }
+
+    function closeProjectScriptsModal() {
+      const modal = document.getElementById('project-scripts-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderProjectScriptsList() {
+      const listEl = document.getElementById('project-scripts-modal-list');
+      const summaryEl = document.getElementById('project-scripts-summary-count');
+      if (!listEl) return;
+
+      const scripts = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) || [];
+      if (summaryEl) {
+        summaryEl.textContent = `${scripts.length} script${scripts.length === 1 ? '' : 's'} in this story world`;
+      }
+
+      if (scripts.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-8 text-center bg-slate-950/60 rounded-xl border border-slate-800 space-y-3">
+            <span class="text-3xl block">📜</span>
+            <div class="text-sm font-semibold text-slate-200">No Saved Scripts in this Project Yet</div>
+            <p class="text-xs text-slate-400 max-w-md mx-auto">Write your scene in the editor and click <span class="text-emerald-300 font-bold">"Save to Project"</span>, or click <span class="text-sky-300 font-bold">"Import File"</span> to add screenplay files.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const activeFilename = document.getElementById('current-title-display').textContent.trim();
+
+      listEl.innerHTML = scripts.map((s, idx) => {
+        const isActive = s.filename === activeFilename;
+        const lineCount = (s.content || '').split('\n').length;
+        const previewLines = (s.content || '').split('\n').filter(l => l.trim()).slice(0, 2).join(' / ');
+        const safeFn = escapeHtml(s.filename).replace(/'/g, "\\'");
+        return `
+          <div class="p-3.5 rounded-xl border ${isActive ? 'bg-indigo-950/30 border-indigo-500/70 shadow-md' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'} flex flex-col space-y-2.5 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 truncate mr-3">
+                <span class="text-base">${isActive ? '🎬' : '📄'}</span>
+                <div class="truncate">
+                  <div class="text-xs font-bold text-white flex items-center space-x-2">
+                    <span class="truncate">${escapeHtml(s.title || s.filename)}</span>
+                    ${isActive ? '<span class="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 text-[10px] border border-indigo-500/40">Currently Open</span>' : ''}
+                  </div>
+                  <div class="text-[11px] text-slate-400 font-mono truncate">${escapeHtml(s.filename)} • ${lineCount} lines ${s.updated_at ? `• Updated ${escapeHtml(s.updated_at)}` : ''}</div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-1.5 shrink-0">
+                <button onclick="loadScriptIntoEditor('${safeFn}')" class="px-2.5 py-1 rounded-lg ${isActive ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-emerald-700 hover:bg-emerald-600 text-white'} font-semibold text-xs transition flex items-center space-x-1 cursor-pointer" title="Open this script in the editor workspace">
+                  <span>🎬</span>
+                  <span>${isActive ? 'Reload' : 'Open in Editor'}</span>
+                </button>
+                <button onclick="exportSavedScript('${safeFn}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition flex items-center space-x-1 cursor-pointer" title="Export this script to a file">
+                  <span>📥</span>
+                </button>
+                <button onclick="deleteScriptFromProject('${safeFn}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-800 text-xs transition flex items-center space-x-1 cursor-pointer" title="Delete this script draft">
+                  <span>🗑️</span>
+                </button>
+              </div>
+            </div>
+            ${previewLines ? `
+              <div class="px-2.5 py-1 rounded bg-slate-900/90 text-slate-400 text-[11px] font-mono truncate border border-slate-850">
+                ${escapeHtml(previewLines)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function loadScriptIntoEditor(filename) {
+      const scripts = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) || [];
+      const match = scripts.find(s => s.filename === filename);
+      if (!match) {
+        alert("Script not found in project.");
+        return;
+      }
+
+      textarea.value = match.content;
+      document.getElementById('current-title-display').textContent = match.filename;
+      isCustomScriptActive = true;
+      customScriptFilename = match.filename;
+
+      updateEditorWordCount(match.content);
+      validateScript(match.content);
+      closeProjectScriptsModal();
+
+      const badge = document.getElementById('lint-status-badge');
+      const prevHtml = badge ? badge.innerHTML : '';
+      if (badge) {
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-400"></span><span class="text-sky-300 font-mono text-[11px]">Opened "${match.title || match.filename}"</span>`;
+        setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
+      }
+    }
+
+    function exportSavedScript(filename) {
+      const scripts = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) || [];
+      const match = scripts.find(s => s.filename === filename);
+      if (!match) return;
+
+      const blob = new Blob([match.content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = match.filename.endsWith('.fountain') || match.filename.endsWith('.txt') ? match.filename : `${match.filename}.fountain`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    async function deleteScriptFromProject(filename) {
+      if (!confirm(`Are you sure you want to delete "${filename}" from this story world?`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/universe/${currentUniverseId}/scripts/${encodeURIComponent(filename)}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (currentUniverseMetadata) {
+            currentUniverseMetadata.source_scripts = data.scripts || [];
+          }
+          updateProjectScriptsCountBadge();
+          renderProjectScriptsList();
+          if (activeRightPanelTab === 'lore') renderSidebarLore();
+        } else {
+          alert("Failed to delete script.");
+        }
+      } catch (err) {
+        console.error("Delete script error:", err);
+        alert("Error deleting script: " + err.message);
+      }
+    }
+
+    function createNewBlankScriptInEditor() {
+      const name = prompt("Enter a filename for your new scene script:", "New_Scene.fountain");
+      if (!name || !name.trim()) return;
+      let clean = name.trim();
+      if (!clean.endsWith('.fountain') && !clean.endsWith('.txt')) {
+        clean += '.fountain';
+      }
+      textarea.value = "";
+      document.getElementById('current-title-display').textContent = clean;
+      isCustomScriptActive = true;
+      customScriptFilename = clean;
+      clearScriptEditor();
+      closeProjectScriptsModal();
+      textarea.focus();
+    }
+
+    function handleModalScreenplayImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target.result;
+        try {
+          const res = await fetch(`${API_BASE}/api/universe/${currentUniverseId}/save-script`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              title: file.name.replace(/\.[^/.]+$/, "").replace(/_/g, ' '),
+              content: content
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (currentUniverseMetadata) {
+              currentUniverseMetadata.source_scripts = data.scripts || [];
+            }
+            updateProjectScriptsCountBadge();
+            renderProjectScriptsList();
+            if (activeRightPanelTab === 'lore') renderSidebarLore();
+          }
+        } catch (err) {
+          console.error("Import to project error:", err);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
     }
 
     // Drag-and-drop on screenplay editor
@@ -2131,15 +2426,21 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
         if (scripts.length === 0) {
           scriptsListEl.innerHTML = `<div class="p-2 text-[11px] text-slate-500 italic bg-slate-950/40 rounded border border-slate-800">No past screenplay files loaded for this universe.</div>`;
         } else {
-          scriptsListEl.innerHTML = scripts.map(s => `
-            <button onclick="viewPastScriptInModal('${escapeHtml(s.filename).replace(/'/g, "\\'")}')" class="w-full text-left p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/50 transition cursor-pointer flex items-center justify-between group">
+          scriptsListEl.innerHTML = scripts.map(s => {
+            const safeFn = escapeHtml(s.filename).replace(/'/g, "\\'");
+            return `
+            <div class="w-full p-2 rounded bg-slate-900/90 border border-slate-800 hover:border-amber-500/40 transition flex items-center justify-between group">
               <div class="truncate mr-2">
                 <div class="text-slate-200 font-semibold text-xs group-hover:text-amber-300 transition truncate">${escapeHtml(s.title || s.filename)}</div>
                 <div class="text-[10px] text-slate-500 font-mono truncate">${escapeHtml(s.filename)}</div>
               </div>
-              <span class="text-[10px] text-amber-400 group-hover:translate-x-0.5 transition shrink-0 font-medium">Read 📜</span>
-            </button>
-          `).join('');
+              <div class="flex items-center space-x-1 shrink-0">
+                <button onclick="loadScriptIntoEditor('${safeFn}')" class="px-2 py-0.5 rounded bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[10px] font-medium transition cursor-pointer" title="Open script in workspace editor">Edit 🎬</button>
+                <button onclick="viewPastScriptInModal('${safeFn}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-750 text-amber-400 border border-slate-700 text-[10px] font-medium transition cursor-pointer" title="Read script with canon citations">Read 📜</button>
+              </div>
+            </div>
+            `;
+          }).join('');
         }
       }
 
@@ -2606,7 +2907,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
         <div class="flex items-center space-x-2.5">
           <span class="text-xl">📚</span>
           <div>
-            <h2 class="text-base font-bold text-white">Franchise Library & Lore Hub</h2>
+            <h2 class="text-base font-bold text-white">Story Library / Create New</h2>
             <p class="text-xs text-slate-400">Active In-Memory Canons, Cold-Storage Lore Archive & Custom Lore Bible Ingestion</p>
           </div>
         </div>
@@ -2820,6 +3121,54 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- PROJECT SCRIPTS MODAL -->
+  <div id="project-scripts-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">📜</span>
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center space-x-2">
+              <span>Project Screenplays</span>
+              <span id="project-scripts-modal-universe-name" class="text-amber-400 text-xs font-mono px-2 py-0.5 rounded bg-amber-950/70 border border-amber-800/80"></span>
+            </h2>
+            <p class="text-xs text-slate-400">All screenplay scenes and drafts saved in this story world. Explore, load, or export anytime.</p>
+          </div>
+        </div>
+        <button onclick="closeProjectScriptsModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold cursor-pointer">✕</button>
+      </div>
+
+      <!-- Action Bar inside modal -->
+      <div class="px-6 py-3 border-b border-slate-800 bg-slate-950/40 flex items-center justify-between flex-wrap gap-2">
+        <span id="project-scripts-summary-count" class="text-xs text-slate-400">0 scripts in this project</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="createNewBlankScriptInEditor()" class="px-3 py-1.5 rounded-lg bg-indigo-950 hover:bg-indigo-900 text-indigo-200 border border-indigo-700 transition text-xs font-semibold flex items-center space-x-1 cursor-pointer">
+            <span>➕</span>
+            <span>New Blank Script</span>
+          </button>
+          <input type="file" id="modal-screenplay-import-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleModalScreenplayImport(event)">
+          <button onclick="document.getElementById('modal-screenplay-import-input').click()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition text-xs font-semibold flex items-center space-x-1 cursor-pointer">
+            <span>📂</span>
+            <span>Import File</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Script List -->
+      <div id="project-scripts-modal-list" class="p-6 overflow-y-auto custom-scrollbar space-y-3 flex-1 text-xs">
+        <!-- Injected dynamically -->
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+        <span class="text-[11px] text-slate-500">Click "Open in Editor" to load, edit, and validate any script in real-time.</span>
+        <button onclick="closeProjectScriptsModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer">Close</button>
+      </div>
     </div>
   </div>
 

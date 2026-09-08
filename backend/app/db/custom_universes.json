@@ -343,5 +343,43 @@
       ]
     }
   },
+  "core_scripts": {
+    "CHRONOVERSE": [
+      {
+        "filename": "The_Solaria_Core_1960.fountain",
+        "title": "Episode 4: The Solaria Core (1960)",
+        "content": "Title: THE QUANTUM HORIZON - EPISODE 4: THE SOLARIA CORE\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Archives\nDraft date: 1960 A.D.\n\nEXT. SOLARIA CORE REACTOR - NIGHT - 1960\n\nLiquid magma surges through subterranean fissures. Alarm sirens wail in descending minor thirds.\n\nKARA (30) clutches the radiant golden SUNSTONE in both blistered palms at the core precipice.\n\nVIKTOR (30) steps out from the access gantry, arm outstretched.\n\nVIKTOR\nKara! Do not drop the stone! The thermal pressure will atomize the crystal matrix forever!\n\nKARA\nThe overload cannot be reversed, Viktor! If we do not atomize the stone, the planetary crust will shatter!\n\nKara drops the Sunstone into the fissure. White-hot plasma engulfs it, reducing the artifact to subatomic vapor.\n\nKARA (CONT'D)\nIt is gone. Forever."
+      },
+      {
+        "filename": "Bunker_42_Cryo_Vault_1989.fountain",
+        "title": "Episode 7: Cold Protocol 42 (1989)",
+        "content": "Title: THE QUANTUM HORIZON - EPISODE 7: COLD PROTOCOL 42\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Archives\nDraft date: 1989 A.D.\n\nINT. SIBERIAN RESEARCH BUNKER 42 - CRYOGENIC VAULT - NIGHT - 1989\n\nFrost crystals coat the reinforced plexiglass portals. Sub-zero nitrogen mist rolls across the grating.\n\nVIKTOR (59) climbs into Stasis Pod 04, his temporal mutant engrams pulsing blue.\n\nHEAD SCIENTIST\nCryogenic freezing cycle confirmed. Stasis window locked from 1975 to 1995.\n\nVIKTOR\nMake sure the locks hold. If I awaken before 1995, the temporal paradox will collapse our timeline.\n\nThe hydraulic seal hisses shut. Nitrogen mist blankets the pod. Viktor's eyes freeze into motionless stasis."
+      },
+      {
+        "filename": "The_Geneva_Collider_1994.fountain",
+        "title": "Episode 9: The Geneva Collapse (1994)",
+        "content": "Title: THE QUANTUM HORIZON - EPISODE 9: THE GENEVA COLLAPSE\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Archives\nDraft date: 1994 A.D.\n\nINT. GENEVA COLLIDER COMPLEX - LAB THREE - NIGHT - 1994\n\nSparks shower from the magnetic containment housing. The experimental QUANTUM DRIVE hums with deafening oscillation.\n\nDR. SARAH\nThe primary harmonic field is rupturing! The Quantum Drive cannot maintain structural stability!\n\nLEAD RESEARCHER\nEmergency jettison is unresponsive!\n\nA blinding sphere of cerulean plasma erupts from the casing. The Quantum Drive shatters into billions of glowing subatomic ions, completely disintegrating the containment cradle.\n\nDR. SARAH (CONT'D)\nIt's vaporized! The Quantum Drive was completely destroyed! Zero recoverable fragments!"
+      }
+    ],
+    "GALACTIC_IMPERIUM": [
+      {
+        "filename": "Imperial_Armada_Valos_2140.fountain",
+        "title": "Chapter 1: The Valos Conquest (2140 A.D.)",
+        "content": "Title: GALACTIC IMPERIUM - CHAPTER 1: THE VALOS CONQUEST\nCredit: Imperial Archives\nDraft date: 2140 A.D.\n\nEXT. VALOS PRIME ORBIT - 2140\n\nTen thousand dreadnoughts blot out the binary suns.\n\nGRAND INQUISITOR KAEL (32) stands upon the command bridge, overlooking the captured orbital shipyards.\n\nGRAND INQUISITOR KAEL\nFrom this day forth, the Valos shipyards belong solely to the Imperium. Inquisitor rule is absolute across the sector."
+      },
+      {
+        "filename": "Kyber_Singularity_Meltdown_2175.fountain",
+        "title": "Chapter 8: The Singularity Fall (2175 A.D.)",
+        "content": "Title: GALACTIC IMPERIUM - CHAPTER 8: THE SINGULARITY FALL\nCredit: Imperial Archives\nDraft date: 2175 A.D.\n\nINT. IMPERIAL DREADNOUGHT - CORE CHAMBER - 2175\n\nThe KYBER SINGULARITY CORE flares uncontrollable violet radiation across the containment catwalks.\n\nLADY SERAPHINA\nThe singularity is uncontained! It is consuming its own housing!\n\nSERAPHINA\nEject the core into the black hole!\n\nThe Kyber Singularity Core collapses inward under gravity shear, vanishing into the event horizon, destroyed permanently in 2175."
+      }
+    ],
+    "MYTHOS_REALM": [
+      {
+        "filename": "Blood_Ridge_Cataclysm_1285.fountain",
+        "title": "Scroll 3: The Blood Ridge Cataclysm (1285 A.D.)",
+        "content": "Title: MYTHOS REALM - SCROLL 3: BLOOD RIDGE\nCredit: Royal Annals of Eldor\nDraft date: 1285 A.D.\n\nEXT. BLOOD RIDGE GORGE - 1285\n\nDragonfire rains from the dark sky. The AETHELGARD BLADE is struck by ancient wyrmfire, shattering into thousands of molten shards across the volcanic stone.\n\nQUEEN MORWEN\nThe ancient blade is broken! The steel of Eldor is no more!"
+      }
+    ]
+  },
   "archived_universes": {}
 }
