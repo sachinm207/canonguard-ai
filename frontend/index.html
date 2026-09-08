@@ -195,92 +195,42 @@
       <div class="flex-1 p-6 flex flex-col justify-start items-center overflow-y-auto custom-scrollbar bg-slate-950/80">
         <div class="w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-xl shadow-2xl p-6 flex flex-col space-y-4">
           
-          <!-- Card Header & View Tabs -->
+          <!-- Card Header Bar -->
           <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
-            <!-- Left: View Switcher Tabs -->
-            <div class="flex items-center space-x-1.5 p-1 rounded-lg bg-slate-950 border border-slate-800">
-              <button id="tab-editor-write" onclick="switchEditorView('write')" class="px-3 py-1.5 rounded-md bg-slate-800 text-white font-semibold border border-slate-700 flex items-center space-x-1.5 text-xs transition cursor-pointer shadow-sm" title="Type and edit your screenplay">
-                <span>✏️</span>
-                <span>Write Screenplay</span>
-              </button>
-              <button id="tab-editor-preview" onclick="switchEditorView('preview')" class="px-3 py-1.5 rounded-md bg-transparent text-slate-400 hover:text-slate-200 border border-transparent flex items-center space-x-1.5 text-xs transition cursor-pointer" title="View script with wavy red underlines under plot holes">
-                <span>👁️</span>
-                <span>Visual Proof (Red Lines)</span>
-              </button>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-bold text-white tracking-wide flex items-center space-x-1.5">
+                <span>🎬</span>
+                <span>Screenplay Scene Editor</span>
+              </span>
+              <span id="editor-slug-display" class="hidden"></span>
             </div>
-
-            <!-- Hidden span for JS backward compatibility -->
-            <span id="editor-slug-display" class="hidden"></span>
-
-            <!-- Right: Live Word Counter & Latency Status Badge -->
-            <div class="flex items-center space-x-2.5">
+            <div class="flex items-center space-x-3 text-xs text-slate-400">
               <span id="editor-word-count" class="font-mono text-xs text-slate-400">0 words</span>
-              <div id="lint-status-badge" class="flex items-center space-x-1.5 text-xs px-2.5 py-1 rounded bg-slate-950 border border-slate-800">
+              <div id="lint-status-badge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded bg-slate-950 border border-slate-800">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span class="text-slate-300 font-mono text-[11px]">Ready</span>
               </div>
             </div>
           </div>
 
-          <!-- VIEW 1: ACTIVE WRITE SCREENPLAY CANVAS -->
-          <div id="editor-write-view" class="space-y-3">
-            <div class="relative">
-              <textarea id="script-input" spellcheck="false"
-                class="w-full bg-slate-950/90 border border-slate-800 rounded-lg p-5 font-screenplay text-sm md:text-[15px] leading-relaxed text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-500/80 transition resize-y min-h-[280px] h-[330px] custom-scrollbar"
-                placeholder="Type or paste your movie scene here...&#10;&#10;Example:&#10;INT. BERLIN SAFEHOUSE - NIGHT - 1982&#10;&#10;Elena pulls the Sunstone from her coat to open the portal in 1982."></textarea>
-            </div>
-
-            <!-- INLINE MISTAKE ALERT BANNER (Shows when a plot hole is detected) -->
-            <div id="editor-mistake-banner" class="hidden p-3.5 rounded-xl bg-rose-950/40 border border-rose-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-in fade-in duration-150">
-              <div class="flex items-start space-x-2.5">
-                <span class="text-base shrink-0 mt-0.5">⚠️</span>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <span class="font-bold text-rose-300">Plot Hole Found:</span>
-                    <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-200 border border-rose-500/40 font-mono font-bold" id="inline-alert-flagged">Mistake</span>
-                  </div>
-                  <p class="text-[11px] text-rose-200/90 mt-0.5 leading-snug" id="inline-alert-explanation">This conflicts with facts established in previous movies.</p>
-                </div>
-              </div>
-              <div class="flex items-center space-x-2 shrink-0">
-                <button onclick="switchEditorView('preview')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition cursor-pointer flex items-center space-x-1" title="Switch to view red wavy underlines in the script">
-                  <span>👁️</span><span>View Red Lines</span>
-                </button>
-                <button onclick="applyFirstMitigation()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-950 transition cursor-pointer flex items-center space-x-1" title="Apply the recommended story-safe fix with 1 click">
-                  <span>⚡</span><span>1-Click Fix</span>
-                </button>
-                <button onclick="openCitationInspector()" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold transition cursor-pointer flex items-center space-x-1" title="View the actual scene and dialogue from past movies">
-                  <span>🔍</span><span>View Proof</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- INLINE CLEAN ALL-CLEAR BANNER (Shows when scene is safe) -->
-            <div id="editor-clean-banner" class="hidden p-3 rounded-lg bg-emerald-950/30 border border-emerald-800/40 flex items-center justify-between text-xs text-emerald-300">
-              <div class="flex items-center space-x-2">
-                <span>✨</span>
-                <span class="font-medium">All Clear! No plot holes or character timeline mistakes detected.</span>
-              </div>
-              <span class="font-mono text-[10px] text-emerald-400">Verified in &lt;1 ms</span>
-            </div>
+          <!-- Real-Time Textarea Editor -->
+          <div class="relative">
+            <textarea id="script-input" rows="7" spellcheck="false"
+              class="w-full bg-slate-950/90 border border-slate-800 rounded-lg p-4 font-screenplay text-sm md:text-[15px] leading-relaxed text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:border-rose-500/80 transition resize-y min-h-[160px] custom-scrollbar"
+              placeholder="Type your movie scene here... Example:&#10;INT. BERLIN SAFEHOUSE - NIGHT - 1982&#10;&#10;Elena pulls the Sunstone from her coat to open the portal in 1982."></textarea>
           </div>
 
-          <!-- VIEW 2: FORMATTED SCRIPT WITH RED WAVY UNDERLINES -->
-          <div id="editor-preview-view" class="hidden space-y-3">
-            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-xs text-slate-400">
+          <!-- Real-Time Live Visual Feedback Output (At bottom of editor box card) -->
+          <div class="border border-slate-800/80 rounded-lg p-4 bg-slate-950/50 space-y-2">
+            <div class="text-[11px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between">
               <div class="flex items-center space-x-1.5">
-                <span>🔍</span>
-                <span>Any story mistakes are underlined in <strong>wavy red</strong>. Hover or click to inspect movie proof.</span>
+                <span class="text-rose-400 font-bold">⚡</span>
+                <span class="text-slate-200">Live Story Feedback (Mistakes Underlined in Red)</span>
               </div>
-              <button onclick="switchEditorView('write')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition cursor-pointer flex items-center space-x-1">
-                <span>✏️</span><span>Back to Writing</span>
-              </button>
+              <span class="text-[10px] text-slate-500 font-normal">Hover or click red words to inspect movie proof</span>
             </div>
-
-            <div class="p-6 rounded-lg bg-slate-950/90 border border-slate-800 font-screenplay text-sm md:text-[15px] leading-relaxed text-slate-100 min-h-[300px] overflow-y-auto custom-scrollbar">
-              <div id="visual-preview" class="whitespace-pre-wrap break-words">
-                <span class="text-slate-500 italic">Type in the editor or choose a sample mistake above to inspect...</span>
-              </div>
+            <div id="visual-preview" class="font-screenplay text-sm md:text-[15px] text-slate-200 leading-relaxed min-h-[50px] block whitespace-pre-wrap break-words py-1">
+              <span class="text-slate-500 italic">Type above or click a sample mistake button to see the live checker in action...</span>
             </div>
           </div>
 
@@ -296,15 +246,9 @@
         <div class="flex items-center space-x-3 text-xs font-semibold">
           <button id="sidebar-tab-diagnostics" onclick="switchRightPanelTab('diagnostics')" class="text-rose-400 border-b-2 border-rose-500 pb-2.5 pt-2 cursor-pointer font-semibold flex items-center space-x-1">
             <span>🔍 Story Check</span>
-            
           </button>
           <button id="sidebar-tab-lore" onclick="switchRightPanelTab('lore')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent flex items-center space-x-1">
             <span>📖 Story Bible</span>
-            
-          </button>
-          <button id="sidebar-tab-telemetry" onclick="switchRightPanelTab('telemetry')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent flex items-center space-x-1">
-            <span>⚡ Activity &amp; Speed</span>
-            
           </button>
         </div>
         <span class="text-[11px] font-mono text-slate-500" id="violation-count">0 Mistakes</span>
@@ -449,50 +393,6 @@
           </div>
         </div>
 
-        <!-- TAB VIEW 3: INLINE TELEMETRY -->
-        <div id="panel-view-telemetry" class="hidden space-y-4 text-xs">
-          <!-- Telemetry Top HUD -->
-          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="font-bold text-sm text-slate-200">⚡ Check Speed &amp; Activity</span>
-              </div>
-              <a href="/api/audit-logs" target="_blank" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-sky-400 font-mono transition flex items-center space-x-1 cursor-pointer" title="Inspect raw JSON activity log">
-                <span>View JSON</span>
-                <span>↗</span>
-              </a>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
-              <div class="p-2 rounded bg-slate-900 border border-slate-800/70">
-                <span class="text-slate-500 block text-[10px]">Average Speed</span>
-                <span class="text-emerald-400 font-bold">&lt; 1 ms</span>
-              </div>
-              <div class="p-2 rounded bg-slate-900 border border-slate-800/70">
-                <span class="text-slate-500 block text-[10px]">Check Trigger</span>
-                <span class="text-sky-300 font-bold">On Pause (350ms)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Telemetry Stream Feed Header -->
-          <div class="flex items-center justify-between pt-1">
-            <div class="flex items-center space-x-1.5">
-              <span class="text-xs font-bold text-slate-300">Recent Checks Log</span>
-              <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-800 text-slate-400" id="sidebar-telemetry-count">0 checks</span>
-            </div>
-            <button onclick="renderSidebarTelemetry()" class="text-[11px] text-slate-400 hover:text-white transition flex items-center space-x-1 cursor-pointer" title="Refresh check log">
-              <span>🔄</span>
-              <span>Refresh</span>
-            </button>
-          </div>
-
-          <!-- Telemetry Stream Items -->
-          <div id="sidebar-telemetry-feed" class="space-y-2">
-            <!-- Dynamically populated by renderSidebarTelemetry() -->
-          </div>
-        </div>
-
       </div>
     </aside>
   </main>
@@ -518,43 +418,9 @@
     const mitigationList = document.getElementById('mitigation-list');
     const violationCount = document.getElementById('violation-count');
 
-    let currentEditorView = 'write';
     function switchEditorView(view) {
-      currentEditorView = view;
-      const writeView = document.getElementById('editor-write-view');
-      const previewView = document.getElementById('editor-preview-view');
-      const tabWrite = document.getElementById('tab-editor-write');
-      const tabPreview = document.getElementById('tab-editor-preview');
-
-      if (view === 'write') {
-        if (writeView) writeView.classList.remove('hidden');
-        if (previewView) previewView.classList.add('hidden');
-        if (tabWrite) {
-          tabWrite.className = "px-3 py-1.5 rounded-md bg-slate-800 text-white font-semibold border border-slate-700 flex items-center space-x-1.5 text-xs transition cursor-pointer shadow-sm";
-        }
-        if (tabPreview) {
-          tabPreview.className = "px-3 py-1.5 rounded-md bg-transparent text-slate-400 hover:text-slate-200 border border-transparent flex items-center space-x-1.5 text-xs transition cursor-pointer";
-        }
-        if (textarea) textarea.focus();
-      } else {
-        if (writeView) writeView.classList.add('hidden');
-        if (previewView) previewView.classList.remove('hidden');
-        if (tabPreview) {
-          tabPreview.className = "px-3 py-1.5 rounded-md bg-rose-950/80 text-rose-300 font-semibold border border-rose-800/80 flex items-center space-x-1.5 text-xs transition cursor-pointer shadow-sm";
-        }
-        if (tabWrite) {
-          tabWrite.className = "px-3 py-1.5 rounded-md bg-transparent text-slate-400 hover:text-slate-200 border border-transparent flex items-center space-x-1.5 text-xs transition cursor-pointer";
-        }
-      }
-    }
-
-    function applyFirstMitigation() {
-      if (activeValidationResult && activeValidationResult.mitigations && activeValidationResult.mitigations.length > 0) {
-        const fix = activeValidationResult.mitigations[0].suggested_rewrite;
-        textarea.value = fix;
-        validateScript(fix);
-        switchEditorView('write');
-      }
+      // Unified editor: textarea on top, live feedback on bottom
+      if (textarea && view === 'write') textarea.focus();
     }
 
     function updateEditorWordCount(text) {
@@ -585,10 +451,6 @@
         visualPreview.innerHTML = `<span class="text-slate-500 italic">Type in the editor or choose a sample mistake above to inspect...</span>`;
         showIdleState();
         lintBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-slate-400 font-mono text-[11px]">Ready</span>`;
-        const cleanBanner = document.getElementById('editor-clean-banner');
-        const mistakeBanner = document.getElementById('editor-mistake-banner');
-        if (cleanBanner) cleanBanner.classList.add('hidden');
-        if (mistakeBanner) mistakeBanner.classList.add('hidden');
         return;
       }
 
@@ -664,17 +526,6 @@
       });
       visualPreview.innerHTML = previewHtml;
 
-      // Update inline editor alert banner
-      const cleanBanner = document.getElementById('editor-clean-banner');
-      const mistakeBanner = document.getElementById('editor-mistake-banner');
-      const inlineFlagged = document.getElementById('inline-alert-flagged');
-      const inlineExplanation = document.getElementById('inline-alert-explanation');
-      
-      if (cleanBanner) cleanBanner.classList.add('hidden');
-      if (mistakeBanner) mistakeBanner.classList.remove('hidden');
-      if (inlineFlagged) inlineFlagged.textContent = v.flagged_phrase;
-      if (inlineExplanation) inlineExplanation.textContent = v.explanation;
-
       // Populate Mitigations
       mitigationList.innerHTML = '';
       mitigations.forEach(m => {
@@ -690,10 +541,6 @@
         `;
         mitigationList.appendChild(item);
       });
-
-      if (activeRightPanelTab === 'telemetry') {
-        renderSidebarTelemetry();
-      }
     }
 
     function applyMitigation(rewrite) {
@@ -2112,33 +1959,24 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       activeRightPanelTab = tab;
       const tabDiag = document.getElementById('sidebar-tab-diagnostics');
       const tabLore = document.getElementById('sidebar-tab-lore');
-      const tabTelem = document.getElementById('sidebar-tab-telemetry');
 
       const viewDiag = document.getElementById('panel-view-diagnostics');
       const viewLore = document.getElementById('panel-view-lore');
-      const viewTelem = document.getElementById('panel-view-telemetry');
 
       const inactiveClass = "text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent font-medium";
       const activeDiagClass = "text-rose-400 border-b-2 border-rose-500 pb-2.5 pt-2 cursor-pointer font-semibold";
       const activeLoreClass = "text-sky-400 border-b-2 border-sky-500 pb-2.5 pt-2 cursor-pointer font-semibold";
-      const activeTelemClass = "text-emerald-400 border-b-2 border-emerald-500 pb-2.5 pt-2 cursor-pointer font-semibold";
 
       if (tabDiag) tabDiag.className = inactiveClass;
       if (tabLore) tabLore.className = inactiveClass;
-      if (tabTelem) tabTelem.className = inactiveClass;
 
       if (viewDiag) viewDiag.classList.add('hidden');
       if (viewLore) viewLore.classList.add('hidden');
-      if (viewTelem) viewTelem.classList.add('hidden');
 
       if (tab === 'lore') {
         if (tabLore) tabLore.className = activeLoreClass;
         if (viewLore) viewLore.classList.remove('hidden');
         renderSidebarLore();
-      } else if (tab === 'telemetry') {
-        if (tabTelem) tabTelem.className = activeTelemClass;
-        if (viewTelem) viewTelem.classList.remove('hidden');
-        renderSidebarTelemetry();
       } else {
         if (tabDiag) tabDiag.className = activeDiagClass;
         if (viewDiag) viewDiag.classList.remove('hidden');
@@ -2296,58 +2134,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
     }
 
     async function renderSidebarTelemetry() {
-      const countEl = document.getElementById('sidebar-telemetry-count');
-      const feedEl = document.getElementById('sidebar-telemetry-feed');
-      if (!feedEl) return;
-
-      feedEl.innerHTML = `<div class="p-4 text-center text-slate-500 font-mono text-[11px]"><span class="animate-spin inline-block mr-1">⏳</span> Loading audit logs from ClickHouse...</div>`;
-
-      try {
-        const res = await fetch(`${API_BASE}/api/audit-logs`);
-        const data = await res.json();
-        const logs = data.logs || [];
-        if (countEl) countEl.textContent = `${logs.length} logs`;
-
-        if (logs.length === 0) {
-          feedEl.innerHTML = `
-            <div class="p-4 text-center bg-slate-950/50 border border-slate-800 rounded-xl space-y-1">
-              <span class="text-emerald-400 text-base">✨</span>
-              <p class="text-xs text-slate-300 font-semibold">Clean Audit Stream</p>
-              <p class="text-[10px] text-slate-500">No retcon violations caught yet in this session. Type in the screenplay editor to watch real-time audit logs stream here!</p>
-            </div>
-          `;
-          return;
-        }
-
-        // Show recent logs first
-        const recentLogs = [...logs].reverse().slice(0, 15);
-        feedEl.innerHTML = recentLogs.map(log => `
-          <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] space-y-1.5 transition hover:border-slate-700">
-            <div class="flex items-center justify-between">
-              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">
-                ${escapeHtml(log.violation_type || 'RETCON')}
-              </span>
-              <div class="flex items-center space-x-2 text-[10px] font-mono">
-                <span class="text-emerald-400 font-semibold">${log.query_latency_ms ? log.query_latency_ms + ' ms' : '< 1 ms'}</span>
-                <span class="text-slate-500">${escapeHtml(log.timestamp ? log.timestamp.split(' ')[1] || log.timestamp : '')}</span>
-              </div>
-            </div>
-            <div class="text-slate-200 font-mono text-[10px] truncate bg-slate-900/90 p-1.5 rounded border border-slate-800/80">
-              "${escapeHtml(log.flagged_line || '')}"
-            </div>
-            ${log.mitigation_suggested ? `
-              <div class="text-slate-400 text-[10px] leading-snug flex items-start space-x-1">
-                <span class="text-amber-400">💡</span>
-                <span class="truncate">${escapeHtml(log.mitigation_suggested)}</span>
-              </div>
-            ` : ''}
-          </div>
-        `).join('');
-
-      } catch (err) {
-        console.error("Telemetry fetch failed:", err);
-        feedEl.innerHTML = `<div class="p-3 text-center text-rose-400 text-xs bg-rose-950/20 rounded border border-rose-900">Failed to load telemetry: ${escapeHtml(err.message)}</div>`;
-      }
+      // Telemetry tab removed per user specification
     }
 
     let currentModalMitigationRewrite = '';
