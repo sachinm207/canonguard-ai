@@ -500,16 +500,20 @@ class ClickHouseEngine:
             aliases = [a.lower() for a in char.get("aliases", [])]
             if char_name in normalized_names or any(a in normalized_names for a in aliases):
                 evaluation = "VALID_ACTIVE"
-                b_year = char.get("birth_year", -9999)
+                b_year = char.get("birth_year")
                 d_year = char.get("death_year")
                 s_start = char.get("stasis_start_year")
                 s_end = char.get("stasis_end_year")
 
                 if d_year is not None and scene_year > d_year:
                     evaluation = "DEAD_BEFORE_SCENE"
-                elif scene_year < b_year:
+                elif b_year is not None and scene_year < b_year:
                     evaluation = "UNBORN_BEFORE_SCENE"
                 elif s_start is not None and scene_year >= s_start and (s_end is None or scene_year <= s_end):
+                    evaluation = "IN_CRYOGENIC_STASIS"
+                elif char.get("status") == "DEAD" and (d_year is None or scene_year >= d_year):
+                    evaluation = "DEAD_BEFORE_SCENE"
+                elif char.get("status") == "STASIS" and s_start is not None and scene_year >= s_start and (s_end is None or scene_year <= s_end):
                     evaluation = "IN_CRYOGENIC_STASIS"
 
                 results.append({
@@ -642,7 +646,10 @@ class ClickHouseEngine:
         for event in self.timeline_events:
             if event.get("universe_id") and event.get("universe_id") != self.active_universe_id:
                 continue
-            e_vec = np.array(event["embedding"], dtype=np.float32)
+            raw_emb = event.get("embedding")
+            if not raw_emb:
+                continue
+            e_vec = np.array(raw_emb, dtype=np.float32)
             e_norm = np.linalg.norm(e_vec)
             if e_norm == 0:
                 continue

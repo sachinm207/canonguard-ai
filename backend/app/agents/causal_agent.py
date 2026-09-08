@@ -41,25 +41,31 @@ class CausalContradictionAgent:
             if eval_result == "IN_CRYOGENIC_STASIS":
                 s_start = char.get("stasis_start_year")
                 s_end = char.get("stasis_end_year")
+                planet = char.get("home_planet") or "Cryo-Vault"
+                stasis_range = f"from {s_start} to {s_end}" if (s_start and s_end) else (f"sealed in {s_start}" if s_start else "during this era")
                 violations.append(ContradictionViolation(
                     violation_id=f"RETCON-TEMP-{char_name.upper()}",
                     severity="CRITICAL_RETCON",
                     category="TEMPORAL_STATUS",
                     flagged_phrase=char_name,
-                    explanation=f"Accidental Retcon: {char_name} is in cryogenic stasis from {s_start} to {s_end} in Siberian Cryo-Vault 9. Physical activity in {scene_year} breaks established continuity.",
-                    canon_reference="ChronoVerse III: The Long Winter (Act 2)",
+                    explanation=f"Accidental Retcon: {char_name} is in cryogenic stasis {stasis_range} in {planet}. Physical activity in {scene_year} breaks established continuity.",
+                    canon_reference=f"{char_name} Canon Dossier",
                     confidence_score=0.99
                 ))
             elif eval_result == "DEAD_BEFORE_SCENE":
                 d_year = char.get("death_year")
-                years_dead = scene_year - d_year
+                if d_year is not None:
+                    years_dead = scene_year - d_year
+                    exp = f"Continuity Violation: {char_name} died in {d_year} ({years_dead} years prior to this scene)."
+                else:
+                    exp = f"Continuity Violation: {char_name} is deceased prior to {scene_year}."
                 violations.append(ContradictionViolation(
                     violation_id=f"RETCON-DEATH-{char_name.upper()}",
                     severity="CRITICAL_RETCON",
                     category="TEMPORAL_STATUS",
                     flagged_phrase=char_name,
-                    explanation=f"Continuity Violation: {char_name} died in {d_year} ({years_dead} years prior to this scene).",
-                    canon_reference="ChronoVerse II: Fall of Solaria",
+                    explanation=exp,
+                    canon_reference="Canon Archive",
                     confidence_score=1.0
                 ))
             elif eval_result == "UNBORN_BEFORE_SCENE":
@@ -81,12 +87,13 @@ class CausalContradictionAgent:
             if eval_result == "DESTROYED_OR_INACTIVE":
                 v_to = relic.get("valid_to_year")
                 source = relic.get("source_media", "Canon Core")
+                dest_text = f"in {v_to}" if v_to else "prior to this scene"
                 violations.append(ContradictionViolation(
                     violation_id=f"RETCON-RELIC-{obj_name.upper().replace(' ', '_')}",
                     severity="CRITICAL_RETCON",
                     category="RELIC_DESTRUCTION",
                     flagged_phrase=obj_name,
-                    explanation=f"Causal Paradox: The {obj_name} was pulverized and destroyed in {v_to}. Possession or use in {scene_year} violates causal continuity.",
+                    explanation=f"Causal Paradox: The {obj_name} was pulverized and destroyed {dest_text}. Possession or use in {scene_year} violates causal continuity.",
                     canon_reference=f"Established in '{source}'",
                     confidence_score=0.98
                 ))
