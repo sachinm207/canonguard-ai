@@ -1,8 +1,40 @@
+import re
 import logging
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 
 logger = logging.getLogger("canonguard.causal")
+
+def find_in_text(raw_text: str, canonical_name: str, aliases: List[str] = None) -> str:
+    """Finds the actual textual phrase that appears in raw_text matching the entity."""
+    candidates = [canonical_name] + (aliases or [])
+    sub_c = re.sub(r'\s+the\s+[A-Za-z]+.*$', '', canonical_name, flags=re.IGNORECASE).strip()
+    if sub_c: candidates.append(sub_c)
+    sub_h = re.sub(r'\s+of\s+House\s+[A-Za-z]+.*$', '', canonical_name, flags=re.IGNORECASE).strip()
+    if sub_h: candidates.append(sub_h)
+    for t in ['High King', 'King', 'Queen', 'Prince', 'Princess', 'Lord Commander', 'Lord', 'Lady', 'Grand Inquisitor', 'Inquisitor', 'Admiral', 'Chief Engineer', 'Special Agent', 'Commander', 'Dr.']:
+        if canonical_name.startswith(t + ' '):
+            candidates.append(canonical_name[len(t)+1:].strip())
+        if sub_c.startswith(t + ' '):
+            candidates.append(sub_c[len(t)+1:].strip())
+    candidates = sorted(set([c for c in candidates if len(c) >= 3]), key=len, reverse=True)
+    for cand in candidates:
+        m = re.search(rf'\b{re.escape(cand)}\b', raw_text, re.IGNORECASE)
+        if m:
+            return m.group(0)
+    return canonical_name
+
+def find_relic_in_text(raw_text: str, obj_name: str) -> str:
+    """Finds the actual relic phrase that appears in raw_text."""
+    candidates = [obj_name]
+    sub_of = re.sub(r'\s+of\s+.*$', '', obj_name, flags=re.IGNORECASE).strip()
+    if sub_of: candidates.append(sub_of)
+    candidates = sorted(set([c for c in candidates if len(c) >= 3]), key=len, reverse=True)
+    for cand in candidates:
+        m = re.search(rf'\b{re.escape(cand)}\b', raw_text, re.IGNORECASE)
+        if m:
+            return m.group(0)
+    return obj_name
 
 class ContradictionViolation(BaseModel):
     violation_id: str
@@ -87,7 +119,7 @@ class CausalContradictionAgent:
                     violation_id=f"RETCON-TEMP-{char_name.upper()}",
                     severity="CRITICAL_RETCON",
                     category="TEMPORAL_STATUS",
-                    flagged_phrase=char_name,
+                    flagged_phrase=find_in_text(raw_text, char_name, char.get("aliases", [])),
                     explanation=f"Accidental Retcon: {char_name} is in cryogenic stasis {stasis_range} in {planet}. Physical activity in {scene_year} breaks established continuity.",
                     canon_reference=f"{char_name} Canon Dossier",
                     confidence_score=0.99,
@@ -121,7 +153,7 @@ class CausalContradictionAgent:
                     violation_id=f"RETCON-DEATH-{char_name.upper()}",
                     severity="CRITICAL_RETCON",
                     category="TEMPORAL_STATUS",
-                    flagged_phrase=char_name,
+                    flagged_phrase=find_in_text(raw_text, char_name, char.get("aliases", [])),
                     explanation=exp,
                     canon_reference="Canon Archive",
                     confidence_score=1.0,
@@ -149,7 +181,7 @@ class CausalContradictionAgent:
                     violation_id=f"RETCON-UNBORN-{char_name.upper()}",
                     severity="CRITICAL_RETCON",
                     category="TEMPORAL_STATUS",
-                    flagged_phrase=char_name,
+                    flagged_phrase=find_in_text(raw_text, char_name, char.get("aliases", [])),
                     explanation=f"Timeline Paradox: {char_name} is not born until {b_year} (Scene takes place in {scene_year}).",
                     canon_reference="ChronoVerse Timeline Archive",
                     confidence_score=1.0,
@@ -214,7 +246,7 @@ class CausalContradictionAgent:
                     violation_id=f"RETCON-RELIC-{obj_name.upper().replace(' ', '_')}",
                     severity="CRITICAL_RETCON",
                     category="RELIC_DESTRUCTION",
-                    flagged_phrase=obj_name,
+                    flagged_phrase=find_relic_in_text(raw_text, obj_name),
                     explanation=f"Causal Paradox: The {obj_name} was pulverized and destroyed {dest_text}. Possession or use in {scene_year} violates causal continuity.",
                     canon_reference=f"Established in '{source}'",
                     confidence_score=0.98,

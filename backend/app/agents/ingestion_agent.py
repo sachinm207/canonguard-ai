@@ -66,13 +66,29 @@ class StreamIngestionAgent:
         for char in ch_engine.characters:
             if char.get("universe_id") == ch_engine.active_universe_id:
                 c_name = char["name"]
-                if re.search(rf'\b{re.escape(c_name)}\b', line, re.IGNORECASE):
-                    if c_name not in detected_characters:
-                        detected_characters.append(c_name)
-                for alias in char.get("aliases", []):
-                    if re.search(rf'\b{re.escape(alias)}\b', line, re.IGNORECASE):
-                        if c_name not in detected_characters:
-                            detected_characters.append(c_name)
+                candidates = [c_name] + list(char.get("aliases", []))
+                # Strip epithets like 'the Frozen' or 'the Blind Prophet'
+                sub_c = re.sub(r'\s+the\s+[A-Za-z]+.*$', '', c_name, flags=re.IGNORECASE).strip()
+                if sub_c and sub_c != c_name:
+                    candidates.append(sub_c)
+                # Strip house affiliations like 'of House Karst'
+                sub_h = re.sub(r'\s+of\s+House\s+[A-Za-z]+.*$', '', c_name, flags=re.IGNORECASE).strip()
+                if sub_h and sub_h != c_name:
+                    candidates.append(sub_h)
+                # Strip titles/honorifics
+                for t in ['High King', 'King', 'Queen', 'Prince', 'Princess', 'Lord Commander', 'Lord', 'Lady', 'Grand Inquisitor', 'Inquisitor', 'Admiral', 'Chief Engineer', 'Special Agent', 'Commander', 'Dr.']:
+                    if c_name.startswith(t + ' '):
+                        candidates.append(c_name[len(t)+1:].strip())
+                    if sub_c.startswith(t + ' '):
+                        candidates.append(sub_c[len(t)+1:].strip())
+
+                matched = False
+                for cand in sorted(set(candidates), key=len, reverse=True):
+                    if len(cand) >= 3 and re.search(rf'\b{re.escape(cand)}\b', line, re.IGNORECASE):
+                        matched = True
+                        break
+                if matched and c_name not in detected_characters:
+                    detected_characters.append(c_name)
 
         # Fallback if no character matched
         if not detected_characters:
@@ -85,9 +101,17 @@ class StreamIngestionAgent:
         for rel in ch_engine.relationships:
             if rel.get("universe_id") == ch_engine.active_universe_id:
                 obj_name = rel.get("object_name", "")
-                if obj_name and re.search(rf'\b{re.escape(obj_name)}\b', line, re.IGNORECASE):
-                    if obj_name not in detected_objects:
-                        detected_objects.append(obj_name)
+                if not obj_name:
+                    continue
+                candidates = [obj_name]
+                sub_of = re.sub(r'\s+of\s+.*$', '', obj_name, flags=re.IGNORECASE).strip()
+                if sub_of and sub_of != obj_name:
+                    candidates.append(sub_of)
+                for cand in sorted(set(candidates), key=len, reverse=True):
+                    if len(cand) >= 3 and re.search(rf'\b{re.escape(cand)}\b', line, re.IGNORECASE):
+                        if obj_name not in detected_objects:
+                            detected_objects.append(obj_name)
+                        break
 
         if not detected_objects:
             for fallback_r in ["Sunstone", "Kyber Singularity Core", "Aethelgard Blade", "Chrono-Key", "The Iron Vanguard"]:

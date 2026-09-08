@@ -659,29 +659,7 @@ The ancient blade is broken! The steel of Eldor is no more!"""
             ],
             default_year=1310,
             default_location="Oakhaven Throne Room",
-            demo_traps=[
-                {
-                    "id": 1,
-                    "title": "Trap 1 (Dead King & Broken Blade)",
-                    "year": 1310,
-                    "location": "Oakhaven Throne Room",
-                    "script": "High King Valerius IV strides into the royal hall in the year 1310, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!"
-                },
-                {
-                    "id": 2,
-                    "title": "Trap 2 (Stasis Prince)",
-                    "year": 1305,
-                    "location": "Frostpeak Courtyard",
-                    "script": "Prince Kaelen walks through the frosty courtyard in the year 1305, having abandoned his quarters to join the vanguard."
-                },
-                {
-                    "id": 3,
-                    "title": "Trap 3 (Combined 3-Mistake Scene)",
-                    "year": 1310,
-                    "location": "Oakhaven Throne Room",
-                    "script": "INT. OAKHAVEN THRONE ROOM - MIDNIGHT - 1310\n\nWinter winds howl against the stained glass. Shadows dance across the cold stone pillars.\n\nGRAND INQUISITOR MALAKOR paces before the dais, reviewing the war tithes.\n\nSuddenly, the oak doors burst open!\n\nHIGH KING VALERIUS IV strides into the royal hall, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!\n\nBeside him walks PRINCE KAELEN, having abandoned the royal quarters to join the vanguard.\n\nHIGH KING VALERIUS IV\nInquisitor! Drop your weapons or taste the steel of Eldor!\n\nGRAND INQUISITOR MALAKOR\nYour Grace, how can this be?\n\nPrince Kaelen steps forward, drawing his dagger to execute the King's decree in the year 1310."
-                }
-            ],
+            demo_traps=[],
             source_scripts=aeth_scripts,
             raw_document=aeth_doc
         )
@@ -735,29 +713,7 @@ The ancient blade is broken! The steel of Eldor is no more!"""
             ],
             default_year=2182,
             default_location="USC Vanguard",
-            demo_traps=[
-                {
-                    "id": 1,
-                    "title": "Trap 1 (Dead Admiral & Destroyed Drive)",
-                    "year": 2182,
-                    "location": "USC Vanguard",
-                    "script": "ADMIRAL TERESA CRUZ stands commanding at the center holotank, ordering the Hyperion Dark-Matter Drive fully engaged in 2182!"
-                },
-                {
-                    "id": 2,
-                    "title": "Trap 2 (Stasis Agent Cross)",
-                    "year": 2182,
-                    "location": "USC Vanguard",
-                    "script": "Beside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor in 2182."
-                },
-                {
-                    "id": 3,
-                    "title": "Trap 3 (Combined 3-Mistake Scene)",
-                    "year": 2182,
-                    "location": "USC Vanguard",
-                    "script": "INT. USC VANGUARD - COMMAND BRIDGE - 2182\n\nWarning klaxons echo across the battle bridge as enemy cruisers approach from the asteroid belt.\n\nADMIRAL TERESA CRUZ stands commanding at the center holotank, barked orders ringing across the flight deck!\n\nADMIRAL TERESA CRUZ\nChief Engineer Vance, divert all auxiliary reactors! I want the Hyperion Dark-Matter Drive fully engaged in three minutes!\n\nBeside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor.\n\nSPECIAL AGENT GABRIEL CROSS\nWeapons online, Admiral. We will jump out of the system the second the Hyperion Drive spools up in 2182!\n\nADMIRAL TERESA CRUZ\nEngage the jump immediately!"
-                }
-            ],
+            demo_traps=[],
             source_scripts=hyp_scripts,
             raw_document=hyp_doc
         )

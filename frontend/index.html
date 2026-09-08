@@ -471,7 +471,18 @@
 
       } catch (err) {
         console.error('Validation error:', err);
-        lintBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="text-rose-400 font-mono text-[11px]">Error</span>`;
+        lintBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="text-rose-400 font-mono text-[11px]">Server Offline</span>`;
+        if (idleCard) {
+          idleCard.classList.remove('hidden');
+          idleCard.innerHTML = `
+            <div class="w-8 h-8 rounded-full bg-rose-950 text-rose-400 flex items-center justify-center text-sm font-bold border border-rose-800 shrink-0">⚠️</div>
+            <div>
+              <h3 class="font-bold text-sm text-rose-400">Connection Error</h3>
+              <p class="text-xs text-slate-400 mt-1">Cannot reach CanonGuard engine at <code>${API_BASE}</code>. Make sure the backend server is running on port 8005.</p>
+            </div>
+          `;
+        }
+        if (violationsContainer) violationsContainer.classList.add('hidden');
       }
     }
 
@@ -727,9 +738,11 @@
       // Render dynamic traps or custom script state
       renderTraps(universe.demo_traps || []);
       
-      // When applying/switching universe without an uploaded script file, load the first trap or clear
+      const isBuiltin = universe.is_builtin !== false && (universe.is_builtin === true || ['CHRONOVERSE', 'GALACTIC_IMPERIUM', 'MYTHOS_REALM'].includes(universe.id));
+
+      // When applying/switching universe without an uploaded script file:
       if (!isCustomScriptActive) {
-        if (universe.demo_traps && universe.demo_traps.length > 0) {
+        if (isBuiltin && universe.demo_traps && universe.demo_traps.length > 0) {
           const trap = universe.demo_traps[0];
           textarea.value = trap.script;
           if (trap.year && document.getElementById('current-year-display')) {
@@ -741,9 +754,7 @@
           validateScript(textarea.value);
           updateEditorWordCount(textarea.value);
         } else {
-          textarea.value = "";
-          validateScript("");
-          updateEditorWordCount("");
+          clearScriptEditor();
         }
       }
       if (activeRightPanelTab === 'lore') {
@@ -757,8 +768,13 @@
       await switchActiveUniverse(universeId);
       closeFranchiseHub();
 
-      // Ensure the first trap/test scene is loaded and validated for this universe
-      if (currentUniverseMetadata && currentUniverseMetadata.demo_traps && currentUniverseMetadata.demo_traps.length > 0) {
+      const isBuiltin = currentUniverseMetadata 
+        ? (currentUniverseMetadata.is_builtin !== false && (currentUniverseMetadata.is_builtin === true || ['CHRONOVERSE', 'GALACTIC_IMPERIUM', 'MYTHOS_REALM'].includes(currentUniverseMetadata.id))) 
+        : false;
+
+      if (!isBuiltin) {
+        clearScriptEditor();
+      } else if (currentUniverseMetadata && currentUniverseMetadata.demo_traps && currentUniverseMetadata.demo_traps.length > 0) {
         const trap = currentUniverseMetadata.demo_traps[0];
         textarea.value = trap.script;
         if (trap.year && document.getElementById('current-year-display')) {
@@ -895,13 +911,28 @@
         return;
       }
 
-      // CASE 2: Both Built-in AND Studio Franchises render their test scenes / traps!
+      // CASE 2: Custom / User-Uploaded Franchises (No mistake traps!)
+      if (!isBuiltin) {
+        const wrap = document.createElement('div');
+        wrap.className = "flex items-center space-x-2";
+        wrap.innerHTML = `
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/90 text-emerald-300 border border-emerald-700/80 text-[11px] font-semibold flex items-center space-x-1 shrink-0 shadow-sm">
+            <span>📁</span>
+            <span>Custom Franchise</span>
+          </span>
+          <span class="text-xs text-slate-400 hidden sm:inline">Write in editor or click <strong>Open Script</strong> to test lore</span>
+        `;
+        container.appendChild(wrap);
+        return;
+      }
+
+      // CASE 3: Built-in Demo Franchises (ChronoVerse, Galactic Imperium, Mythos Realm)
       const wrap = document.createElement('div');
       wrap.className = "flex items-center space-x-2 overflow-x-auto custom-scrollbar";
       wrap.innerHTML = `
-        <span class="px-2.5 py-0.5 rounded-full ${isBuiltin ? 'bg-purple-950/90 text-purple-300 border border-purple-700/80' : 'bg-emerald-950/90 text-emerald-300 border border-emerald-700/80'} text-[11px] font-semibold flex items-center space-x-1 shrink-0 shadow-sm">
-          <span>${isBuiltin ? '🎯' : '📁'}</span>
-          <span class="hidden md:inline">${isBuiltin ? 'Try Sample Mistakes' : 'Franchise Test Scenes'}</span>
+        <span class="px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 border border-purple-700/80 text-[11px] font-semibold flex items-center space-x-1 shrink-0 shadow-sm">
+          <span>🎯</span>
+          <span class="hidden md:inline">Try Sample Mistakes</span>
           <span class="md:hidden">Tests</span>
         </span>
         <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1 shrink-0">
@@ -916,20 +947,12 @@
           btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-900/40 text-xs font-medium border border-slate-700 hover:border-purple-500/50 text-slate-200 transition cursor-pointer shrink-0 shadow-sm";
           let titleText = trap.title || `Mistake ${idx + 1}`;
           titleText = titleText.replace(/^Trap\s*/i, 'Mistake ').replace(/^Demo Trap\s*/i, 'Mistake ');
-          if (titleText.toLowerCase().includes('stasis') && !titleText.toLowerCase().includes('prince') && !titleText.toLowerCase().includes('agent')) titleText = '1. Frozen Hero';
-          else if (titleText.toLowerCase().includes('relic') && !titleText.toLowerCase().includes('blade') && !titleText.toLowerCase().includes('drive')) titleText = '2. Destroyed Item';
-          else if (titleText.toLowerCase().includes('bio') && !titleText.toLowerCase().includes('blood')) titleText = '3. Broken World Rule';
+          if (titleText.toLowerCase().includes('stasis')) titleText = '1. Frozen Hero';
+          else if (titleText.toLowerCase().includes('relic')) titleText = '2. Destroyed Item';
+          else if (titleText.toLowerCase().includes('bio')) titleText = '3. Broken World Rule';
           btn.innerHTML = `<span class="text-amber-400 mr-1">⚡</span><span>${escapeHtml(titleText)}</span>`;
           btn.title = `Load Sample Mistake: ${titleText} - ${trap.location || ''} (${trap.year || ''})`;
           btn.onclick = () => {
-            if (isCustomScriptActive) {
-              if (!confirm(`⚠️ A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Sample Test Scene will overwrite your active screenplay. Do you want to proceed?`)) {
-                return;
-              }
-              isCustomScriptActive = false;
-              customScriptFilename = '';
-              renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
-            }
             if (document.getElementById('current-year-display')) {
               document.getElementById('current-year-display').textContent = trap.year || currentUniverseMetadata.default_year || 1982;
             }
