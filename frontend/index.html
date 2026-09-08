@@ -378,6 +378,192 @@
     let isCustomScriptActive = false;
     let customScriptFilename = '';
 
+    // --- UNIVERSAL APP DIALOGUE BOX SYSTEM (Alert, Confirm, Prompt) ---
+    const _nativeAlert = window.alert ? window.alert.bind(window) : null;
+    const _nativeConfirm = window.confirm ? window.confirm.bind(window) : null;
+    const _nativePrompt = window.prompt ? window.prompt.bind(window) : null;
+
+    function showAppAlert(message, title = 'Notice', icon = 'ℹ️') {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('app-dialog-modal');
+        const titleEl = document.getElementById('app-dialog-title');
+        const iconEl = document.getElementById('app-dialog-icon');
+        const msgEl = document.getElementById('app-dialog-message');
+        const inputWrap = document.getElementById('app-dialog-input-wrap');
+        const cancelBtn = document.getElementById('app-dialog-cancel-btn');
+        const confirmBtn = document.getElementById('app-dialog-confirm-btn');
+        const closeBtn = document.getElementById('app-dialog-close-btn');
+
+        if (!modal) {
+          if (_nativeAlert) _nativeAlert(message);
+          return resolve(true);
+        }
+
+        if (message.includes('✅') || message.includes('Successfully')) icon = '✅';
+        else if (message.includes('⚠️') || message.includes('Error') || message.includes('Failed')) icon = '⚠️';
+        else if (message.includes('📦')) icon = '📦';
+        else if (message.includes('♻️')) icon = '♻️';
+
+        titleEl.textContent = title;
+        iconEl.textContent = icon;
+        msgEl.textContent = message;
+
+        inputWrap.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+        confirmBtn.textContent = 'OK';
+        confirmBtn.className = 'px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition text-xs cursor-pointer shadow-sm';
+
+        modal.classList.remove('hidden');
+
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          confirmBtn.onclick = null;
+          cancelBtn.onclick = null;
+          closeBtn.onclick = null;
+          document.removeEventListener('keydown', keyHandler);
+        };
+
+        const keyHandler = (e) => {
+          if (e.key === 'Escape' || e.key === 'Enter') {
+            e.preventDefault();
+            cleanup();
+            resolve(true);
+          }
+        };
+
+        confirmBtn.onclick = () => { cleanup(); resolve(true); };
+        closeBtn.onclick = () => { cleanup(); resolve(true); };
+        document.addEventListener('keydown', keyHandler);
+        confirmBtn.focus();
+      });
+    }
+
+    function showAppConfirm(message, title = 'Confirm Action', options = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('app-dialog-modal');
+        const titleEl = document.getElementById('app-dialog-title');
+        const iconEl = document.getElementById('app-dialog-icon');
+        const msgEl = document.getElementById('app-dialog-message');
+        const inputWrap = document.getElementById('app-dialog-input-wrap');
+        const cancelBtn = document.getElementById('app-dialog-cancel-btn');
+        const confirmBtn = document.getElementById('app-dialog-confirm-btn');
+        const closeBtn = document.getElementById('app-dialog-close-btn');
+
+        if (!modal) {
+          return resolve(_nativeConfirm ? _nativeConfirm(message) : false);
+        }
+
+        let icon = options.icon || (message.includes('⚠️') ? '⚠️' : (message.includes('📦') ? '📦' : '❓'));
+        titleEl.textContent = title;
+        iconEl.textContent = icon;
+        msgEl.textContent = message;
+
+        inputWrap.classList.add('hidden');
+        cancelBtn.classList.remove('hidden');
+        cancelBtn.textContent = options.cancelText || 'Cancel';
+        confirmBtn.textContent = options.confirmText || 'Confirm';
+
+        if (options.danger || message.toLowerCase().includes('delete') || message.toLowerCase().includes('purge')) {
+          confirmBtn.className = 'px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold transition text-xs cursor-pointer shadow-sm';
+        } else {
+          confirmBtn.className = 'px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition text-xs cursor-pointer shadow-sm';
+        }
+
+        modal.classList.remove('hidden');
+
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          confirmBtn.onclick = null;
+          cancelBtn.onclick = null;
+          closeBtn.onclick = null;
+          document.removeEventListener('keydown', keyHandler);
+        };
+
+        const keyHandler = (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            cleanup();
+            resolve(false);
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            cleanup();
+            resolve(true);
+          }
+        };
+
+        confirmBtn.onclick = () => { cleanup(); resolve(true); };
+        cancelBtn.onclick = () => { cleanup(); resolve(false); };
+        closeBtn.onclick = () => { cleanup(); resolve(false); };
+        document.addEventListener('keydown', keyHandler);
+        confirmBtn.focus();
+      });
+    }
+
+    function showAppPrompt(message, defaultValue = '', title = 'Input Required', options = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('app-dialog-modal');
+        const titleEl = document.getElementById('app-dialog-title');
+        const iconEl = document.getElementById('app-dialog-icon');
+        const msgEl = document.getElementById('app-dialog-message');
+        const inputWrap = document.getElementById('app-dialog-input-wrap');
+        const input = document.getElementById('app-dialog-input');
+        const cancelBtn = document.getElementById('app-dialog-cancel-btn');
+        const confirmBtn = document.getElementById('app-dialog-confirm-btn');
+        const closeBtn = document.getElementById('app-dialog-close-btn');
+
+        if (!modal) {
+          return resolve(_nativePrompt ? _nativePrompt(message, defaultValue) : defaultValue);
+        }
+
+        titleEl.textContent = title;
+        iconEl.textContent = options.icon || '✏️';
+        msgEl.textContent = message;
+
+        inputWrap.classList.remove('hidden');
+        input.value = defaultValue || '';
+        cancelBtn.classList.remove('hidden');
+        cancelBtn.textContent = options.cancelText || 'Cancel';
+        confirmBtn.textContent = options.confirmText || 'OK';
+        confirmBtn.className = 'px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition text-xs cursor-pointer shadow-sm';
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          input.focus();
+          input.select();
+        }, 50);
+
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          confirmBtn.onclick = null;
+          cancelBtn.onclick = null;
+          closeBtn.onclick = null;
+          document.removeEventListener('keydown', keyHandler);
+        };
+
+        const keyHandler = (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            cleanup();
+            resolve(null);
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            cleanup();
+            resolve(input.value);
+          }
+        };
+
+        confirmBtn.onclick = () => { cleanup(); resolve(input.value); };
+        cancelBtn.onclick = () => { cleanup(); resolve(null); };
+        closeBtn.onclick = () => { cleanup(); resolve(null); };
+        document.addEventListener('keydown', keyHandler);
+      });
+    }
+
+    // Override browser window.alert fallback
+    window.alert = function(msg) {
+      showAppAlert(String(msg));
+    };
+
     const textarea = document.getElementById('script-input');
     const visualPreview = document.getElementById('visual-preview');
     const lintBadge = document.getElementById('lint-status-badge');
@@ -828,6 +1014,8 @@
           if (document.getElementById('current-title-display')) {
             document.getElementById('current-title-display').textContent = latest.filename || 'Screenplay.fountain';
           }
+          isCustomScriptActive = true;
+          customScriptFilename = latest.filename || 'Screenplay.fountain';
           validateScript(textarea.value);
           updateEditorWordCount(textarea.value);
         } else {
@@ -855,6 +1043,8 @@
       textarea.value = '';
       isCustomScriptActive = false;
       customScriptFilename = '';
+      const titleEl = document.getElementById('current-title-display');
+      if (titleEl) titleEl.textContent = 'Untitled_Scene.fountain';
       const slugEl = document.getElementById('editor-slug-display');
       if (slugEl) slugEl.textContent = '';
       validateScript('');
@@ -864,9 +1054,8 @@
     }
 
     async function archiveUniverseById(uid, name) {
-      if (!confirm(`📦 Move franchise "${name}" to Cold Storage Archive?\n\nIts full lore bible, character roster, rules, and relics will be preserved safely. You can inspect all lore anytime or restore it back to active ClickHouse memory with 1 click.`)) {
-        return;
-      }
+      const confirmed = await showAppConfirm(`Move franchise "${name}" to Cold Storage Archive?\n\nIts full lore bible, character roster, rules, and relics will be preserved safely. You can inspect all lore anytime or restore it back to active ClickHouse memory with 1 click.`, "Archive Franchise", { icon: '📦', confirmText: 'Archive' });
+      if (!confirmed) return;
       try {
         const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}/archive`, {
           method: 'POST',
@@ -877,12 +1066,12 @@
         if (res.ok && data.status === 'SUCCESS') {
           await loadAvailableUniverses();
           switchHubView('archived');
-          alert(`📦 Successfully archived "${name}" to cold storage!\n\nYou can inspect its full lore or restore it anytime.`);
+          await showAppAlert(`Successfully archived "${name}" to cold storage!\n\nYou can inspect its full lore or restore it anytime.`, "Franchise Archived", "📦");
         } else {
-          alert(`⚠️ Archive failed: ${data.detail || JSON.stringify(data)}`);
+          await showAppAlert(`Archive failed: ${data.detail || JSON.stringify(data)}`, "Archive Failed", "⚠️");
         }
       } catch (err) {
-        alert(`Error archiving universe: ${err.message}`);
+        await showAppAlert(`Error archiving universe: ${err.message}`, "Archive Error", "⚠️");
       }
     }
 
@@ -902,19 +1091,18 @@
         if (res.ok && data.status === 'SUCCESS') {
           await loadAvailableUniverses();
           switchHubView('active');
-          alert(`♻️ Restored "${name}" to active ClickHouse memory!\n\nIt is now the active canon for script validation.`);
+          await showAppAlert(`Restored "${name}" to active ClickHouse memory!\n\nIt is now the active canon for script validation.`, "Franchise Restored", "♻️");
         } else {
-          alert(`⚠️ Restore failed: ${data.detail || JSON.stringify(data)}`);
+          await showAppAlert(`Restore failed: ${data.detail || JSON.stringify(data)}`, "Restore Failed", "⚠️");
         }
       } catch (err) {
-        alert(`Error restoring universe: ${err.message}`);
+        await showAppAlert(`Error restoring universe: ${err.message}`, "Restore Error", "⚠️");
       }
     }
 
     async function purgeArchivedUniverseById(uid, name) {
-      if (!confirm(`⚠️ Permanently purge archived universe "${name}" from disk?\n\nThis cannot be undone.`)) {
-        return;
-      }
+      const confirmed = await showAppConfirm(`Permanently purge archived universe "${name}" from disk?\n\nThis cannot be undone.`, "Purge Archive", { icon: '⚠️', confirmText: 'Purge Forever', danger: true });
+      if (!confirmed) return;
       try {
         const res = await fetch(`${API_BASE}/api/universe/archived/${encodeURIComponent(uid)}`, {
           method: 'DELETE'
@@ -923,10 +1111,10 @@
         if (res.ok && data.status === 'SUCCESS') {
           await loadArchivedUniverses();
         } else {
-          alert(`⚠️ Delete failed: ${data.detail || JSON.stringify(data)}`);
+          await showAppAlert(`Delete failed: ${data.detail || JSON.stringify(data)}`, "Delete Failed", "⚠️");
         }
       } catch (err) {
-        alert(`Error deleting archived universe: ${err.message}`);
+        await showAppAlert(`Error deleting archived universe: ${err.message}`, "Delete Error", "⚠️");
       }
     }
 
@@ -1037,11 +1225,10 @@
       container.appendChild(wrap);
     }
 
-    function unloadCustomScript() {
+    async function unloadCustomScript() {
       if (textarea.value && textarea.value.trim().length > 0) {
-        if (!confirm(`Switch to Demo Playground?\n\nThis will unload "${customScriptFilename || 'Custom Script'}" and reload the franchise demonstration scene and tests.`)) {
-          return;
-        }
+        const confirmed = await showAppConfirm(`Switch to Demo Playground?\n\nThis will unload "${customScriptFilename || 'Custom Script'}" and reload the franchise demonstration scene and tests.`, "Switch to Demo", { icon: '🔄', confirmText: 'Switch' });
+        if (!confirmed) return;
       }
       isCustomScriptActive = false;
       customScriptFilename = '';
@@ -1059,11 +1246,10 @@
       }
     }
 
-    function loadTrap(idx) {
+    async function loadTrap(idx) {
       if (isCustomScriptActive) {
-        if (!confirm(`⚠️ A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Sample Test Scene will overwrite your active screenplay. Do you want to proceed?`)) {
-          return;
-        }
+        const confirmed = await showAppConfirm(`A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Sample Test Scene will overwrite your active screenplay. Do you want to proceed?`, "Overwrite Script", { icon: '⚠️', confirmText: 'Overwrite', danger: true });
+        if (!confirmed) return;
         isCustomScriptActive = false;
         customScriptFilename = '';
         renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
@@ -1117,16 +1303,17 @@
     }
 
     // --- SCRIPT TITLE RENAMING ---
-    function renameCurrentScript() {
+    async function renameCurrentScript() {
       const titleEl = document.getElementById('current-title-display');
-      const current = titleEl ? titleEl.textContent.trim() : 'Screenplay.fountain';
-      const newTitle = prompt("Rename script file:", current);
+      const current = customScriptFilename || (titleEl ? titleEl.textContent.trim() : 'Screenplay.fountain');
+      const newTitle = await showAppPrompt("Rename script file:", current, "Rename Script", { icon: '✏️', confirmText: 'Rename' });
       if (newTitle && newTitle.trim()) {
         let clean = newTitle.trim();
         if (!clean.endsWith('.fountain') && !clean.endsWith('.txt')) {
           clean += '.fountain';
         }
         if (titleEl) titleEl.textContent = clean;
+        customScriptFilename = clean;
       }
     }
 
@@ -1134,19 +1321,30 @@
     async function saveCurrentScriptToProject() {
       const text = textarea.value;
       if (!text.trim()) {
-        alert("The script editor is empty! Type some scene action or dialogue first.");
+        await showAppAlert("The script editor is empty! Type some scene action or dialogue first.", "Editor Empty");
         return;
       }
       const activeUid = getActiveUniverseId();
       if (!activeUid || activeUid === 'NONE') {
-        alert("Please select or open an active story world first.");
+        await showAppAlert("Please select or open an active story world first.", "No Active Story World");
         return;
       }
-      let currentFilename = document.getElementById('current-title-display').textContent.trim() || 'scene_script.fountain';
-      const promptName = prompt("Save screenplay to active story world as filename:", currentFilename);
-      if (!promptName || !promptName.trim()) return; // User cancelled
 
-      let cleanName = promptName.trim();
+      let cleanName = '';
+      // If already saved to a file or opened from an existing file, save directly without prompting
+      if (customScriptFilename && customScriptFilename.trim()) {
+        cleanName = customScriptFilename.trim();
+      } else {
+        // Not yet saved in a file: ask user for filename using custom dialog box
+        let currentFilename = document.getElementById('current-title-display') ? document.getElementById('current-title-display').textContent.trim() : 'scene_script.fountain';
+        if (currentFilename === 'Untitled_Scene.fountain' || currentFilename === 'Screenplay.fountain' || !currentFilename) {
+          currentFilename = 'Scene_Draft.fountain';
+        }
+        const promptName = await showAppPrompt("Save screenplay to active story world as filename:", currentFilename, "Save Script to Project", { icon: '💾', confirmText: 'Save' });
+        if (!promptName || !promptName.trim()) return; // User cancelled
+        cleanName = promptName.trim();
+      }
+
       if (!cleanName.endsWith('.fountain') && !cleanName.endsWith('.txt')) {
         cleanName += '.fountain';
       }
@@ -1184,30 +1382,30 @@
           if (activeRightPanelTab === 'lore') renderSidebarLore();
 
           if (badge) {
-            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Saved to Project!</span>`;
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Saved "${escapeHtml(cleanName)}"!</span>`;
             setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
           }
         } else {
           const errData = await res.json().catch(() => ({}));
-          alert("Failed to save script to project: " + (errData.detail || res.statusText));
+          await showAppAlert("Failed to save script to project: " + (errData.detail || res.statusText), "Save Failed", "⚠️");
           if (badge) badge.innerHTML = prevHtml;
         }
       } catch (err) {
         console.error("Save script error:", err);
-        alert("Error saving script to project: " + err.message);
+        await showAppAlert("Error saving script to project: " + err.message, "Save Error", "⚠️");
         if (badge) badge.innerHTML = prevHtml;
       }
     }
 
     // --- EXPORT SCREENPLAY (Local File Download) ---
-    function exportScreenplay() {
+    async function exportScreenplay() {
       const text = textarea.value;
       if (!text.trim()) {
-        alert("The script editor is empty! Type some scene action or dialogue first.");
+        await showAppAlert("The script editor is empty! Type some scene action or dialogue first.", "Editor Empty");
         return;
       }
-      let currentFilename = document.getElementById('current-title-display').textContent.trim() || 'scene_script.fountain';
-      const exportName = prompt("Export script to local file name:", currentFilename);
+      let currentFilename = customScriptFilename || (document.getElementById('current-title-display') ? document.getElementById('current-title-display').textContent.trim() : 'scene_script.fountain');
+      const exportName = await showAppPrompt("Export script to local file name:", currentFilename, "Export Screenplay", { icon: '📥', confirmText: 'Export' });
       if (!exportName || !exportName.trim()) return; // User cancelled
 
       let cleanName = exportName.trim();
@@ -1228,7 +1426,7 @@
       const badge = document.getElementById('lint-status-badge');
       const prevHtml = badge ? badge.innerHTML : '';
       if (badge) {
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Exported ${cleanName}!</span>`;
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-mono text-[11px]">Exported ${escapeHtml(cleanName)}!</span>`;
         setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
       }
     }
@@ -1355,7 +1553,7 @@
       const scripts = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) || [];
       const match = scripts.find(s => s.filename === filename);
       if (!match) {
-        alert("Script not found in project.");
+        showAppAlert("Script not found in project.", "Script Not Found", "⚠️");
         return;
       }
 
@@ -1393,7 +1591,8 @@
     }
 
     async function deleteScriptFromProject(filename) {
-      if (!confirm(`Are you sure you want to delete "${filename}" from this story world?`)) return;
+      const confirmed = await showAppConfirm(`Are you sure you want to delete "${filename}" from this story world?`, "Delete Script", { icon: '🗑️', confirmText: 'Delete', danger: true });
+      if (!confirmed) return;
       const activeUid = getActiveUniverseId();
       try {
         const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(activeUid)}/scripts/${encodeURIComponent(filename)}`, {
@@ -1412,26 +1611,25 @@
           renderProjectScriptsList();
           if (activeRightPanelTab === 'lore') renderSidebarLore();
         } else {
-          alert("Failed to delete script.");
+          await showAppAlert("Failed to delete script.", "Delete Failed", "⚠️");
         }
       } catch (err) {
         console.error("Delete script error:", err);
-        alert("Error deleting script: " + err.message);
+        await showAppAlert("Error deleting script: " + err.message, "Delete Error", "⚠️");
       }
     }
 
-    function createNewBlankScriptInEditor() {
-      const name = prompt("Enter a filename for your new scene script:", "New_Scene.fountain");
+    async function createNewBlankScriptInEditor() {
+      const name = await showAppPrompt("Enter a filename for your new scene script:", "New_Scene.fountain", "New Screenplay Draft", { icon: '➕', confirmText: 'Create' });
       if (!name || !name.trim()) return;
       let clean = name.trim();
       if (!clean.endsWith('.fountain') && !clean.endsWith('.txt')) {
         clean += '.fountain';
       }
-      textarea.value = "";
+      clearScriptEditor();
       document.getElementById('current-title-display').textContent = clean;
       isCustomScriptActive = true;
       customScriptFilename = clean;
-      clearScriptEditor();
       closeProjectScriptsModal();
       textarea.focus();
     }
@@ -1465,9 +1663,12 @@
             updateProjectScriptsCountBadge();
             renderProjectScriptsList();
             if (activeRightPanelTab === 'lore') renderSidebarLore();
+          } else {
+            showAppAlert("Failed to import script to project.", "Import Failed", "⚠️");
           }
         } catch (err) {
           console.error("Import to project error:", err);
+          showAppAlert("Error importing script: " + err.message, "Import Error", "⚠️");
         }
       };
       reader.readAsText(file);
@@ -1886,20 +2087,19 @@
     }
 
     async function resetDefaultUniverses() {
-      if (!confirm("Are you sure you want to restore all default franchise universes (ChronoVerse, Galactic Imperium, Mythos Realm, and CyberCity 2099)?")) {
-        return;
-      }
+      const confirmed = await showAppConfirm("Are you sure you want to restore all default franchise universes (ChronoVerse, Galactic Imperium, Mythos Realm, and CyberCity 2099)?", "Restore Default Franchises", { icon: '🔄', confirmText: 'Restore Defaults' });
+      if (!confirmed) return;
       try {
         const res = await fetch(`${API_BASE}/api/universe/reset-defaults`, { method: 'POST' });
         const data = await res.json();
         if (res.ok && data.status === 'SUCCESS') {
-          alert("✅ Successfully restored all default studio franchises!");
+          await showAppAlert("Successfully restored all default studio franchises!", "Franchises Restored", "✅");
           await loadAvailableUniverses();
         } else {
-          alert(`⚠️ Reset failed: ${data.detail || JSON.stringify(data)}`);
+          await showAppAlert(`Reset failed: ${data.detail || JSON.stringify(data)}`, "Reset Failed", "⚠️");
         }
       } catch (err) {
-        alert("Error resetting defaults: " + err.message);
+        await showAppAlert("Error resetting defaults: " + err.message, "Reset Error", "⚠️");
       }
     }
 
@@ -1953,14 +2153,15 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       const content = document.getElementById('ingest-content').value.trim();
 
       if (!name || !content) {
-        alert("Please provide at least a Franchise Name and Lore Bible Content.");
+        await showAppAlert("Please provide at least a Franchise Name and Lore Bible Content.", "Missing Fields", "⚠️");
         return;
       }
 
       // Check if a universe with this name already exists
       const duplicate = allUniversesList.find(u => u.name.trim().toLowerCase() === name.toLowerCase());
       if (duplicate) {
-        if (confirm(`⚠️ A universe named "${name}" already exists in ClickHouse!\n\nWould you like to open the "Manage Existing Franchises" tab to view or delete it?`)) {
+        const openManage = await showAppConfirm(`A universe named "${name}" already exists in ClickHouse!\n\nWould you like to open the "Manage Existing Franchises" tab to view or delete it?`, "Franchise Already Exists", { icon: '⚠️', confirmText: 'Manage Franchises' });
+        if (openManage) {
           switchModalView('manage');
         }
         return;
@@ -1987,10 +2188,10 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
           await loadAvailableUniverses();
           displayIngestionResults(data, name, 'bible');
         } else {
-          alert(`⚠️ Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`);
+          await showAppAlert(`Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`, "Ingestion Failed", "⚠️");
         }
       } catch (err) {
-        alert("Error ingesting document: " + err.message);
+        await showAppAlert("Error ingesting document: " + err.message, "Ingestion Error", "⚠️");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<span>⚡ Ingest into ClickHouse Engine</span>`;
@@ -2190,7 +2391,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       const rawText = document.getElementById('batch-scripts-content').value.trim();
 
       if (!name) {
-        alert("Please enter a Franchise Universe Name.");
+        await showAppAlert("Please enter a Franchise Universe Name.", "Missing Name", "⚠️");
         return;
       }
 
@@ -2198,13 +2399,13 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
         ? loadedBatchScriptFiles
         : (rawText ? [{ filename: "Screenplay_Archive.fountain", content: rawText }] : []);
       if (payloadScripts.length === 0) {
-        alert("Please upload at least one screenplay file or paste script text.");
+        await showAppAlert("Please upload at least one screenplay file or paste script text.", "No Scripts Provided", "⚠️");
         return;
       }
 
       const duplicate = allUniversesList.find(u => u.name.trim().toLowerCase() === name.toLowerCase());
       if (duplicate) {
-        alert(`⚠️ A universe named "${name}" already exists in ClickHouse!\nPlease choose a unique name or delete the existing universe first.`);
+        await showAppAlert(`A universe named "${name}" already exists in ClickHouse!\nPlease choose a unique name or delete the existing universe first.`, "Franchise Already Exists", "⚠️");
         return;
       }
 
@@ -2230,10 +2431,10 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
           await loadAvailableUniverses();
           displayIngestionResults(data, name, 'scripts');
         } else {
-          alert(`⚠️ AI Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`);
+          await showAppAlert(`AI Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`, "AI Ingestion Failed", "⚠️");
         }
       } catch (err) {
-        alert("Error ingesting screenplays: " + err.message);
+        await showAppAlert("Error ingesting screenplays: " + err.message, "AI Ingestion Error", "⚠️");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<span>🚀 Auto-Extract Canon with Gemini AI</span>`;
@@ -3600,6 +3801,38 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
             Done Inspecting
           </button>
         </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- APP DIALOG BOX MODAL (Replaces all browser alert, confirm, prompt) -->
+  <div id="app-dialog-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden" onclick="if(event.target === this) { const cancelBtn = document.getElementById('app-dialog-cancel-btn'); if (!cancelBtn.classList.contains('hidden')) cancelBtn.click(); else document.getElementById('app-dialog-confirm-btn').click(); }">
+    <div class="bg-slate-900 border border-slate-700/90 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-150" onclick="event.stopPropagation()">
+      
+      <!-- Dialog Header -->
+      <div class="px-5 py-3.5 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <span id="app-dialog-icon" class="text-lg">💬</span>
+          <h3 id="app-dialog-title" class="text-sm font-bold text-white tracking-wide">Notice</h3>
+        </div>
+        <button id="app-dialog-close-btn" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition text-xs font-bold cursor-pointer">✕</button>
+      </div>
+
+      <!-- Dialog Body -->
+      <div class="p-5 space-y-3">
+        <div id="app-dialog-message" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line select-text"></div>
+        
+        <!-- Input for prompt type -->
+        <div id="app-dialog-input-wrap" class="hidden pt-1">
+          <input type="text" id="app-dialog-input" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition font-mono" />
+        </div>
+      </div>
+
+      <!-- Dialog Footer / Buttons -->
+      <div class="px-5 py-3 border-t border-slate-800 bg-slate-950/50 flex items-center justify-end space-x-2">
+        <button id="app-dialog-cancel-btn" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold transition text-xs cursor-pointer">Cancel</button>
+        <button id="app-dialog-confirm-btn" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition text-xs cursor-pointer shadow-sm">OK</button>
       </div>
 
     </div>
