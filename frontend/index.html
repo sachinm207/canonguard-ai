@@ -159,15 +159,18 @@
     <section class="flex-1 flex flex-col border-r border-slate-800 bg-slate-950">
       
       <!-- Script Meta Bar -->
-      <div class="h-10 bg-slate-900/50 border-b border-slate-800/80 px-4 md:px-6 flex items-center justify-between text-xs text-slate-400">
-        <div class="flex items-center space-x-2 truncate mr-2">
+      <div class="h-10 bg-slate-900/50 border-b border-slate-800/80 px-4 md:px-6 flex items-center justify-start space-x-3 text-xs text-slate-400 overflow-x-auto">
+        <div class="flex items-center space-x-2 shrink-0">
           <span class="text-sm">📄</span>
-          <span class="font-semibold text-slate-200 tracking-wide text-xs cursor-pointer hover:text-amber-300 transition truncate" id="current-title-display" title="Click to rename script file" onclick="renameCurrentScript()">Cold War Requiem.fountain</span>
+          <span class="font-semibold text-slate-200 tracking-wide text-xs cursor-pointer hover:text-amber-300 transition truncate max-w-[160px] sm:max-w-[220px]" id="current-title-display" title="Click to rename script file" onclick="renameCurrentScript()">Cold War Requiem.fountain</span>
           <span class="text-[10px] text-slate-500 hover:text-slate-300 cursor-pointer" onclick="renameCurrentScript()" title="Rename script file">✏️</span>
           <!-- Hidden spans preserved for JS state compatibility -->
           <span id="current-setting-display" class="hidden">Berlin Safehouse</span>
           <span id="current-year-display" class="hidden">1982</span>
         </div>
+
+        <div class="h-4 w-px bg-slate-800 shrink-0"></div>
+
         <div class="flex items-center space-x-1.5 md:space-x-2 text-[11px] shrink-0">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
           <button onclick="openProjectScriptsModal()" id="btn-project-scripts" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1 font-medium cursor-pointer shadow-sm" title="View, load, or manage saved screenplay scenes for this story world">
@@ -183,7 +186,7 @@
             <span>🧹</span>
             <span>Clear</span>
           </button>
-          <span class="hidden sm:flex px-2 py-1 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 items-center space-x-1">
+          <span class="flex px-2 py-1 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 items-center space-x-1">
             <span>🟢 Live: On</span>
           </span>
         </div>
@@ -237,7 +240,7 @@
     </section>
 
     <!-- RIGHT: STORY CHECK & STORY BIBLE PANEL -->
-    <aside class="w-96 lg:w-[420px] bg-slate-900 border-l border-slate-800 flex flex-col h-full overflow-hidden">
+    <aside class="w-[460px] lg:w-[504px] shrink-0 bg-slate-900 border-l border-slate-800 flex flex-col h-full overflow-hidden">
       
       <!-- Panel Header Tabs -->
       <div class="h-11 border-b border-slate-800 bg-slate-900/90 px-4 flex items-center justify-between">
