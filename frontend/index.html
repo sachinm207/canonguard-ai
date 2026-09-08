@@ -170,9 +170,9 @@
         </div>
         <div class="flex items-center space-x-1.5 md:space-x-2 text-[11px] shrink-0">
           <input type="file" id="screenplay-upload-input" accept=".fountain,.txt,.fdx" class="hidden" onchange="handleScreenplayFileUpload(event)">
-          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Import an existing script file (.fountain or .txt) into the editor">
+          <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Open an existing screenplay file (.fountain or .txt) in the editor">
             <span>📂</span>
-            <span>Import</span>
+            <span>Open in Editor</span>
           </button>
           <button onclick="openProjectScriptsModal()" id="btn-project-scripts" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-1 font-medium cursor-pointer shadow-sm" title="View, load, or manage saved screenplay scenes for this story world">
             <span>📜</span>
@@ -624,9 +624,17 @@
     }
 
     let currentUniverseMetadata = null;
+    let currentUniverseId = 'CHRONOVERSE';
     let allUniversesList = [];
     let allArchivedUniversesList = [];
     let expandedLoreDetails = new Set();
+
+    function getActiveUniverseId() {
+      if (currentUniverseMetadata && currentUniverseMetadata.id) return currentUniverseMetadata.id;
+      if (currentUniverseId && currentUniverseId !== 'NONE') return currentUniverseId;
+      const select = document.getElementById('universe-select');
+      return (select && select.value) ? select.value : 'CHRONOVERSE';
+    }
 
     // --- MULTI-UNIVERSE MANAGEMENT ---
     async function loadAvailableUniverses() {
@@ -634,6 +642,7 @@
         const res = await fetch(`${API_BASE}/api/universes`);
         const data = await res.json();
         currentUniverseMetadata = data.active_universe;
+        currentUniverseId = currentUniverseMetadata ? currentUniverseMetadata.id : 'CHRONOVERSE';
         allUniversesList = data.universes;
 
         const select = document.getElementById('universe-select');
@@ -676,6 +685,7 @@
         }
 
         applyUniverseToUI(currentUniverseMetadata);
+        updateProjectScriptsCountBadge();
         renderActiveUniversesList();
         await loadArchivedUniverses();
       } catch (err) {
@@ -693,7 +703,9 @@
         const data = await res.json();
         if (data.status === 'SUCCESS') {
           currentUniverseMetadata = data.active_universe;
+          currentUniverseId = currentUniverseMetadata ? currentUniverseMetadata.id : universeId;
           applyUniverseToUI(currentUniverseMetadata);
+          updateProjectScriptsCountBadge();
           renderActiveUniversesList();
           // Re-validate current script
           validateScript(textarea.value);
@@ -704,37 +716,51 @@
     }
 
     async function ensureUniverseScriptsLoaded(universeId) {
-      if (!currentUniverseMetadata || !universeId) return [];
-      if (currentUniverseMetadata.source_scripts && currentUniverseMetadata.source_scripts.length > 0) {
-        return currentUniverseMetadata.source_scripts;
-      }
+      const uid = universeId || getActiveUniverseId();
+      if (!uid || uid === 'NONE') return [];
       try {
-        const res = await fetch(`${API_BASE}/api/universe/${universeId}/scripts`);
+        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(uid)}/scripts`);
         if (res.ok) {
           const data = await res.json();
-          currentUniverseMetadata.source_scripts = data.scripts || [];
-          if (data.raw_document && !currentUniverseMetadata.raw_document) {
-            currentUniverseMetadata.raw_document = data.raw_document;
+          const scripts = data.scripts || [];
+          if (currentUniverseMetadata && (currentUniverseMetadata.id === uid || currentUniverseMetadata.name === data.universe_name)) {
+            currentUniverseMetadata.source_scripts = scripts;
+            if (data.raw_document && !currentUniverseMetadata.raw_document) {
+              currentUniverseMetadata.raw_document = data.raw_document;
+            }
           }
-          const scriptsBadge = document.getElementById('modal-scripts-badge');
-          if (scriptsBadge) scriptsBadge.textContent = currentUniverseMetadata.source_scripts.length;
-          const sidebarScriptsCount = document.getElementById('sidebar-scripts-count');
-          if (sidebarScriptsCount) sidebarScriptsCount.textContent = `${currentUniverseMetadata.source_scripts.length} scripts`;
-          return currentUniverseMetadata.source_scripts;
+          const uniInList = allUniversesList.find(u => u.id === uid);
+          if (uniInList) {
+            uniInList.source_scripts = scripts;
+          }
+          updateProjectScriptsCountBadge();
+          return scripts;
         }
       } catch (e) {
         console.warn("Could not fetch universe scripts:", e);
       }
-      return [];
+      return (currentUniverseMetadata && currentUniverseMetadata.source_scripts) || [];
     }
 
     function applyUniverseToUI(universe) {
       if (!universe) return;
-      if (universe.id && (!universe.source_scripts || universe.source_scripts.length === 0)) {
-        ensureUniverseScriptsLoaded(universe.id).then(() => {
-          if (activeRightPanelTab === 'lore') renderSidebarLore();
-        });
+      currentUniverseId = universe.id;
+
+      // Keep dropdown synchronized
+      const uniSelect = document.getElementById('universe-select');
+      if (uniSelect && uniSelect.value !== universe.id) {
+        uniSelect.value = universe.id;
       }
+
+      // Update script count badge
+      updateProjectScriptsCountBadge();
+
+      // Ensure scripts are loaded
+      ensureUniverseScriptsLoaded(universe.id).then((scripts) => {
+        updateProjectScriptsCountBadge();
+        if (activeRightPanelTab === 'lore') renderSidebarLore();
+      });
+
       const yr = universe.default_year || 1982;
       const loc = universe.default_location || "Earth";
       const title = universe.default_title || `${(universe.name || 'Screenplay').replace(/[^a-zA-Z0-9_]/g, '_')}.fountain`;
@@ -744,9 +770,6 @@
       }
       if (document.getElementById('current-setting-display')) {
         document.getElementById('current-setting-display').textContent = loc;
-      }
-      if (document.getElementById('current-title-display')) {
-        document.getElementById('current-title-display').textContent = title;
       }
       
       const slugEl = document.getElementById('editor-slug-display');
@@ -770,10 +793,25 @@
           if (trap.location && document.getElementById('current-setting-display')) {
             document.getElementById('current-setting-display').textContent = trap.location;
           }
+          if (document.getElementById('current-title-display')) {
+            document.getElementById('current-title-display').textContent = title;
+          }
+          validateScript(textarea.value);
+          updateEditorWordCount(textarea.value);
+        } else if (universe.source_scripts && universe.source_scripts.length > 0) {
+          // Load latest saved script for this universe so user work is preserved
+          const latest = universe.source_scripts[universe.source_scripts.length - 1];
+          textarea.value = latest.content || "";
+          if (document.getElementById('current-title-display')) {
+            document.getElementById('current-title-display').textContent = latest.filename || title;
+          }
           validateScript(textarea.value);
           updateEditorWordCount(textarea.value);
         } else {
           clearScriptEditor();
+          if (document.getElementById('current-title-display')) {
+            document.getElementById('current-title-display').textContent = title;
+          }
         }
       }
       if (activeRightPanelTab === 'lore') {
@@ -792,7 +830,17 @@
         : false;
 
       if (!isBuiltin) {
-        clearScriptEditor();
+        if (currentUniverseMetadata && currentUniverseMetadata.source_scripts && currentUniverseMetadata.source_scripts.length > 0) {
+          const latest = currentUniverseMetadata.source_scripts[currentUniverseMetadata.source_scripts.length - 1];
+          textarea.value = latest.content || "";
+          if (document.getElementById('current-title-display')) {
+            document.getElementById('current-title-display').textContent = latest.filename || 'Screenplay.fountain';
+          }
+          validateScript(textarea.value);
+          updateEditorWordCount(textarea.value);
+        } else {
+          clearScriptEditor();
+        }
       } else if (currentUniverseMetadata && currentUniverseMetadata.demo_traps && currentUniverseMetadata.demo_traps.length > 0) {
         const trap = currentUniverseMetadata.demo_traps[0];
         textarea.value = trap.script;
@@ -1097,7 +1145,8 @@
         alert("The script editor is empty! Type some scene action or dialogue first.");
         return;
       }
-      if (!currentUniverseId) {
+      const activeUid = getActiveUniverseId();
+      if (!activeUid || activeUid === 'NONE') {
         alert("Please select or open an active story world first.");
         return;
       }
@@ -1114,11 +1163,11 @@
       const badge = document.getElementById('lint-status-badge');
       const prevHtml = badge ? badge.innerHTML : '';
       if (badge) {
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span><span class="text-amber-300 font-mono text-[11px]">Saving...</span>`;
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span><span class="text-amber-300 font-mono text-[11px]">Saving to Project...</span>`;
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/universe/${currentUniverseId}/save-script`, {
+        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(activeUid)}/save-script`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1132,7 +1181,13 @@
           if (currentUniverseMetadata) {
             currentUniverseMetadata.source_scripts = data.scripts || [];
           }
+          const uniInList = allUniversesList.find(u => u.id === activeUid);
+          if (uniInList) {
+            uniInList.source_scripts = data.scripts || [];
+          }
           document.getElementById('current-title-display').textContent = cleanName;
+          isCustomScriptActive = true;
+          customScriptFilename = cleanName;
           updateProjectScriptsCountBadge();
           if (activeRightPanelTab === 'lore') renderSidebarLore();
 
@@ -1141,7 +1196,8 @@
             setTimeout(() => { badge.innerHTML = prevHtml; }, 2500);
           }
         } else {
-          alert("Failed to save script to project.");
+          const errData = await res.json().catch(() => ({}));
+          alert("Failed to save script to project: " + (errData.detail || res.statusText));
           if (badge) badge.innerHTML = prevHtml;
         }
       } catch (err) {
@@ -1193,7 +1249,8 @@
     // --- PROJECT SCRIPTS MANAGEMENT MODAL ---
     function updateProjectScriptsCountBadge() {
       const badge = document.getElementById('project-scripts-count-badge');
-      const count = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) ? currentUniverseMetadata.source_scripts.length : 0;
+      const scripts = (currentUniverseMetadata && currentUniverseMetadata.source_scripts) ? currentUniverseMetadata.source_scripts : [];
+      const count = scripts.length;
       if (badge) {
         badge.textContent = count;
       }
@@ -1201,18 +1258,23 @@
       if (sidebarScriptsCount) {
         sidebarScriptsCount.textContent = `${count} script${count === 1 ? '' : 's'}`;
       }
+      const modalBadge = document.getElementById('modal-scripts-badge');
+      if (modalBadge) {
+        modalBadge.textContent = count;
+      }
     }
 
     async function openProjectScriptsModal() {
       const modal = document.getElementById('project-scripts-modal');
       if (!modal) return;
       
+      const activeUid = getActiveUniverseId();
       const uniNameEl = document.getElementById('project-scripts-modal-universe-name');
       if (uniNameEl) {
-        uniNameEl.textContent = (currentUniverseMetadata && currentUniverseMetadata.name) ? currentUniverseMetadata.name : (currentUniverseId || 'Active Project');
+        uniNameEl.textContent = (currentUniverseMetadata && currentUniverseMetadata.name) ? currentUniverseMetadata.name : activeUid;
       }
 
-      await ensureUniverseScriptsLoaded(currentUniverseId);
+      await ensureUniverseScriptsLoaded(activeUid);
       renderProjectScriptsList();
       modal.classList.remove('hidden');
     }
@@ -1266,7 +1328,7 @@
               <div class="flex items-center space-x-1.5 shrink-0">
                 <button onclick="loadScriptIntoEditor('${safeFn}')" class="px-2.5 py-1 rounded-lg ${isActive ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-emerald-700 hover:bg-emerald-600 text-white'} font-semibold text-xs transition flex items-center space-x-1 cursor-pointer" title="Open this script in the editor workspace">
                   <span>🎬</span>
-                  <span>${isActive ? 'Reload' : 'Open in Editor'}</span>
+                  <span>Open in Editor</span>
                 </button>
                 <button onclick="exportSavedScript('${safeFn}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition flex items-center space-x-1 cursor-pointer" title="Export this script to a file">
                   <span>📥</span>
@@ -1329,14 +1391,19 @@
 
     async function deleteScriptFromProject(filename) {
       if (!confirm(`Are you sure you want to delete "${filename}" from this story world?`)) return;
+      const activeUid = getActiveUniverseId();
       try {
-        const res = await fetch(`${API_BASE}/api/universe/${currentUniverseId}/scripts/${encodeURIComponent(filename)}`, {
+        const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(activeUid)}/scripts/${encodeURIComponent(filename)}`, {
           method: 'DELETE'
         });
         if (res.ok) {
           const data = await res.json();
           if (currentUniverseMetadata) {
             currentUniverseMetadata.source_scripts = data.scripts || [];
+          }
+          const uniInList = allUniversesList.find(u => u.id === activeUid);
+          if (uniInList) {
+            uniInList.source_scripts = data.scripts || [];
           }
           updateProjectScriptsCountBadge();
           renderProjectScriptsList();
@@ -1369,11 +1436,12 @@
     function handleModalScreenplayImport(event) {
       const file = event.target.files[0];
       if (!file) return;
+      const activeUid = getActiveUniverseId();
       const reader = new FileReader();
       reader.onload = async (e) => {
         const content = e.target.result;
         try {
-          const res = await fetch(`${API_BASE}/api/universe/${currentUniverseId}/save-script`, {
+          const res = await fetch(`${API_BASE}/api/universe/${encodeURIComponent(activeUid)}/save-script`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1386,6 +1454,10 @@
             const data = await res.json();
             if (currentUniverseMetadata) {
               currentUniverseMetadata.source_scripts = data.scripts || [];
+            }
+            const uniInList = allUniversesList.find(u => u.id === activeUid);
+            if (uniInList) {
+              uniInList.source_scripts = data.scripts || [];
             }
             updateProjectScriptsCountBadge();
             renderProjectScriptsList();
@@ -1563,9 +1635,10 @@
                   <span>${isExpanded ? '🔼' : '👁️'}</span>
                   <span>${isExpanded ? 'Hide Lore' : 'View Lore Details'}</span>
                 </button>
-                ${!isActive 
-                  ? `<button onclick="startWritingForUniverse('${u.id}');" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
-                  : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
+                <button onclick="startWritingForUniverse('${u.id}');" class="px-3 py-1.5 text-xs font-bold rounded-lg ${isActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md' : 'bg-slate-800 hover:bg-sky-900 text-sky-300 border border-slate-700 hover:border-sky-500'} transition cursor-pointer flex items-center space-x-1" title="Open this story world in the screenplay editor workspace">
+                  <span>🎬</span>
+                  <span>Open in Editor</span>
+                </button>
                 <button onclick="archiveUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 hover:border-amber-500 shadow-sm flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Safely move this franchise into cold storage archive">
                   <span>📦</span>
                   <span>Archive</span>
