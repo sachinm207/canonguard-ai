@@ -376,12 +376,14 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
         characters=characters,
         timeline_events=events,
         relationships=relationships,
-        lore_rules=rules
+        lore_rules=rules,
+        raw_document=req.document_content
     )
 
     logger.info(f"Custom universe '{req.universe_name}' ({uid}) ingested into ClickHouse with {len(characters)} characters, {len(relationships)} relics, {len(rules)} rules.")
     return {
         "status": "SUCCESS",
+        "universe_id": uid,
         "universe": universe_metadata,
         "characters_ingested": len(characters),
         "relics_ingested": len(relationships),
@@ -503,12 +505,14 @@ def ingest_from_screenplays(req: IngestFromScreenplaysRequest):
         relationships=relationships,
         lore_rules=rules,
         default_year=extracted.get("default_year", 1982),
-        default_location=extracted.get("default_location", "Main Base")
+        default_location=extracted.get("default_location", "Main Base"),
+        source_scripts=scripts_dicts
     )
 
     logger.info(f"Method B: Ingested {len(req.scripts)} screenplays into '{req.universe_name}' ({uid}) via AI: {len(characters)} chars, {len(relationships)} relics, {len(rules)} rules.")
     return {
         "status": "SUCCESS",
+        "universe_id": uid,
         "universe": universe_metadata,
         "characters_ingested": len(characters),
         "relics_ingested": len(relationships),
@@ -519,6 +523,21 @@ def ingest_from_screenplays(req: IngestFromScreenplaysRequest):
         "relics_extracted": relationships,
         "rules_extracted": rules,
         "events_extracted": events
+    }
+
+@app.get("/api/universe/{universe_id}/scripts")
+def get_universe_scripts(universe_id: str):
+    """Returns past screenplay scripts and story bible document for a universe."""
+    target = ch_engine.find_universe_by_name(universe_id)
+    if not target:
+        target = ch_engine.universes.get(universe_id)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found.")
+    return {
+        "universe_id": target.get("id"),
+        "universe_name": target.get("name"),
+        "scripts": target.get("source_scripts", []),
+        "raw_document": target.get("raw_document", "")
     }
 
 class ScreenplayUploadRequest(BaseModel):

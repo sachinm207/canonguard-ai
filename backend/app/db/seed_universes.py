@@ -55,6 +55,80 @@ def seed_all_universes(force_reset: bool = False):
                 "location": "Planet Zora",
                 "script": "On Planet Zora, Lord Vane removes his helmet and takes a deep breath of the air."
             }
+        ],
+        "source_scripts": [
+            {
+                "filename": "The_Solaria_Core_1960.fountain",
+                "title": "Episode 4: The Solaria Core (1960)",
+                "content": """Title: THE QUANTUM HORIZON - EPISODE 4: THE SOLARIA CORE
+Credit: Written by Screenplay Vault
+Author: CanonGuard Archives
+Draft date: 1960 A.D.
+
+EXT. SOLARIA CORE REACTOR - NIGHT - 1960
+
+Liquid magma surges through subterranean fissures. Alarm sirens wail in descending minor thirds.
+
+KARA (30) clutches the radiant golden SUNSTONE in both blistered palms at the core precipice.
+
+VIKTOR (30) steps out from the access gantry, arm outstretched.
+
+VIKTOR
+Kara! Do not drop the stone! The thermal pressure will atomize the crystal matrix forever!
+
+KARA
+The overload cannot be reversed, Viktor! If we do not atomize the stone, the planetary crust will shatter!
+
+Kara drops the Sunstone into the fissure. White-hot plasma engulfs it, reducing the artifact to subatomic vapor.
+
+KARA (CONT'D)
+It is gone. Forever."""
+            },
+            {
+                "filename": "Bunker_42_Cryo_Vault_1989.fountain",
+                "title": "Episode 7: Cold Protocol 42 (1989)",
+                "content": """Title: THE QUANTUM HORIZON - EPISODE 7: COLD PROTOCOL 42
+Credit: Written by Screenplay Vault
+Author: CanonGuard Archives
+Draft date: 1989 A.D.
+
+INT. SIBERIAN RESEARCH BUNKER 42 - CRYOGENIC VAULT - NIGHT - 1989
+
+Frost crystals coat the reinforced plexiglass portals. Sub-zero nitrogen mist rolls across the grating.
+
+VIKTOR (59) climbs into Stasis Pod 04, his temporal mutant engrams pulsing blue.
+
+HEAD SCIENTIST
+Cryogenic freezing cycle confirmed. Stasis window locked from 1975 to 1995.
+
+VIKTOR
+Make sure the locks hold. If I awaken before 1995, the temporal paradox will collapse our timeline.
+
+The hydraulic seal hisses shut. Nitrogen mist blankets the pod. Viktor's eyes freeze into motionless stasis."""
+            },
+            {
+                "filename": "The_Geneva_Collider_1994.fountain",
+                "title": "Episode 9: The Geneva Collapse (1994)",
+                "content": """Title: THE QUANTUM HORIZON - EPISODE 9: THE GENEVA COLLAPSE
+Credit: Written by Screenplay Vault
+Author: CanonGuard Archives
+Draft date: 1994 A.D.
+
+INT. GENEVA COLLIDER COMPLEX - LAB THREE - NIGHT - 1994
+
+Sparks shower from the magnetic containment housing. The experimental QUANTUM DRIVE hums with deafening oscillation.
+
+DR. SARAH
+The primary harmonic field is rupturing! The Quantum Drive cannot maintain structural stability!
+
+LEAD RESEARCHER
+Emergency jettison is unresponsive!
+
+A blinding sphere of cerulean plasma erupts from the casing. The Quantum Drive shatters into billions of glowing subatomic ions, completely disintegrating the containment cradle.
+
+DR. SARAH (CONT'D)
+It's vaporized! The Quantum Drive was completely destroyed! Zero recoverable fragments!"""
+            }
         ]
     }
 
@@ -234,6 +308,43 @@ def seed_all_universes(force_reset: bool = False):
                 "location": "Planet Krynn",
                 "script": "On Planet Krynn, pilot Jarek steps onto the surface and takes a deep breath of the air without his helmet."
             }
+        ],
+        "source_scripts": [
+            {
+                "filename": "Imperial_Armada_Valos_2140.fountain",
+                "title": "Chapter 1: The Valos Conquest (2140 A.D.)",
+                "content": """Title: GALACTIC IMPERIUM - CHAPTER 1: THE VALOS CONQUEST
+Credit: Imperial Archives
+Draft date: 2140 A.D.
+
+EXT. VALOS PRIME ORBIT - 2140
+
+Ten thousand dreadnoughts blot out the binary suns.
+
+GRAND INQUISITOR KAEL (32) stands upon the command bridge, overlooking the captured orbital shipyards.
+
+GRAND INQUISITOR KAEL
+From this day forth, the Valos shipyards belong solely to the Imperium. Inquisitor rule is absolute across the sector."""
+            },
+            {
+                "filename": "Kyber_Singularity_Meltdown_2175.fountain",
+                "title": "Chapter 8: The Singularity Fall (2175 A.D.)",
+                "content": """Title: GALACTIC IMPERIUM - CHAPTER 8: THE SINGULARITY FALL
+Credit: Imperial Archives
+Draft date: 2175 A.D.
+
+INT. IMPERIAL DREADNOUGHT - CORE CHAMBER - 2175
+
+The KYBER SINGULARITY CORE flares uncontrollable violet radiation across the containment catwalks.
+
+LADY SERAPHINA
+The singularity is uncontained! It is consuming its own housing!
+
+SERAPHINA
+Eject the core into the black hole!
+
+The Kyber Singularity Core collapses inward under gravity shear, vanishing into the event horizon, destroyed permanently in 2175."""
+            }
         ]
     }
 
@@ -368,6 +479,22 @@ def seed_all_universes(force_reset: bool = False):
                 "year": 1480,
                 "location": "Iron Wastes of Skar",
                 "script": "A Silver Elf scout marches into the Iron Wastes of Skar and removes his enchanted talisman."
+            }
+        ],
+        "source_scripts": [
+            {
+                "filename": "Blood_Ridge_Cataclysm_1285.fountain",
+                "title": "Scroll 3: The Blood Ridge Cataclysm (1285 A.D.)",
+                "content": """Title: MYTHOS REALM - SCROLL 3: BLOOD RIDGE
+Credit: Royal Annals of Eldor
+Draft date: 1285 A.D.
+
+EXT. BLOOD RIDGE GORGE - 1285
+
+Dragonfire rains from the dark sky. The AETHELGARD BLADE is struck by ancient wyrmfire, shattering into thousands of molten shards across the volcanic stone.
+
+QUEEN MORWEN
+The ancient blade is broken! The steel of Eldor is no more!"""
             }
         ]
     }

@@ -129,6 +129,8 @@ class ClickHouseEngine:
             u_copy["timeline_events_full"] = events_for_u
             u_copy["lore_rules_full"] = rules_for_u
             u_copy["relationships_full"] = relics_for_u
+            u_copy["source_scripts"] = udata.get("source_scripts", [])
+            u_copy["raw_document"] = udata.get("raw_document", "")
             result.append(u_copy)
         return result
 
@@ -374,8 +376,13 @@ class ClickHouseEngine:
                 custom_dict = data
 
             for uid, item in custom_dict.items():
-                if uid not in self.universes and uid not in self.archived_universes:
+                if uid not in self.archived_universes:
                     self.universes[uid] = item.get("metadata", {})
+                    self.characters = [c for c in self.characters if c.get("universe_id") != uid]
+                    self.timeline_events = [e for e in self.timeline_events if e.get("universe_id") != uid]
+                    self.relationships = [r for r in self.relationships if r.get("universe_id") != uid]
+                    self.lore_rules = [rl for rl in self.lore_rules if rl.get("universe_id") != uid]
+
                     self.characters.extend(item.get("characters", []))
                     self.timeline_events.extend(item.get("timeline_events", []))
                     self.relationships.extend(item.get("relationships", []))
@@ -396,7 +403,9 @@ class ClickHouseEngine:
         lore_rules: List[Dict[str, Any]],
         default_year: int = 2026,
         default_location: str = "Central Facility",
-        demo_traps: Optional[List[Dict[str, Any]]] = None
+        demo_traps: Optional[List[Dict[str, Any]]] = None,
+        source_scripts: Optional[List[Dict[str, str]]] = None,
+        raw_document: Optional[str] = None
     ) -> Dict[str, Any]:
         """Ingests a user-uploaded story bible or custom canon into ClickHouse."""
         self.universes[universe_id] = {
@@ -408,7 +417,9 @@ class ClickHouseEngine:
             "default_year": default_year,
             "default_location": default_location,
             "default_title": f"{name.replace(' ', '_')}.fountain",
-            "demo_traps": demo_traps or []
+            "demo_traps": demo_traps or [],
+            "source_scripts": source_scripts or [],
+            "raw_document": raw_document or ""
         }
         for c in characters:
             c["universe_id"] = universe_id

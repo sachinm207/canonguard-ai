@@ -55,6 +55,209 @@
           "universe_id": "CUSTOM_CYBERCITY_2099"
         }
       ]
+    },
+    "CUSTOM_PROJECT_HYPERIO_6892": {
+      "metadata": {
+        "id": "CUSTOM_PROJECT_HYPERIO_6892",
+        "name": "Project Hyperion Test",
+        "genre": "Sci-Fi / Space Opera",
+        "era": "2160s-2190s",
+        "description": "Humanity navigates the dangers of advanced space technology, from experimental dark-matter drives to long-term cryogenic suspension, amidst the backdrop of interplanetary colonization and naval operations.",
+        "default_year": 2175,
+        "default_location": "Ganymede Sub-Surface Dock 4",
+        "default_title": "Project_Hyperion_Test.fountain",
+        "demo_traps": [],
+        "source_scripts": [
+          {
+            "filename": "Hyperion_Ep1_The_Ganymede_Breach_2175.fountain",
+            "content": "Title: PROJECT HYPERION: 2180 - EPISODE 1: THE GANYMEDE BREACH\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 2175 A.D.\n\nINT. GANYMEDE SUB-SURFACE DOCK 4 - NIGHT - 2175\n\nRed emergency sirens strobe across the massive titanium bulkheads. Decompression klaxons wail.\n\nCHIEF ENGINEER MARCUS VANCE (37), soot smeared across his EVA suit, frantically types override codes into the primary console.\n\nBeside him stands DR. ARIS THORNE (Model AX-9), synthetic chrome skin reflecting the pulsing crimson warning indicators.\n\nDR. ARIS THORNE\nAntimatter magnetic field containment is decaying at 4.2 percent per second. The Hyperion Drive has entered runaway resonance!\n\nCHIEF ENGINEER MARCUS VANCE\nEject the core into the Jovian gravity well! We cannot let another disaster happen like Phobos in 2172!\n\nDR. ARIS THORNE\nAdmiral Teresa Cruz went down with Phobos Station when her hull breached. If this core detonates inside Dock 4, all twelve thousand colonists will follow her to the grave!\n\nVance pulls the manual emergency jettison lever. Sparks burst from the hydraulic couplings.\n\nThe blast doors shudder. Inside the containment chamber, the HYPERION DARK-MATTER DRIVE flares into a blinding sapphire vortex.\n\nDR. ARIS THORNE (CONT'D)\nContainment failure is absolute. The core is undergoing subatomic vaporization!\n\nA deafening shockwave rocks the station. The sapphire vortex collapses into a blinding pinprick, consuming the entire drive array.\n\nWhen the smoke clears, only a scorched, empty magnetic cradle remains. The Hyperion Dark-Matter Drive has been completely vaporized.\n\nCHIEF ENGINEER MARCUS VANCE\n(coughing into his respirator)\nThe drive... the prototype drive is completely destroyed. Record it in the naval archives. Year 2175. The Hyperion program is dead.\n"
+          },
+          {
+            "filename": "Hyperion_Ep2_Cold_Sleep_Transit_2178.fountain",
+            "content": "Title: PROJECT HYPERION: 2180 - EPISODE 2: COLD SLEEP TRANSIT\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 2178 A.D.\n\nINT. USC BOREALIS - CRYOGENIC BAY - 2178\n\nThe steady, rhythmic hum of liquid helium pumps fills the silent chamber. Rows of frosted cylindrical pods line the dark corridor.\n\nDR. ARIS THORNE (Model AX-9) steps silently along the catwalk, checking biometric readouts on a handheld diagnostic pad.\n\nThorne stops before POD 09. Through the condensation-frosted quartz glass, the frozen face of SPECIAL AGENT GABRIEL CROSS (33) is visible. His eyelids are sealed behind a silver retinal sheath.\n\nA digital holographic readout hovers over the pod:\nSUBJECT: SPECIAL AGENT GABRIEL CROSS\nSTATUS: DEEP CRYOGENIC SUSPENSION (COMMENCED 2165)\nAUTOMATED REVIVAL SCHEDULED: 2190 A.D.\nCURRENT TRANSIT TIME: 13 YEARS ELAPSED / 12 YEARS REMAINING\n\nDR. ARIS THORNE\n(recording audio log)\nShip Log: Stardate 2178. Dr. Thorne reporting. USC Borealis has crossed the Saturn orbital boundary on conventional ion cruise.\n\nThorne taps the stasis pod status panel.\n\nDR. ARIS THORNE (CONT'D)\nAgent Cross remains in stable deep-freeze stasis within Pod 09. Core temperature negative two-hundred-fourteen Celsius. Neural engrams fully frozen. No waking consciousness will occur until the year 2190.\n"
+          }
+        ],
+        "raw_document": ""
+      },
+      "characters": [
+        {
+          "character_id": "f0d1511e-d50e-4e5e-9e4b-050095e75fbe",
+          "name": "Marcus Vance",
+          "aliases": [],
+          "species": "HUMAN",
+          "birth_year": 2138,
+          "death_year": null,
+          "status": "ALIVE",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "home_planet": "Earth",
+          "powers": [
+            "Chief Engineer",
+            "Field Operative"
+          ],
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "character_id": "681b7377-50c8-4f33-9456-758c3a2a756f",
+          "name": "Dr. Aris Thorne",
+          "aliases": [],
+          "species": "SYNTHETIC",
+          "birth_year": null,
+          "death_year": null,
+          "status": "ALIVE",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "home_planet": null,
+          "powers": [
+            "Scientist",
+            "Diagnostic Specialist"
+          ],
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "character_id": "ef940963-76a3-4d2e-95c0-f5ede5d5a254",
+          "name": "Admiral Teresa Cruz",
+          "aliases": [],
+          "species": "HUMAN",
+          "birth_year": null,
+          "death_year": 2172,
+          "status": "DEAD",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "home_planet": "Earth",
+          "powers": [
+            "Admiral",
+            "Commander"
+          ],
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "character_id": "848a48f8-bf43-4e97-9889-60f08f75fa0b",
+          "name": "Special Agent Gabriel Cross",
+          "aliases": [],
+          "species": "HUMAN",
+          "birth_year": 2145,
+          "death_year": null,
+          "status": "STASIS",
+          "stasis_start_year": 2165,
+          "stasis_end_year": 2190,
+          "home_planet": "Earth",
+          "powers": [
+            "Special Agent"
+          ],
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        }
+      ],
+      "timeline_events": [
+        {
+          "event_id": "32dbec9a-2e1f-44af-a12c-1190a4c86593",
+          "title": "Special Agent Gabriel Cross commences deep cryogenic suspension.",
+          "year": 2165,
+          "location": "USC Borealis",
+          "canon_tier": "PRIMARY",
+          "media_type": "SCRIPT_CATALOG",
+          "description": "Special Agent Gabriel Cross commences deep cryogenic suspension.",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "event_id": "f4e1bd0d-9086-4fa4-8b7e-b1f87bff43b4",
+          "title": "Phobos Station disaster occurs, resulting in the death of Admiral Teresa Cruz and all onboard.",
+          "year": 2172,
+          "location": "Phobos Station",
+          "canon_tier": "PRIMARY",
+          "media_type": "SCRIPT_CATALOG",
+          "description": "Phobos Station disaster occurs, resulting in the death of Admiral Teresa Cruz and all onboard.",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "event_id": "1e126bd8-bc92-40d9-be0e-040c757303b8",
+          "title": "The Hyperion Dark-Matter Drive prototype undergoes runaway resonance and is completely vaporized due to containment failure.",
+          "year": 2175,
+          "location": "Ganymede Sub-Surface Dock 4",
+          "canon_tier": "PRIMARY",
+          "media_type": "SCRIPT_CATALOG",
+          "description": "The Hyperion Dark-Matter Drive prototype undergoes runaway resonance and is completely vaporized due to containment failure.",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "event_id": "dc9756c2-0b97-418b-a855-d9ed29184ea5",
+          "title": "The USC Borealis crosses the Saturn orbital boundary on conventional ion cruise, with Agent Cross still in stasis.",
+          "year": 2178,
+          "location": "Saturn Orbital Boundary",
+          "canon_tier": "PRIMARY",
+          "media_type": "SCRIPT_CATALOG",
+          "description": "The USC Borealis crosses the Saturn orbital boundary on conventional ion cruise, with Agent Cross still in stasis.",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "event_id": "8e11bf6e-dae7-48b5-8726-6c2718dd98ca",
+          "title": "Automated revival scheduled for Special Agent Gabriel Cross from cryogenic suspension.",
+          "year": 2190,
+          "location": "USC Borealis (projected)",
+          "canon_tier": "PRIMARY",
+          "media_type": "SCRIPT_CATALOG",
+          "description": "Automated revival scheduled for Special Agent Gabriel Cross from cryogenic suspension.",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        }
+      ],
+      "relationships": [
+        {
+          "relationship_id": "9fd2f11d-db28-4965-9b00-88c7aa9c2a3e",
+          "subject_name": "Project Hyperion Test",
+          "predicate": "POSSESSES",
+          "object_name": "Hyperion Dark-Matter Drive",
+          "valid_from_year": 2175,
+          "valid_to_year": 2175,
+          "status": "DESTROYED",
+          "source_media": "Screenplay Batch (2 scripts)",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "relationship_id": "b79544bc-04ab-4d1e-a1b6-9c4b92e034aa",
+          "subject_name": "Project Hyperion Test",
+          "predicate": "POSSESSES",
+          "object_name": "USC Borealis",
+          "valid_from_year": 2178,
+          "valid_to_year": 2000,
+          "status": "ACTIVE",
+          "source_media": "Screenplay Batch (2 scripts)",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        }
+      ],
+      "lore_rules": [
+        {
+          "rule_id": "3adaf93a-5d25-4a48-b1eb-eb5e612cff32",
+          "category": "TECH",
+          "entity_or_species": "Antimatter magnetic field containment",
+          "rule_statement": "Antimatter magnetic field containment can decay, leading to runaway resonance and core detonation.",
+          "canon_tier": "ABSOLUTE",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "rule_id": "d6991aba-4558-46bd-a58b-ddfec17f8c27",
+          "category": "PHYSICS",
+          "entity_or_species": "Jovian gravity well",
+          "rule_statement": "Jovian gravity wells can be used as a viable method for safely ejecting unstable energy cores.",
+          "canon_tier": "ABSOLUTE",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "rule_id": "01727214-b1c9-46c1-89b7-eb6f12182cb3",
+          "category": "TECH",
+          "entity_or_species": "Hyperion Dark-Matter Drive",
+          "rule_statement": "The Hyperion Dark-Matter Drive operates with subatomic vaporization during runaway resonance, resulting in complete destruction if containment fails.",
+          "canon_tier": "ABSOLUTE",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        },
+        {
+          "rule_id": "04cd8ed2-8691-4426-bf43-bbfc41299b78",
+          "category": "BIOLOGY",
+          "entity_or_species": "Deep Cryogenic Suspension",
+          "rule_statement": "Deep Cryogenic Suspension can preserve human life for decades (e.g., 25+ years) by freezing neural engrams and core temperature to extreme sub-zero levels, preventing waking consciousness until automated revival.",
+          "canon_tier": "ABSOLUTE",
+          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
+        }
+      ]
     }
   },
   "archived_universes": {}
