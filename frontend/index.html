@@ -286,6 +286,8 @@
     const API_BASE = window.location.origin;
     let debounceTimer = null;
     let activeValidationResult = null;
+    let isCustomScriptActive = false;
+    let customScriptFilename = '';
 
     const textarea = document.getElementById('script-input');
     const visualPreview = document.getElementById('visual-preview');
@@ -456,17 +458,21 @@
 
     function applyUniverseToUI(universe) {
       if (!universe) return;
-      document.getElementById('current-year-display').textContent = universe.default_year || 1982;
-      document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
-      document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
-      // Render dynamic traps
+      if (!isCustomScriptActive) {
+        document.getElementById('current-year-display').textContent = universe.default_year || 1982;
+        document.getElementById('current-setting-display').textContent = universe.default_location || "Safehouse";
+        document.getElementById('current-title-display').textContent = universe.default_title || "Screenplay.fountain";
+      }
+      // Render dynamic traps or disabled custom script state
       renderTraps(universe.demo_traps || []);
       
-      // Set sample script if textarea is empty or default
-      if (!textarea.value.trim() || textarea.value.includes("Viktor") || textarea.value.includes("Kael") || textarea.value.includes("Eldor")) {
-        if (universe.demo_traps && universe.demo_traps.length > 0) {
-          textarea.value = universe.demo_traps[0].script;
-          validateScript(textarea.value);
+      // Set sample script if textarea is empty or default, ONLY IF no custom script is active
+      if (!isCustomScriptActive) {
+        if (!textarea.value.trim() || textarea.value.includes("Viktor") || textarea.value.includes("Kael") || textarea.value.includes("Eldor")) {
+          if (universe.demo_traps && universe.demo_traps.length > 0) {
+            textarea.value = universe.demo_traps[0].script;
+            validateScript(textarea.value);
+          }
         }
       }
     }
@@ -550,23 +556,49 @@
       const container = document.getElementById('traps-container');
       if (!container) return;
       container.innerHTML = `
-        <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1">
+        <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1 shrink-0">
           <span>⚡</span>
           <span class="hidden sm:inline">Demo Traps:</span>
           <span class="sm:hidden">Demos:</span>
         </span>
       `;
+
+      if (isCustomScriptActive) {
+        const badge = document.createElement('div');
+        badge.className = "flex items-center space-x-2";
+        badge.innerHTML = `
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs font-mono border border-emerald-700/60 flex items-center space-x-1.5 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span class="truncate max-w-[180px] sm:max-w-[240px]" title="${escapeHtml(customScriptFilename)}">Custom: <strong>${escapeHtml(customScriptFilename)}</strong></span>
+            <span class="text-emerald-400/90 text-[10px] uppercase font-bold tracking-wider ml-1 bg-emerald-900/60 px-1.5 py-0.5 rounded shrink-0">Disabled</span>
+          </span>
+          <button onclick="unloadCustomScript()" class="px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 hover:border-slate-500 transition cursor-pointer flex items-center space-x-1 shadow-sm shrink-0" title="Switch back to franchise demonstration traps and restore default script">
+            <span>↺ Restore Demos</span>
+          </button>
+        `;
+        container.appendChild(badge);
+        return;
+      }
+
       if (!traps || traps.length === 0) {
         container.innerHTML += `<span class="text-[11px] text-slate-500 font-mono">None</span>`;
         return;
       }
       traps.forEach((trap, idx) => {
         const btn = document.createElement('button');
-        btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer";
+        btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer shrink-0";
         const titleText = trap.title ? trap.title.replace(/^Trap\s*/i, 'Demo Trap ') : `Demo Trap ${idx + 1}`;
         btn.textContent = titleText;
         btn.title = `Load ${titleText} - ${trap.location || ''} (${trap.year || ''})`;
         btn.onclick = () => {
+          if (isCustomScriptActive) {
+            if (!confirm(`⚠️ A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Demo Trap will overwrite your active screenplay. Do you want to proceed?`)) {
+              return;
+            }
+            isCustomScriptActive = false;
+            customScriptFilename = '';
+            renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
+          }
           document.getElementById('current-year-display').textContent = trap.year || 1982;
           document.getElementById('current-setting-display').textContent = trap.location || "Location";
           textarea.value = trap.script;
@@ -576,7 +608,37 @@
       });
     }
 
+    function unloadCustomScript() {
+      if (textarea.value && textarea.value.trim().length > 0) {
+        if (!confirm(`Restore Demo Traps?\n\nThis will unload "${customScriptFilename || 'Custom Script'}" and reload the franchise demonstration scene and traps.`)) {
+          return;
+        }
+      }
+      isCustomScriptActive = false;
+      customScriptFilename = '';
+      if (currentUniverseMetadata) {
+        document.getElementById('current-title-display').textContent = currentUniverseMetadata.default_title || "Screenplay.fountain";
+        document.getElementById('current-year-display').textContent = currentUniverseMetadata.default_year || 1982;
+        document.getElementById('current-setting-display').textContent = currentUniverseMetadata.default_location || "Safehouse";
+        if (currentUniverseMetadata.demo_traps && currentUniverseMetadata.demo_traps.length > 0) {
+          textarea.value = currentUniverseMetadata.demo_traps[0].script;
+          validateScript(textarea.value);
+        }
+        renderTraps(currentUniverseMetadata.demo_traps || []);
+      } else {
+        renderTraps([]);
+      }
+    }
+
     function loadTrap(idx) {
+      if (isCustomScriptActive) {
+        if (!confirm(`⚠️ A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Demo Trap will overwrite your active screenplay. Do you want to proceed?`)) {
+          return;
+        }
+        isCustomScriptActive = false;
+        customScriptFilename = '';
+        renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
+      }
       if (currentUniverseMetadata && currentUniverseMetadata.demo_traps && currentUniverseMetadata.demo_traps[idx - 1]) {
         const trap = currentUniverseMetadata.demo_traps[idx - 1];
         document.getElementById('current-year-display').textContent = trap.year || 1982;
@@ -597,6 +659,8 @@
       const reader = new FileReader();
       reader.onload = async (e) => {
         const content = e.target.result;
+        isCustomScriptActive = true;
+        customScriptFilename = file.name || 'Custom Script';
         try {
           const res = await fetch(`${API_BASE}/api/screenplay/parse`, {
             method: 'POST',
@@ -608,11 +672,13 @@
           document.getElementById('current-title-display').textContent = data.filename;
           document.getElementById('current-year-display').textContent = data.scene_year;
           document.getElementById('current-setting-display').textContent = data.location;
+          renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
           validateScript(data.content);
         } catch (err) {
           // Fallback to local insertion
           textarea.value = content;
           document.getElementById('current-title-display').textContent = file.name;
+          renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
           validateScript(content);
         }
       };
