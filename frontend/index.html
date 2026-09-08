@@ -910,6 +910,7 @@
       } else {
         expandedLoreDetails.add(uid);
       }
+      renderActiveUniversesList();
       renderArchivedUniversesList();
     }
 
@@ -930,36 +931,142 @@
         const isActive = currentUniverseMetadata && currentUniverseMetadata.id === u.id;
         const safeName = escapeHtml(u.name);
         const attrName = safeName.replace(/'/g, "\\'");
+        const isExpanded = expandedLoreDetails.has(u.id);
+        const chars = u.characters_full || [];
+        const rules = u.lore_rules_full || [];
+        const relics = u.relationships_full || [];
+        const events = u.timeline_events_full || [];
+
         return `
-          <div class="p-3.5 rounded-xl border ${isActive ? 'border-sky-500/80 bg-sky-950/25 ring-1 ring-sky-500/40' : 'border-slate-800 bg-slate-950/70'} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-slate-700">
-            <div class="space-y-1 flex-1">
-              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
-                <span class="text-sm font-bold text-white">${safeName}</span>
-                ${isBuiltin 
-                  ? `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-purple-950/80 text-purple-300 border border-purple-800/80">🎯 Demo Playground</span>` 
-                  : `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/80">🎬 Studio Franchise</span>`}
-                ${isActive ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-sky-950 text-sky-300 border border-sky-700">● Active</span>` : ''}
+          <div class="p-3.5 rounded-xl border ${isActive ? 'border-sky-500/80 bg-sky-950/25 ring-1 ring-sky-500/40' : 'border-slate-800 bg-slate-950/70'} transition hover:border-slate-700 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1 flex-1">
+                <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                  <span class="text-sm font-bold text-white">${safeName}</span>
+                  ${isBuiltin 
+                    ? `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-purple-950/80 text-purple-300 border border-purple-800/80">🎯 Demo Playground</span>` 
+                    : `<span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/80">🎬 Studio Franchise</span>`}
+                  ${isActive ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-sky-950 text-sky-300 border border-sky-700">● Active</span>` : ''}
+                </div>
+                <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(u.description || 'No description provided.')}</p>
+                <div class="flex items-center space-x-3 text-[11px] text-slate-500 font-mono flex-wrap">
+                  <span>Genre: <strong class="text-slate-300">${escapeHtml(u.genre || 'Sci-Fi')}</strong></span>
+                  <span>•</span>
+                  <span>Era: <strong class="text-slate-300">${escapeHtml(u.era || 'N/A')}</strong></span>
+                  <span>•</span>
+                  <span><strong class="text-emerald-400">${u.characters_count || 0}</strong> characters</span>
+                  <span>•</span>
+                  <span><strong class="text-sky-400">${u.rules_count || 0}</strong> rules</span>
+                  ${relics.length > 0 ? `<span>•</span><span><strong class="text-indigo-400">${relics.length}</strong> relics</span>` : ''}
+                  ${events.length > 0 ? `<span>•</span><span><strong class="text-amber-400">${events.length}</strong> events</span>` : ''}
+                </div>
               </div>
-              <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(u.description || 'No description provided.')}</p>
-              <div class="flex items-center space-x-3 text-[11px] text-slate-500 font-mono flex-wrap">
-                <span>Genre: <strong class="text-slate-300">${escapeHtml(u.genre || 'Sci-Fi')}</strong></span>
-                <span>•</span>
-                <span>Era: <strong class="text-slate-300">${escapeHtml(u.era || 'N/A')}</strong></span>
-                <span>•</span>
-                <span><strong class="text-emerald-400">${u.characters_count || 0}</strong> characters</span>
-                <span>•</span>
-                <span><strong class="text-sky-400">${u.rules_count || 0}</strong> rules</span>
+              <div class="flex items-center space-x-2 self-end sm:self-center shrink-0">
+                <button onclick="toggleLoreDetails('${u.id}')" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg ${isExpanded ? 'bg-slate-700 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'} border border-slate-700 hover:border-slate-500 transition cursor-pointer flex items-center space-x-1" title="Inspect character roster, rules, relics, and timeline milestones">
+                  <span>${isExpanded ? '🔼' : '👁️'}</span>
+                  <span>${isExpanded ? 'Hide Lore' : 'View Lore Details'}</span>
+                </button>
+                ${!isActive 
+                  ? `<button onclick="switchActiveUniverse('${u.id}'); closeFranchiseHub();" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
+                  : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
+                <button onclick="archiveUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 hover:border-amber-500 shadow-sm flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Safely move this franchise into cold storage archive">
+                  <span>📦</span>
+                  <span>Archive</span>
+                </button>
               </div>
             </div>
-            <div class="flex items-center space-x-2 self-end sm:self-center shrink-0">
-              ${!isActive 
-                ? `<button onclick="switchActiveUniverse('${u.id}'); closeFranchiseHub();" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
-                : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
-              <button onclick="archiveUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 hover:border-amber-500 shadow-sm flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Safely move this franchise into cold storage archive">
-                <span>📦</span>
-                <span>Archive</span>
-              </button>
-            </div>
+
+            <!-- Expandable Lore Details Accordion for Active Franchises -->
+            ${isExpanded ? `
+              <div class="pt-3 border-t border-slate-800 space-y-3 bg-slate-900/60 p-3 rounded-lg animate-in fade-in duration-150">
+                <!-- Characters Roster -->
+                <div>
+                  <h4 class="text-xs font-bold text-emerald-300 mb-1.5 flex items-center space-x-1.5">
+                    <span>👥</span>
+                    <span>Character Roster (${chars.length}):</span>
+                  </h4>
+                  ${chars.length > 0 ? `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      ${chars.map(c => `
+                        <div class="p-2 rounded bg-slate-950/80 border border-slate-800 text-[11px] space-y-0.5">
+                          <div class="flex items-center justify-between">
+                            <strong class="text-white">${escapeHtml(c.name)}</strong>
+                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                              c.status === 'ALIVE' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' :
+                              c.status === 'DEAD' ? 'bg-rose-950 text-rose-300 border border-rose-800' :
+                              'bg-amber-950 text-amber-300 border border-amber-800'
+                            }">
+                              ${c.status === 'STASIS' && c.stasis_start_year && c.stasis_end_year 
+                                ? `STASIS: ${c.stasis_start_year}–${c.stasis_end_year}` 
+                                : (c.status === 'DEAD' && c.death_year ? `DEAD (${c.death_year})` : (c.status || 'ALIVE'))}
+                            </span>
+                          </div>
+                          <div class="text-slate-400">Lifespan: ${c.birth_year || '?'}${c.death_year ? ` – ${c.death_year}` : (c.stasis_start_year ? ` (Stasis: ${c.stasis_start_year}–${c.stasis_end_year})` : ' (Current)')}</div>
+                          <div class="text-slate-500 text-[10px]">Powers/Traits: ${(c.powers || []).join(', ') || 'Standard'} • Planet: ${escapeHtml(c.home_planet || 'Earth')}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : `<p class="text-slate-500 italic text-[11px]">No character records found.</p>`}
+                </div>
+
+                <!-- Lore Rules & Invariants -->
+                <div>
+                  <h4 class="text-xs font-bold text-sky-300 mb-1.5 flex items-center space-x-1.5">
+                    <span>⚖️</span>
+                    <span>Absolute Lore Invariants & Rules (${rules.length}):</span>
+                  </h4>
+                  ${rules.length > 0 ? `
+                    <div class="space-y-1">
+                      ${rules.map(r => `
+                        <div class="p-1.5 rounded bg-slate-950/80 border border-slate-800 text-[11px] flex items-start space-x-2">
+                          <span class="px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800 text-[9px] font-mono shrink-0">${escapeHtml(r.category || 'PHYSICS')}</span>
+                          <span class="text-slate-300">${escapeHtml(r.rule_statement || '')}</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : `<p class="text-slate-500 italic text-[11px]">No specific lore rules recorded.</p>`}
+                </div>
+
+                <!-- Relics & Possessions -->
+                ${relics.length > 0 ? `
+                  <div>
+                    <h4 class="text-xs font-bold text-indigo-300 mb-1.5 flex items-center space-x-1.5">
+                      <span>🏺</span>
+                      <span>Relics & Artifacts (${relics.length}):</span>
+                    </h4>
+                    <div class="flex flex-wrap gap-1.5">
+                      ${relics.map(rel => `
+                        <span class="px-2 py-0.5 rounded bg-indigo-950/70 border border-indigo-800/60 text-indigo-200 text-[10px]">
+                          ${escapeHtml(rel.object_name)} (${rel.status === 'DESTROYED' ? `Destroyed in ${rel.valid_to_year}` : 'Active'})
+                        </span>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
+                <!-- Timeline Milestones -->
+                ${events.length > 0 ? `
+                  <div>
+                    <h4 class="text-xs font-bold text-amber-300 mb-1.5 flex items-center space-x-1.5">
+                      <span>📅</span>
+                      <span>Timeline Milestones (${events.length}):</span>
+                    </h4>
+                    <div class="space-y-1">
+                      ${events.map(ev => `
+                        <div class="p-1.5 rounded bg-slate-950/80 border border-slate-800 text-[11px] flex items-start space-x-2">
+                          <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 text-[9px] font-mono font-bold shrink-0">${ev.year || 'Era'}</span>
+                          <div class="flex-1">
+                            ${ev.location ? `<span class="text-[10px] text-slate-400 font-mono">📍 ${escapeHtml(ev.location)}: </span>` : ''}
+                            <span class="text-slate-200">${escapeHtml(ev.title || ev.description || '')}</span>
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
@@ -1204,9 +1311,8 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
         });
         const data = await res.json();
         if (res.ok && data.status === 'SUCCESS') {
-          alert(`🎉 Successfully ingested "${name}" into ClickHouse!\n\n• ${data.characters_ingested} Characters\n• ${data.relics_ingested} Relics\n• ${data.rules_ingested} Lore Axioms\n\nSwitched active universe to "${name}".`);
-          closeIngestModal();
           await loadAvailableUniverses();
+          displayIngestionResults(data, name, 'bible');
         } else {
           alert(`⚠️ Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`);
         }
@@ -1265,7 +1371,19 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       }
     }
 
+    function resetIngestView() {
+      const inputSec = document.getElementById('ingest-input-section');
+      const resultsCard = document.getElementById('ingest-results-card');
+      if (inputSec) inputSec.classList.remove('hidden');
+      if (resultsCard) {
+        resultsCard.classList.add('hidden');
+        resultsCard.innerHTML = '';
+      }
+    }
+
     function clearIngestForm() {
+      resetIngestView();
+
       const nameInput = document.getElementById('ingest-univ-name');
       if (nameInput) nameInput.value = '';
 
@@ -1319,12 +1437,14 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
 
       const badge = document.getElementById('batch-files-count-badge');
       if (badge) {
-        badge.textContent = `📁 ${files.length} file${files.length > 1 ? 's' : ''} loaded (Chronologically Sorted)`;
+        badge.textContent = `📁 ${files.length} script file(s) loaded (sorted naturally)`;
         badge.classList.remove('hidden');
       }
 
       const textarea = document.getElementById('batch-scripts-content');
-      if (textarea) textarea.value = combined.trim();
+      if (textarea) {
+        textarea.value = combined.trim();
+      }
 
       // Pre-fill universe name if empty
       const univInput = document.getElementById('ingest-univ-name');
@@ -1334,19 +1454,20 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
     }
 
     function loadSampleScriptBatch() {
+      switchIngestMode('scripts');
+
       const ep1 = `--- S01E01: The Genesis Anomaly (1982) ---
 INT. BERLIN VAULT - 1982
-Commander Ryan activates the Quantum Drive. The blue chronal field pulses across the room.
+COMMANDER RYAN steps toward the humming machine. DR. SARAH checks the temporal gauges.
 DR. SARAH
-Ryan, you cannot initialize the drive within three miles of a residential zone. The temporal feedback will sever the timeline.
-Ryan ignores the warning and locks the Quantum Drive into the primary chamber.`;
+Ryan, do not activate the Quantum Drive here. Initializing within three miles of a residential zone will cause severe temporal feedback!
+COMMANDER RYAN
+We are out of time, Sarah. Initiating power sequence now.`;
 
       const ep2 = `--- S01E08: The Geneva Cataclysm (1994) ---
-INT. GENEVA RUINS - 1994
-Smoke rises from the collapsed research bunker. Sarah sifts through the carbonized rubble.
-She finds the fractured chassis of the Quantum Drive, its crystal core split in two.
+INT. GENEVA RUINS - RESEARCH BUNKER - 1994
+Smoke fills the underground chamber. DR. SARAH speaks into her radio receiver.
 DR. SARAH
-(into radio)
 Command, the Quantum Drive was completely destroyed during the breach. There is nothing left to salvage.
 GENERAL VANCE (O.S.)
 And Ryan?
@@ -1437,9 +1558,8 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
 
         const data = await res.json();
         if (res.ok && data.status === 'SUCCESS') {
-          alert(`🎉 Gemini AI Successfully Built Canon for "${name}"!\n\n• Processed: ${data.scripts_processed || 1} Screenplay(s)\n• Extracted Characters: ${data.characters_ingested}\n• Extracted Relics: ${data.relics_ingested}\n• Extracted Lore Rules: ${data.rules_ingested}\n• Milestones: ${data.events_ingested || 0}\n\nSwitched active canon to "${name}"!`);
-          closeFranchiseHub();
           await loadAvailableUniverses();
+          displayIngestionResults(data, name, 'scripts');
         } else {
           alert(`⚠️ AI Ingestion Failed (${res.status}):\n${data.detail || JSON.stringify(data)}`);
         }
@@ -1449,6 +1569,202 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
         btn.disabled = false;
         btn.innerHTML = `<span>🚀 Auto-Extract Canon with Gemini AI</span>`;
       }
+    }
+
+    function displayIngestionResults(data, universeName, mode) {
+      const inputSec = document.getElementById('ingest-input-section');
+      const resultsCard = document.getElementById('ingest-results-card');
+      if (!resultsCard) return;
+
+      if (inputSec) inputSec.classList.add('hidden');
+      resultsCard.classList.remove('hidden');
+
+      const name = universeName || data.universe_name || (data.universe && data.universe.name) || 'New Franchise';
+      const genre = data.genre || (data.universe && data.universe.genre) || 'Sci-Fi';
+      const era = data.era || (data.universe && data.universe.era) || 'N/A';
+      const desc = data.description || (data.universe && data.universe.description) || 'Franchise continuity canon built and validated.';
+      const universeId = data.universe_id || (data.universe && data.universe.id);
+
+      const chars = data.characters_extracted || (data.universe && data.universe.characters) || [];
+      const relics = data.relics_extracted || (data.universe && data.universe.relationships) || [];
+      const rules = data.rules_extracted || (data.universe && data.universe.lore_rules) || [];
+      const events = data.events_extracted || (data.universe && data.universe.timeline_events) || [];
+
+      resultsCard.innerHTML = `
+        <!-- Top Extraction Banner -->
+        <div class="p-4 rounded-xl bg-gradient-to-r from-purple-950/80 via-slate-900 to-sky-950/80 border border-purple-500/50 shadow-lg space-y-2.5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center space-x-2.5">
+              <span class="text-2xl">✨</span>
+              <div>
+                <div class="flex items-center space-x-2 flex-wrap gap-1">
+                  <h3 class="text-base font-bold text-white">${escapeHtml(name)}</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-900/90 text-purple-300 border border-purple-500/80 shadow-sm">
+                    ${mode === 'scripts' ? '🤖 Gemini AI Extracted' : '📖 Story Bible Ingested'}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-300">
+                  <span class="text-slate-400">Genre:</span> <strong class="text-slate-200">${escapeHtml(genre)}</strong> • <span class="text-slate-400">Era:</span> <strong class="text-slate-200">${escapeHtml(era)}</strong>
+                </p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-lg bg-emerald-950/90 text-emerald-300 border border-emerald-700/80 font-bold text-xs flex items-center space-x-1.5 shadow-sm">
+              <span>⚡</span>
+              <span>Seeded into ClickHouse Memory</span>
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 italic">${escapeHtml(desc)}</p>
+          <div class="text-[11px] text-purple-200 bg-purple-950/50 p-2.5 rounded-lg border border-purple-800/60 font-mono">
+            ${mode === 'scripts' 
+              ? `🎉 Gemini 2.5 Flash analyzed your screenplay archive, extracted key character states, destroyed relics, continuity rules, and chronological milestones!`
+              : `🎉 Story Bible processed and structured into ClickHouse columnar memory with real-time sub-20ms retcon validation!`}
+          </div>
+        </div>
+
+        <!-- Quick Stats Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-center">
+            <span class="block text-xl font-bold text-emerald-400">${chars.length}</span>
+            <span class="text-[11px] text-slate-400 font-medium">👥 Characters</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-center">
+            <span class="block text-xl font-bold text-indigo-400">${relics.length}</span>
+            <span class="text-[11px] text-slate-400 font-medium">🏺 Relics & Artifacts</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-center">
+            <span class="block text-xl font-bold text-sky-400">${rules.length}</span>
+            <span class="text-[11px] text-slate-400 font-medium">⚖️ Lore Axioms</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-center">
+            <span class="block text-xl font-bold text-amber-400">${events.length}</span>
+            <span class="text-[11px] text-slate-400 font-medium">📅 Timeline Milestones</span>
+          </div>
+        </div>
+
+        <!-- Characters Extracted -->
+        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+          <h4 class="text-xs font-bold text-emerald-300 flex items-center space-x-1.5">
+            <span>👥</span>
+            <span>Extracted Character Roster (${chars.length}):</span>
+          </h4>
+          ${chars.length > 0 ? `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${chars.map(c => `
+                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs space-y-1">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-white text-xs">${escapeHtml(c.name)}</strong>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                      c.status === 'ALIVE' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' :
+                      c.status === 'DEAD' ? 'bg-rose-950 text-rose-300 border border-rose-800' :
+                      'bg-amber-950 text-amber-300 border border-amber-800'
+                    }">
+                      ${c.status === 'STASIS' && c.stasis_start_year && c.stasis_end_year 
+                        ? `STASIS: ${c.stasis_start_year}–${c.stasis_end_year}` 
+                        : (c.status === 'DEAD' && c.death_year ? `DEAD (${c.death_year})` : (c.status || 'ALIVE'))}
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-slate-400">
+                    Lifespan: ${c.birth_year || '?'}${c.death_year ? ` – ${c.death_year}` : (c.stasis_start_year ? ` (Stasis: ${c.stasis_start_year}–${c.stasis_end_year})` : ' (Active)')}
+                    ${c.species ? ` • Species: <span class="text-slate-300">${escapeHtml(c.species)}</span>` : ''}
+                  </div>
+                  ${c.powers && c.powers.length > 0 ? `
+                    <div class="text-[10px] text-slate-500">
+                      Role/Traits: <span class="text-slate-300">${escapeHtml(Array.isArray(c.powers) ? c.powers.join(', ') : c.powers)}</span>
+                      ${c.home_planet ? ` • Planet: <span class="text-slate-400">${escapeHtml(c.home_planet)}</span>` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          ` : `<p class="text-slate-500 italic text-[11px]">No specific character profiles extracted.</p>`}
+        </div>
+
+        <!-- Relics & Invariants Extracted -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Relics -->
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <h4 class="text-xs font-bold text-indigo-300 flex items-center space-x-1.5">
+              <span>🏺</span>
+              <span>Relics & Possessions (${relics.length}):</span>
+            </h4>
+            ${relics.length > 0 ? `
+              <div class="space-y-1.5">
+                ${relics.map(rel => `
+                  <div class="p-2 rounded bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
+                    <div>
+                      <strong class="text-white">${escapeHtml(rel.object_name)}</strong>
+                      ${rel.subject_name && rel.subject_name !== 'Franchise Order' ? `<span class="text-[10px] text-slate-500 block">Held by: ${escapeHtml(rel.subject_name)}</span>` : ''}
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${rel.status === 'DESTROYED' ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
+                      ${rel.status === 'DESTROYED' ? `Destroyed in ${rel.valid_to_year || 'past'}` : 'Active'}
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<p class="text-slate-500 italic text-[11px]">No relics or artifacts recorded.</p>`}
+          </div>
+
+          <!-- Lore Rules -->
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <h4 class="text-xs font-bold text-sky-300 flex items-center space-x-1.5">
+              <span>⚖️</span>
+              <span>Lore Axioms & Invariants (${rules.length}):</span>
+            </h4>
+            ${rules.length > 0 ? `
+              <div class="space-y-1.5">
+                ${rules.map(r => `
+                  <div class="p-2 rounded bg-slate-900/80 border border-slate-800 text-[11px] space-y-0.5">
+                    <div class="flex items-center space-x-1.5">
+                      <span class="px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800 text-[9px] font-mono">${escapeHtml(r.category || 'PHYSICS')}</span>
+                      ${r.entity_or_species ? `<strong class="text-slate-200 text-[10px]">${escapeHtml(r.entity_or_species)}</strong>` : ''}
+                    </div>
+                    <p class="text-slate-300 text-xs">${escapeHtml(r.rule_statement || '')}</p>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<p class="text-slate-500 italic text-[11px]">No specific universe rules recorded.</p>`}
+          </div>
+        </div>
+
+        <!-- Timeline Milestones -->
+        ${events.length > 0 ? `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <h4 class="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
+              <span>📅</span>
+              <span>Discovered Timeline Milestones (${events.length}):</span>
+            </h4>
+            <div class="space-y-1.5">
+              ${events.map(ev => `
+                <div class="p-2 rounded bg-slate-900/80 border border-slate-800 flex items-start space-x-2 text-xs">
+                  <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 text-[10px] font-mono font-bold shrink-0">${ev.year || 'Era'}</span>
+                  <div class="flex-1 space-y-0.5">
+                    ${ev.location ? `<span class="text-[10px] text-slate-400 font-mono block">📍 ${escapeHtml(ev.location)}</span>` : ''}
+                    <p class="text-slate-200">${escapeHtml(ev.title || ev.description || '')}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Action Bar -->
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-between flex-wrap gap-2">
+          <button onclick="resetIngestView()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer flex items-center space-x-1 text-xs">
+            <span>🔄</span>
+            <span>Ingest Another Franchise</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button onclick="switchHubView('active')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition cursor-pointer flex items-center space-x-1.5 text-xs">
+              <span>📚</span>
+              <span>View in Franchise Library</span>
+            </button>
+            <button onclick="${universeId ? `switchActiveUniverse('${universeId}'); ` : ''}closeFranchiseHub();" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-md text-xs">
+              <span>🎬</span>
+              <span>Start Writing in Screenplay Editor</span>
+            </button>
+          </div>
+        </div>
+      `;
     }
 
     function switchTab(tab) {
@@ -1573,133 +1889,142 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
 
       <!-- Tab View 3: Ingest Form -->
       <div id="modal-view-ingest" class="hidden flex flex-col flex-1 overflow-hidden">
-        <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
-          
-          <!-- Ingestion Method Switcher: Method A vs Method B -->
-          <div class="flex items-center p-1 bg-slate-950 border border-slate-800 rounded-xl space-x-1">
-            <button id="btn-ingest-mode-bible" onclick="switchIngestMode('bible')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 bg-amber-950/90 text-amber-300 border border-amber-700/80 shadow-sm cursor-pointer">
-              <span>📖</span>
-              <span>Method A: Direct Story Bible</span>
-            </button>
-            <button id="btn-ingest-mode-scripts" onclick="switchIngestMode('scripts')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 text-slate-400 hover:text-white border border-transparent cursor-pointer">
-              <span>🎬</span>
-              <span>Method B: Batch Screenplay Catalog</span>
-              <span class="px-1.5 py-0.2 rounded-full bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono">Gemini AI</span>
-            </button>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Franchise Universe Name</label>
-              <input id="ingest-univ-name" type="text" placeholder="e.g. CyberCity 2099" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium">
-            </div>
-            <div>
-              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Genre</label>
-              <input id="ingest-genre" type="text" placeholder="e.g. Cyberpunk / Noir" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Era / Timeline Range</label>
-              <input id="ingest-era" type="text" placeholder="e.g. 2090–2105" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
-            </div>
-            <div>
-              <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Brief Description</label>
-              <input id="ingest-desc" type="text" placeholder="e.g. Dystopian megacorp city" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
-            </div>
-          </div>
-
-          <!-- PANEL A: Direct Story Bible -->
-          <div id="panel-ingest-bible" class="space-y-3">
-            <div class="flex items-center justify-between text-[11px] bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
-              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
-                <span class="text-amber-400 font-bold">Quick Templates:</span>
-                <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition cursor-pointer">⚡ CyberCity 2099</button>
-                <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition cursor-pointer">🔮 Shadow Realm (Dark Fantasy)</button>
-              </div>
-              <button onclick="clearIngestForm()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/80 transition cursor-pointer flex items-center space-x-1 font-medium shrink-0 ml-2" title="Clear all fields and start fresh with an empty form">
-                <span>🧹</span>
-                <span>Clear Form</span>
+        
+        <!-- Input Form Section (active before extraction) -->
+        <div id="ingest-input-section" class="flex flex-col flex-1 overflow-hidden">
+          <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs text-slate-300">
+            
+            <!-- Ingestion Method Switcher: Method A vs Method B -->
+            <div class="flex items-center p-1 bg-slate-950 border border-slate-800 rounded-xl space-x-1">
+              <button id="btn-ingest-mode-bible" onclick="switchIngestMode('bible')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 bg-amber-950/90 text-amber-300 border border-amber-700/80 shadow-sm cursor-pointer">
+                <span>📖</span>
+                <span>Method A: Direct Story Bible</span>
+              </button>
+              <button id="btn-ingest-mode-scripts" onclick="switchIngestMode('scripts')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 text-slate-400 hover:text-white border border-transparent cursor-pointer">
+                <span>🎬</span>
+                <span>Method B: Batch Screenplay Catalog</span>
+                <span class="px-1.5 py-0.2 rounded-full bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono">Gemini AI</span>
               </button>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content</label>
-                <input type="file" id="lore-file-input" accept=".txt,.md,.json" class="hidden" onchange="handleLoreFileUpload(event)">
-                <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1 cursor-pointer">
-                  <span>📁</span>
-                  <span>Select File (.txt, .md, .json)</span>
-                </button>
-                <span id="lore-file-status" class="text-[10px] text-emerald-400 font-mono"></span>
-              </div>
-              <span class="text-[10px] text-slate-500">Supports JSON, Markdown, or plain story notes</span>
-            </div>
-            <textarea id="ingest-content" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
-e.g.:
-Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)
-Relic: Neon Pulse Rifle (Destroyed in 2075)
-Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
-          </div>
 
-          <!-- PANEL B: Screenplay Batch Catalog Extractor (Method B) -->
-          <div id="panel-ingest-scripts" class="hidden space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-purple-950/30 p-3 rounded-lg border border-purple-800/60">
+            <div class="grid grid-cols-2 gap-3">
               <div>
-                <span class="text-xs font-bold text-purple-300 flex items-center space-x-1">
-                  <span>🤖</span>
-                  <span>Gemini AI Screenplay Catalog Extractor</span>
-                </span>
-                <p class="text-[11px] text-slate-400">Select files in any order (random or chronological)—Gemini & CanonGuard auto-sort timelines by scene dates.</p>
+                <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Franchise Universe Name</label>
+                <input id="ingest-univ-name" type="text" placeholder="e.g. CyberCity 2099" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium">
               </div>
-              <div class="flex items-center space-x-2 shrink-0">
-                <button onclick="loadSampleScriptBatch()" class="px-3 py-1 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 hover:border-purple-500 transition text-xs font-bold flex items-center space-x-1 cursor-pointer shadow-sm">
-                  <span>⚡</span>
-                  <span>Load Sample Batch (2 Ep.)</span>
-                </button>
-                <button onclick="clearIngestForm()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/80 transition text-xs font-medium cursor-pointer flex items-center space-x-1" title="Clear all fields and loaded scripts">
+              <div>
+                <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Genre</label>
+                <input id="ingest-genre" type="text" placeholder="e.g. Cyberpunk / Noir" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Era / Timeline Range</label>
+                <input id="ingest-era" type="text" placeholder="e.g. 2090–2105" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              </div>
+              <div>
+                <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Brief Description</label>
+                <input id="ingest-desc" type="text" placeholder="e.g. Dystopian megacorp city" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500">
+              </div>
+            </div>
+
+            <!-- PANEL A: Direct Story Bible -->
+            <div id="panel-ingest-bible" class="space-y-3">
+              <div class="flex items-center justify-between text-[11px] bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+                <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                  <span class="text-amber-400 font-bold">Quick Templates:</span>
+                  <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition cursor-pointer">⚡ CyberCity 2099</button>
+                  <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition cursor-pointer">🔮 Shadow Realm (Dark Fantasy)</button>
+                </div>
+                <button onclick="clearIngestForm()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/80 transition cursor-pointer flex items-center space-x-1 font-medium shrink-0 ml-2" title="Clear all fields and start fresh with an empty form">
                   <span>🧹</span>
-                  <span>Clear</span>
+                  <span>Clear Form</span>
                 </button>
               </div>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <label class="block text-[11px] uppercase font-bold text-slate-400">Screenplay Archive Files</label>
-                <input type="file" id="batch-script-files" accept=".fountain,.txt,.fdx" multiple class="hidden" onchange="handleBatchScriptFiles(event)">
-                <button onclick="document.getElementById('batch-script-files').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-purple-500 transition text-[11px] flex items-center space-x-1 cursor-pointer">
-                  <span>📂</span>
-                  <span>Select Multiple Script Files</span>
-                </button>
-                <span id="batch-files-count-badge" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono hidden">0 files</span>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <label class="block text-[11px] uppercase font-bold text-slate-400">Lore Bible Content</label>
+                  <input type="file" id="lore-file-input" accept=".txt,.md,.json" class="hidden" onchange="handleLoreFileUpload(event)">
+                  <button onclick="document.getElementById('lore-file-input').click()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500 transition text-[11px] flex items-center space-x-1 cursor-pointer">
+                    <span>📁</span>
+                    <span>Select File (.txt, .md, .json)</span>
+                  </button>
+                  <span id="lore-file-status" class="text-[10px] text-emerald-400 font-mono"></span>
+                </div>
+                <span class="text-[10px] text-slate-500">Supports JSON, Markdown, or plain story notes</span>
               </div>
-              <span class="text-[10px] text-slate-500">Select multiple .fountain, .txt, or .fdx files</span>
+              <textarea id="ingest-content" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none custom-scrollbar" placeholder="Paste characters, destroyed relics, and universe rules here...
+  e.g.:
+  Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)
+  Relic: Neon Pulse Rifle (Destroyed in 2075)
+  Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
             </div>
 
-            <textarea id="batch-scripts-content" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none custom-scrollbar" placeholder="Paste or drop multiple past screenplay scripts here...
-Example format:
---- S01E01: The Genesis Anomaly (1982) ---
-INT. ORBITAL STATION - 1982
-Commander Ryan activates the Quantum Drive. Dr. Sarah warns him...
+            <!-- PANEL B: Screenplay Batch Catalog Extractor (Method B) -->
+            <div id="panel-ingest-scripts" class="hidden space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-purple-950/30 p-3 rounded-lg border border-purple-800/60">
+                <div>
+                  <span class="text-xs font-bold text-purple-300 flex items-center space-x-1">
+                    <span>🤖</span>
+                    <span>Gemini AI Screenplay Catalog Extractor</span>
+                  </span>
+                  <p class="text-[11px] text-slate-400">Select files in any order (random or chronological)—Gemini & CanonGuard auto-sort timelines by scene dates.</p>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                  <button onclick="loadSampleScriptBatch()" class="px-3 py-1 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 hover:border-purple-500 transition text-xs font-bold flex items-center space-x-1 cursor-pointer shadow-sm">
+                    <span>⚡</span>
+                    <span>Load Sample Batch (2 Ep.)</span>
+                  </button>
+                  <button onclick="clearIngestForm()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/80 transition text-xs font-medium cursor-pointer flex items-center space-x-1" title="Clear all fields and loaded scripts">
+                    <span>🧹</span>
+                    <span>Clear</span>
+                  </button>
+                </div>
+              </div>
 
---- S01E08: The Geneva Cataclysm (1994) ---
-INT. GENEVA RUINS - 1994
-Sarah holds the shattered pieces. The Quantum Drive was completely destroyed in 1994..."></textarea>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <label class="block text-[11px] uppercase font-bold text-slate-400">Screenplay Archive Files</label>
+                  <input type="file" id="batch-script-files" accept=".fountain,.txt,.fdx" multiple class="hidden" onchange="handleBatchScriptFiles(event)">
+                  <button onclick="document.getElementById('batch-script-files').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-purple-500 transition text-[11px] flex items-center space-x-1 cursor-pointer">
+                    <span>📂</span>
+                    <span>Select Multiple Script Files</span>
+                  </button>
+                  <span id="batch-files-count-badge" class="px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono hidden">0 files</span>
+                </div>
+                <span class="text-[10px] text-slate-500">Select multiple .fountain, .txt, or .fdx files</span>
+              </div>
+
+              <textarea id="batch-scripts-content" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none custom-scrollbar" placeholder="Paste or drop multiple past screenplay scripts here...
+  Example format:
+  --- S01E01: The Genesis Anomaly (1982) ---
+  INT. ORBITAL STATION - 1982
+  Commander Ryan activates the Quantum Drive. Dr. Sarah warns him...
+
+  --- S01E08: The Geneva Cataclysm (1994) ---
+  INT. GENEVA RUINS - 1994
+  Sarah holds the shattered pieces. The Quantum Drive was completely destroyed in 1994..."></textarea>
+            </div>
+
           </div>
 
-        </div>
-
-        <!-- Ingest Footer -->
-        <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
-          <span id="ingest-footer-note" class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
-          <div class="flex items-center space-x-2">
-            <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer">Cancel</button>
-            <button id="ingest-submit-btn" onclick="submitActiveIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5 cursor-pointer shadow-sm">
-              <span>⚡ Ingest into ClickHouse Engine</span>
-            </button>
+          <!-- Ingest Footer -->
+          <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+            <span id="ingest-footer-note" class="text-[11px] text-slate-500 font-mono">Seeds instantly into ClickHouse columnar memory</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="closeFranchiseHub()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer">Cancel</button>
+              <button id="ingest-submit-btn" onclick="submitActiveIngestion()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-white transition flex items-center space-x-1.5 cursor-pointer shadow-sm">
+                <span>⚡ Ingest into ClickHouse Engine</span>
+              </button>
+            </div>
           </div>
         </div>
+
+        <!-- Extraction Results Report View (revealed dynamically after extraction) -->
+        <div id="ingest-results-card" class="hidden flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 text-xs text-slate-300">
+        </div>
+
       </div>
 
     </div>

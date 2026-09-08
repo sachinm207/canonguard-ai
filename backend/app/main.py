@@ -385,7 +385,12 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
         "universe": universe_metadata,
         "characters_ingested": len(characters),
         "relics_ingested": len(relationships),
-        "rules_ingested": len(rules)
+        "rules_ingested": len(rules),
+        "events_ingested": len(events),
+        "characters_extracted": characters,
+        "relics_extracted": relationships,
+        "rules_extracted": rules,
+        "events_extracted": events
     }
 
 class ScriptFilePayload(BaseModel):
@@ -509,7 +514,11 @@ def ingest_from_screenplays(req: IngestFromScreenplaysRequest):
         "relics_ingested": len(relationships),
         "rules_ingested": len(rules),
         "events_ingested": len(events),
-        "scripts_processed": len(req.scripts)
+        "scripts_processed": len(req.scripts),
+        "characters_extracted": characters,
+        "relics_extracted": relationships,
+        "rules_extracted": rules,
+        "events_extracted": events
     }
 
 class ScreenplayUploadRequest(BaseModel):

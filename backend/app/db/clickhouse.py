@@ -73,9 +73,18 @@ class ClickHouseEngine:
         if self.active_universe_id and self.active_universe_id in self.universes:
             u_copy = dict(self.universes[self.active_universe_id])
             u_copy["is_builtin"] = self.active_universe_id in {"CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"}
-            u_copy["characters_count"] = len([c for c in self.characters if c.get("universe_id") == self.active_universe_id])
-            u_copy["rules_count"] = len([r for r in self.lore_rules if r.get("universe_id") == self.active_universe_id])
-            u_copy["relationships_count"] = len([rel for rel in self.relationships if rel.get("universe_id") == self.active_universe_id])
+            chars_for_u = [c for c in self.characters if c.get("universe_id") == self.active_universe_id]
+            events_for_u = [e for e in self.timeline_events if e.get("universe_id") == self.active_universe_id]
+            rules_for_u = [r for r in self.lore_rules if r.get("universe_id") == self.active_universe_id]
+            relics_for_u = [rel for rel in self.relationships if rel.get("universe_id") == self.active_universe_id]
+            u_copy["characters_count"] = len(chars_for_u)
+            u_copy["events_count"] = len(events_for_u)
+            u_copy["rules_count"] = len(rules_for_u)
+            u_copy["relationships_count"] = len(relics_for_u)
+            u_copy["characters_full"] = chars_for_u
+            u_copy["timeline_events_full"] = events_for_u
+            u_copy["lore_rules_full"] = rules_for_u
+            u_copy["relationships_full"] = relics_for_u
             return u_copy
 
         return {
@@ -91,7 +100,11 @@ class ClickHouseEngine:
             "is_builtin": False,
             "characters_count": 0,
             "rules_count": 0,
-            "relationships_count": 0
+            "relationships_count": 0,
+            "characters_full": [],
+            "timeline_events_full": [],
+            "lore_rules_full": [],
+            "relationships_full": []
         }
 
     def get_all_universes(self) -> List[Dict[str, Any]]:
@@ -104,11 +117,18 @@ class ClickHouseEngine:
             u_copy = dict(udata)
             u_copy["is_active"] = (uid == self.active_universe_id)
             u_copy["is_builtin"] = uid in {"CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"}
-            # Add character and event counts for UI display
-            u_copy["characters_count"] = len([c for c in self.characters if c.get("universe_id") == uid])
-            u_copy["events_count"] = len([e for e in self.timeline_events if e.get("universe_id") == uid])
-            u_copy["rules_count"] = len([r for r in self.lore_rules if r.get("universe_id") == uid])
-            u_copy["relationships_count"] = len([rel for rel in self.relationships if rel.get("universe_id") == uid])
+            chars_for_u = [c for c in self.characters if c.get("universe_id") == uid]
+            events_for_u = [e for e in self.timeline_events if e.get("universe_id") == uid]
+            rules_for_u = [r for r in self.lore_rules if r.get("universe_id") == uid]
+            relics_for_u = [rel for rel in self.relationships if rel.get("universe_id") == uid]
+            u_copy["characters_count"] = len(chars_for_u)
+            u_copy["events_count"] = len(events_for_u)
+            u_copy["rules_count"] = len(rules_for_u)
+            u_copy["relationships_count"] = len(relics_for_u)
+            u_copy["characters_full"] = chars_for_u
+            u_copy["timeline_events_full"] = events_for_u
+            u_copy["lore_rules_full"] = rules_for_u
+            u_copy["relationships_full"] = relics_for_u
             result.append(u_copy)
         return result
 
