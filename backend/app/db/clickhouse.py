@@ -71,7 +71,12 @@ class ClickHouseEngine:
             self.active_universe_id = rem[0] if rem else None
 
         if self.active_universe_id and self.active_universe_id in self.universes:
-            return self.universes[self.active_universe_id]
+            u_copy = dict(self.universes[self.active_universe_id])
+            u_copy["is_builtin"] = self.active_universe_id in {"CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"}
+            u_copy["characters_count"] = len([c for c in self.characters if c.get("universe_id") == self.active_universe_id])
+            u_copy["rules_count"] = len([r for r in self.lore_rules if r.get("universe_id") == self.active_universe_id])
+            u_copy["relationships_count"] = len([rel for rel in self.relationships if rel.get("universe_id") == self.active_universe_id])
+            return u_copy
 
         return {
             "id": "NONE",
@@ -82,7 +87,11 @@ class ClickHouseEngine:
             "default_year": 2026,
             "default_location": "None",
             "default_title": "Untitled.fountain",
-            "demo_traps": []
+            "demo_traps": [],
+            "is_builtin": False,
+            "characters_count": 0,
+            "rules_count": 0,
+            "relationships_count": 0
         }
 
     def get_all_universes(self) -> List[Dict[str, Any]]:
@@ -94,10 +103,12 @@ class ClickHouseEngine:
         for uid, udata in self.universes.items():
             u_copy = dict(udata)
             u_copy["is_active"] = (uid == self.active_universe_id)
+            u_copy["is_builtin"] = uid in {"CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"}
             # Add character and event counts for UI display
             u_copy["characters_count"] = len([c for c in self.characters if c.get("universe_id") == uid])
             u_copy["events_count"] = len([e for e in self.timeline_events if e.get("universe_id") == uid])
             u_copy["rules_count"] = len([r for r in self.lore_rules if r.get("universe_id") == uid])
+            u_copy["relationships_count"] = len([rel for rel in self.relationships if rel.get("universe_id") == uid])
             result.append(u_copy)
         return result
 
