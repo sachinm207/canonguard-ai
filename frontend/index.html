@@ -51,81 +51,6 @@
       background-color: rgba(244, 63, 94, 0.40);
       color: #ffffff;
     }
-    /* Interactive Help Tooltip Component */
-    .help-tip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: help;
-      margin-left: 3px;
-      vertical-align: middle;
-    }
-    .help-tip .help-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 14px;
-      height: 14px;
-      border-radius: 9999px;
-      background: rgba(51, 65, 85, 0.85);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      color: #cbd5e1;
-      font-size: 10px;
-      font-weight: 700;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      line-height: 1;
-      transition: all 0.15s ease;
-    }
-    .help-tip:hover .help-badge {
-      background: rgba(245, 158, 11, 0.25);
-      border-color: #f59e0b;
-      color: #fbbf24;
-      transform: scale(1.15);
-    }
-    .help-tip .help-bubble {
-      visibility: hidden;
-      opacity: 0;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      width: 250px;
-      background: #090d16;
-      border: 1px solid rgba(245, 158, 11, 0.5);
-      box-shadow: 0 12px 28px -5px rgba(0, 0, 0, 0.85), 0 0 12px rgba(245, 158, 11, 0.15);
-      border-radius: 8px;
-      padding: 9px 11px;
-      color: #f1f5f9;
-      font-size: 11px;
-      font-weight: 400;
-      line-height: 1.4;
-      text-transform: none;
-      white-space: normal;
-      z-index: 99999;
-      pointer-events: none;
-      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .help-tip-left .help-bubble {
-      left: 0;
-      transform: translateY(4px);
-    }
-    .help-tip-right .help-bubble {
-      left: auto;
-      right: 0;
-      transform: translateY(4px);
-    }
-    .help-tip:hover .help-bubble {
-      visibility: visible;
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .help-tip-left:hover .help-bubble {
-      transform: translateY(0);
-    }
-    .help-tip-right:hover .help-bubble {
-      transform: translateY(0);
-    }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -183,7 +108,7 @@
           <span class="text-xs font-semibold text-slate-400 flex items-center space-x-1">
             <span>🌌</span>
             <span>Story World:</span>
-            <span class="help-tip help-tip-left"><span class="help-badge">?</span><span class="help-bubble"><strong>Story World</strong>: The fictional movie universe you are writing in. Contains all official characters, past movie events, and rules.</span></span>
+            
           </span>
           <select id="universe-select" onchange="switchActiveUniverse(this.value)" class="bg-slate-900 border border-slate-700 text-sky-400 text-xs font-semibold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono cursor-pointer hover:border-slate-600 transition shadow-inner max-w-[260px] truncate">
             <option value="CHRONOVERSE">ChronoVerse (Time Travel Spy Series)</option>
@@ -194,7 +119,7 @@
         <button onclick="openFranchiseHub('active')" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-xs font-bold text-amber-300 border border-amber-700/60 hover:border-amber-500 transition flex items-center space-x-2 shadow-sm cursor-pointer" title="Story Worlds Library: Manage worlds, view characters, or add new movie lore">
           <span>📚</span>
           <span>Story Worlds Library</span>
-          <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Story Worlds Library</strong>: Switch active movie series, browse character rosters, or upload new movie story bibles.</span></span>
+          
           <span id="hub-active-count" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-mono" title="Active Worlds">0</span>
           <span id="hub-archived-count" class="hidden px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono" title="Saved Worlds">📦 0</span>
         </button>
@@ -207,19 +132,19 @@
             <span>🎯</span>
             <span class="hidden md:inline">Try Sample Mistakes</span>
             <span class="md:hidden">Demos</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Sample Mistakes</strong>: Click these buttons to paste intentional movie plot holes and watch CanonGuard catch them in less than 1 millisecond.</span></span>
+            
           </span>
           <button onclick="loadTrap(1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-900/40 text-xs font-medium border border-slate-700 hover:border-purple-500/50 text-slate-200 transition cursor-pointer shrink-0 flex items-center space-x-1" title="Mistake 1: Placing a character in a scene during years they were frozen in ice">
             <span>⚡ 1. Frozen Hero</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Frozen Hero Mistake</strong>: Elena talks to Viktor in 1982, but Viktor was frozen in cryogenic stasis from 1975 to 1995!</span></span>
+            
           </button>
           <button onclick="loadTrap(2)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-900/40 text-xs font-medium border border-slate-700 hover:border-purple-500/50 text-slate-200 transition cursor-pointer shrink-0 flex items-center space-x-1" title="Mistake 2: Using an item that was destroyed in a past film">
             <span>⚡ 2. Destroyed Item</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Destroyed Item Mistake</strong>: Elena uses the Sunstone in 1982, but it was permanently melted in a reactor in 1960!</span></span>
+            
           </button>
           <button onclick="loadTrap(3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-900/40 text-xs font-medium border border-slate-700 hover:border-purple-500/50 text-slate-200 transition cursor-pointer shrink-0 flex items-center space-x-1" title="Mistake 3: Violating physical rules of this world">
             <span>⚡ 3. Broken World Rule</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Broken World Rule Mistake</strong>: A character removes their helmet in poisonous air that past movies established is immediately fatal!</span></span>
+            
           </button>
         </div>
       </div>
@@ -247,21 +172,21 @@
           <button onclick="document.getElementById('screenplay-upload-input').click()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-sky-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Open an existing script file (.fountain or .txt)">
             <span>📂</span>
             <span>Open Script</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Open Script</strong>: Load a screenplay (.fountain, .txt) from your local computer into the live story checker.</span></span>
+            
           </button>
           <button onclick="clearScriptEditor()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700 transition flex items-center space-x-1 font-medium cursor-pointer" title="Clear the editor to write a brand new scene">
             <span>🧹</span>
             <span>Clear Text</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Clear Text</strong>: Empties the editor so you can begin typing a fresh scene from scratch.</span></span>
+            
           </button>
           <button onclick="downloadScreenplay()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 hover:border-emerald-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="Download your screenplay to your computer">
             <span>💾</span>
             <span>Save Script</span>
-            <span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Save Script</strong>: Download your screenplay as a standard text file you can open in any writing software.</span></span>
+            
           </button>
           <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center space-x-1">
             <span>🟢 Live Checker: On</span>
-            <span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Live Story Checker</strong>: Automatically checks your script for movie plot holes 350ms after you stop typing.</span></span>
+            
           </span>
         </div>
       </div>
@@ -371,15 +296,15 @@
         <div class="flex items-center space-x-3 text-xs font-semibold">
           <button id="sidebar-tab-diagnostics" onclick="switchRightPanelTab('diagnostics')" class="text-rose-400 border-b-2 border-rose-500 pb-2.5 pt-2 cursor-pointer font-semibold flex items-center space-x-1">
             <span>🔍 Story Check</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Story Check</strong>: Shows any plot holes found in your scene and offers 1-click creative fixes.</span></span>
+            
           </button>
           <button id="sidebar-tab-lore" onclick="switchRightPanelTab('lore')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent flex items-center space-x-1">
             <span>📖 Story Bible</span>
-            <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Story Bible</strong>: Encyclopedia of all official characters, important items, and world rules.</span></span>
+            
           </button>
           <button id="sidebar-tab-telemetry" onclick="switchRightPanelTab('telemetry')" class="text-slate-400 hover:text-slate-200 pb-2.5 pt-2 transition cursor-pointer border-b-2 border-transparent flex items-center space-x-1">
             <span>⚡ Activity &amp; Speed</span>
-            <span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Activity &amp; Speed</strong>: See how fast each check takes in real time (usually 0.1 to 0.5 ms).</span></span>
+            
           </button>
         </div>
         <span class="text-[11px] font-mono text-slate-500" id="violation-count">0 Mistakes</span>
@@ -395,7 +320,7 @@
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center space-x-1">
                 <span>⚠️ Story Mistake Found!</span>
-                <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Story Mistake</strong>: This line conflicts with a past film in the series (like using an item that was previously destroyed).</span></span>
+                
               </span>
               <span class="font-mono text-xs font-bold text-amber-400" id="card-latency">0.72 ms</span>
             </div>
@@ -410,11 +335,11 @@
                 <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider flex items-center space-x-1">
                   <span>🎬</span>
                   <span>Seen in Previous Movie:</span>
-                  <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Previous Movie Citation</strong>: The exact film or episode where this history was first established.</span></span>
+                  
                 </span>
                 <button onclick="openCitationInspector()" class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition flex items-center space-x-1 cursor-pointer" title="View authentic scene from past movie proving this mistake">
                   <span>🔍 View Movie Proof</span>
-                  <span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>View Movie Proof</strong>: Read the actual movie script scene and dialogue from the past film where this happened.</span></span>
+                  
                 </button>
               </div>
               <div id="card-citation" onclick="openCitationInspector()" class="text-amber-300 font-semibold cursor-pointer hover:underline flex items-center space-x-1">
@@ -427,7 +352,7 @@
               <span class="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2 flex items-center space-x-1">
                 <span>💡</span>
                 <span>Suggested Fixes (1-Click Update)</span>
-                <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Suggested Fixes</strong>: Creative story alternatives that solve the mistake while keeping your scene exciting.</span></span>
+                
               </span>
               <div id="mitigation-list" class="space-y-2">
                 <!-- Dynamically populated -->
@@ -454,7 +379,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-1">
                 <span class="font-bold text-slate-300">Fast Story Database (ClickHouse)</span>
-                <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Fast Database</strong>: Checks 50 years of movie facts in a fraction of a millisecond so you never feel typing lag.</span></span>
+                
               </div>
               <div class="flex items-center space-x-1">
                 <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">Instant Memory</span>
@@ -2286,9 +2211,9 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
               filteredChars.map(c => {
                 let badge = '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">ALIVE</span>';
                 if (c.status === 'STASIS' || c.stasis_start_year) {
-                  badge = `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800 flex items-center space-x-1"><span>FROZEN / STASIS (${c.stasis_start_year || '?'}-${c.stasis_end_year || '?'})</span><span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Frozen in Stasis</strong>: Suspended animation or cryo-sleep. Character cannot be active in scenes during these years.</span></span></span>`;
+                  badge = `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800 flex items-center space-x-1"><span>FROZEN / STASIS (${c.stasis_start_year || '?'}-${c.stasis_end_year || '?'})</span></span>`;
                 } else if (c.status === 'DEAD' || c.death_year) {
-                  badge = `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800 flex items-center space-x-1"><span>DECEASED (${c.death_year || 'perished'})</span><span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Deceased</strong>: Died in a past movie. Cannot appear alive in scenes set after this year.</span></span></span>`;
+                  badge = `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800 flex items-center space-x-1"><span>DECEASED (${c.death_year || 'perished'})</span></span>`;
                 }
                 return `
                   <div class="p-2 rounded bg-slate-950/80 border border-slate-800/80 text-[11px] space-y-0.5">
@@ -2312,7 +2237,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       html += `
         <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
           <div class="flex items-center justify-between text-[11px] font-bold text-indigo-400">
-            <span class="flex items-center space-x-1"><span>🔮</span><span>Important Items & Weapons (${filteredRelics.length})</span><span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Important Items</strong>: High-tech devices, weapons, or magical objects whose history and destruction dates are tracked.</span></span></span>
+            <span class="flex items-center space-x-1"><span>🔮</span><span>Important Items & Weapons (${filteredRelics.length})</span></span>
             <span class="text-[10px] text-slate-500 font-normal">Active Items</span>
           </div>
           <div class="space-y-1 max-h-40 overflow-y-auto custom-scrollbar pr-1">
@@ -2325,7 +2250,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
                       <strong class="text-slate-200">${escapeHtml(r.object_name)}</strong>
                       <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${isDestroyed ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-sky-950 text-sky-300 border border-sky-800'} flex items-center space-x-1">
                         <span>${isDestroyed ? `DESTROYED ${r.valid_to_year ? `(${r.valid_to_year})` : ''}` : (r.status || 'ACTIVE')}</span>
-                        ${isDestroyed ? `<span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Destroyed Item</strong>: Permanently broken or melted in a past movie. Cannot be used in later years.</span></span>` : ''}
+                        ${isDestroyed ? `` : ''}
                       </span>
                     </div>
                     <div class="text-slate-400 text-[10px] flex items-center justify-between">
@@ -2344,7 +2269,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       html += `
         <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
           <div class="flex items-center justify-between text-[11px] font-bold text-amber-400">
-            <span class="flex items-center space-x-1"><span>📜</span><span>World Rules & Laws (${filteredRules.length})</span><span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>World Rules</strong>: Physical, biological, or magical laws of this story world that writers cannot break.</span></span></span>
+            <span class="flex items-center space-x-1"><span>📜</span><span>World Rules & Laws (${filteredRules.length})</span></span>
             <span class="text-[10px] text-slate-500 font-normal">Story Rules</span>
           </div>
           <div class="space-y-1 max-h-40 overflow-y-auto custom-scrollbar pr-1">
@@ -3000,7 +2925,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
               <span class="text-[10px] text-rose-400 uppercase font-bold tracking-wider flex items-center space-x-1">
                 <span>📝</span>
                 <span>Your Script Line</span>
-                <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Draft Line</strong>: What you wrote in the editor that contradicts past movie history.</span></span>
+                
               </span>
               <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-rose-900/60 text-rose-300 border border-rose-700">❌ Conflict with Movie History</span>
             </div>
@@ -3016,7 +2941,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
               <span class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider flex items-center space-x-1">
                 <span>🔒</span>
                 <span>What Happened in Past Movies</span>
-                <span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Movie Fact</strong>: Official event established in previously released movies.</span></span>
+                
               </span>
               <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-900/60 text-emerald-300 border border-emerald-700" id="modal-cite-tier-badge">🔒 Established Fact</span>
             </div>
@@ -3036,7 +2961,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
             <div class="flex items-center space-x-1.5">
               <span class="text-amber-400">📜</span>
               <span class="text-[11px] font-bold text-slate-200 uppercase tracking-wider">Actual Scene from the Previous Movie</span>
-              <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Script Scene</strong>: The exact screenplay dialogue and action from the released movie proving when this event happened.</span></span>
+              
             </div>
             <span class="text-[10px] text-amber-400/90 font-mono font-semibold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/60">Official Film Scene</span>
           </div>
@@ -3069,7 +2994,7 @@ It is gone. Forever.
             <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider flex items-center space-x-1.5">
               <span class="text-emerald-400 font-mono">⚡</span>
               <span>Fast Database Verification (ClickHouse)</span>
-              <span class="help-tip help-tip-right"><span class="help-badge">?</span><span class="help-bubble"><strong>Database Record</strong>: Proves when and where this fact was indexed in the official archives.</span></span>
+              
             </span>
             <div class="flex items-center space-x-2 text-[10px] font-mono">
               <span class="text-emerald-400">⚡ Verified in <strong id="modal-cite-latency">0.14 ms</strong></span>
@@ -3100,7 +3025,7 @@ It is gone. Forever.
             <div class="flex items-center space-x-1.5">
               <span class="text-amber-400">💡</span>
               <span class="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Recommended Story Fix</span>
-              <span class="help-tip"><span class="help-badge">?</span><span class="help-bubble"><strong>Story Fix</strong>: A creative screenplay rewrite that maintains your scene drama without breaking movie history.</span></span>
+              
             </div>
             <span class="text-[10px] text-emerald-400 font-mono">Story-Safe Alternative</span>
           </div>
