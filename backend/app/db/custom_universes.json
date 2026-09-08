@@ -1,6 +1,334 @@
 {
   "deleted_builtins": [],
   "custom_universes": {
+    "CUSTOM_AETHELGARD": {
+      "metadata": {
+        "id": "CUSTOM_AETHELGARD",
+        "name": "Aethelgard: The Broken Crowns",
+        "genre": "Grimdark Fantasy / High Magic",
+        "era": "1240\u20131325 (Aethelgard High Annals)",
+        "description": "Feuding royal houses, blood sorcery curses, shattered ancestral blades, and amber stasis tombs.",
+        "default_year": 1310,
+        "default_location": "Oakhaven Throne Room",
+        "default_title": "Aethelgard:_The_Broken_Crowns.fountain",
+        "demo_traps": [
+          {
+            "id": 1,
+            "title": "Trap 1 (Dead King & Broken Blade)",
+            "year": 1310,
+            "location": "Oakhaven Throne Room",
+            "script": "High King Valerius IV strides into the royal hall in the year 1310, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!"
+          },
+          {
+            "id": 2,
+            "title": "Trap 2 (Stasis Prince)",
+            "year": 1305,
+            "location": "Frostpeak Courtyard",
+            "script": "Prince Kaelen walks through the frosty courtyard in the year 1305, having abandoned his quarters to join the vanguard."
+          },
+          {
+            "id": 3,
+            "title": "Trap 3 (Combined 3-Mistake Scene)",
+            "year": 1310,
+            "location": "Oakhaven Throne Room",
+            "script": "INT. OAKHAVEN THRONE ROOM - MIDNIGHT - 1310\n\nWinter winds howl against the stained glass. Shadows dance across the cold stone pillars.\n\nGRAND INQUISITOR MALAKOR paces before the dais, reviewing the war tithes.\n\nSuddenly, the oak doors burst open!\n\nHIGH KING VALERIUS IV strides into the royal hall, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!\n\nBeside him walks PRINCE KAELEN, having abandoned the royal quarters to join the vanguard.\n\nHIGH KING VALERIUS IV\nInquisitor! Drop your weapons or taste the steel of Eldor!\n\nGRAND INQUISITOR MALAKOR\nYour Grace, how can this be?\n\nPrince Kaelen steps forward, drawing his dagger to execute the King's decree in the year 1310."
+          }
+        ],
+        "source_scripts": [
+          {
+            "filename": "Aethelgard_Ep1_The_Cataclysm_1285.fountain",
+            "title": "Aethelgard Ep1 The Cataclysm 1285",
+            "content": "Title: AETHELGARD: THE BROKEN CROWNS - EPISODE 1: THE CATACLYSM\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 1285 A.D.\n\nEXT. BLOOD RIDGE GORGE - NIGHT - 1285\n\nBlack volcanic ash blankets the jagged ravines. Thunder rolls across the crimson sky. \n\nHIGH KING VALERIUS IV (43), clad in hammered black plate mail, stands atop the broken barricade. His knuckles whiten around the hilt of the ancestral broadsword.\n\nBeside him, SERAPHINA THE BLIND PROPHET (65) clutches her bone rosary, blindfolded eyes turned toward the howling tempest.\n\nHIGH KING VALERIUS IV\nIf the horde crosses the ridge tonight, Oakhaven burns before dawn! Lady Morwen, raise the obsidian ward!\n\nLADY MORWEN (20) thrusts her silver stave into the blood-soaked soil. Azure sparks cascade along the rune carvings.\n\nLADY MORWEN\nThe ley lines are fracturing, my King! The dragonfire is too fierce!\n\nA monstrous roar tears through the mountain peaks. A torrent of white-hot dragonfire descends from the black clouds.\n\nValerius raises the sacred royal sword to intercept the blast.\n\nHIGH KING VALERIUS IV\nStand firm behind the steel of our ancestors!\n\nThe flame impacts the blade with apocalyptic force. The ancient runes flare blinding violet--then CRACK.\n\nSERAPHINA\n(screaming over the gale)\nThe prophecy is severed! The steel of Eldor cannot endure the flame!\n\nThe SUN-FORGED BLADE OF ELDOR shatters into a dozen jagged, molten fragments. Liquid iron rains into the mud, hissing into steam. The hilt melts away in Valerius's armored gauntlet.\n\nHIGH KING VALERIUS IV\n(staring in horror at his empty hands)\nThe blade... the Sun-Forged Blade is destroyed. It is gone forever!\n\nValerius drops the scorched iron tang into the ash. Lady Morwen pulls the King back as the ridge collapses into ruin.\n"
+          },
+          {
+            "filename": "Aethelgard_Ep2_The_Frost_Tomb_1294.fountain",
+            "title": "Aethelgard Ep2 The Frost Tomb 1294",
+            "content": "Title: AETHELGARD: THE BROKEN CROWNS - EPISODE 2: THE FROST TOMB\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 1294 A.D.\n\nINT. FROSTPEAK ENCHANTED AMBER VAULT - DAWN - 1292\n\nMassive pillars of glacial ice support the vaulted ceiling. In the center of the chamber rests the CRYOGENIC AMBER TOMB, radiating an unnatural sub-zero mist.\n\nLADY MORWEN (27) checks the glowing runic seals carved into the amber casing.\n\nPRINCE KAELEN (22), his skin pale as snow, lying inside the crystalline sarcophagus. Dark necrotic veins pulse slowly along his throat.\n\nLADY MORWEN\nThe Wyrm-poison will reach his heart in hours unless we arrest his pulse. Prince Kaelen must enter deep stasis.\n\nPRINCE KAELEN\n(weakly, barely audible)\nHow long must I sleep, Morwen?\n\nLADY MORWEN\nUntil the grand celestial alignment in the year 1320. Twenty-eight winters you shall sleep in suspended animation, undisturbed by mortal warfare.\n\nLady Morwen depresses the twin frost runes. The amber lid slides shut. Frost crystals bloom across the glass. Kaelen's breathing ceases as total stasis takes hold.\n\nINT. THE RED MIRE FORTRESS - DUNGEON - DUSK - 1294\n\nChains clatter against stone. LORD COMMANDER BRANOK (44) is dragged before the tribunal.\n\nGRAND INQUISITOR MALAKOR (36) holds the glowing EYE OF THE VOID ORB between black leather gloves.\n\nGRAND INQUISITOR MALAKOR\nLord Commander Branok, for treason against the Crown, surrender the Void Orb to the holy inquisition!\n\nLORD COMMANDER BRANOK\n(blood spitting onto the flagstones)\nNo inquisitor will ever enslave the souls of the dead with this cursed stone!\n\nBranok breaks his chains with a surge of desperate fury, lunges forward, and slams his iron-plated war hammer directly into the Eye of the Void Orb!\n\nThe orb detonates with an ear-splitting screech, splintering into thousands of lifeless obsidian pebbles. The necromantic light vanishes forever.\n\nGRAND INQUISITOR MALAKOR\nGuards, seize him! The relic is annihilated!\n\nMalakor's guards drive halberds into Branok's chest. Lord Commander Branok collapses to the stone floor, dead.\n\nMALAKOR (CONT'D)\nRecord it in the ledger. Year 1294. Commander Branok is dead, and the Void Orb is permanently broken.\n"
+          }
+        ],
+        "raw_document": "# STORY BIBLE: Aethelgard: The Broken Crowns\nGenre: Grimdark Fantasy / High Magic\nEra: 1240\u20131325 (Aethelgard High Annals)\nSetting: The Seven Shattered Realms of Aethelgard\n\n## Dramatis Personae (Character Canon)\n- Character: High King Valerius IV (Born: 1242, Died: 1298, Status: Dead) - The Iron Sovereign of Oakhaven. Assassinated during the 1298 Winter Solstice feast.\n- Character: Lady Morwen of House Karst (Born: 1265, Died: 1340, Status: Alive) - Arch-Mage of the Obsidian Spire and master of protective wards.\n- Character: Lord Commander Branok (Born: 1250, Died: 1294, Status: Dead) - Blood Shield of Karst. Executed after the siege of Red Mire in 1294.\n- Character: Prince Kaelen the Frozen (Born: 1270, Stasis: 1292-1320, Status: Stasis) - Heir to Frostpeak. Sealed in cryo-enchanted amber stasis from 1292 to 1320.\n- Character: Seraphina the Blind Prophet (Born: 1220, Died: 1289, Status: Dead) - Seer of the Weeping Mire whose visions foretold the shattering of royal relics.\n- Character: Grand Inquisitor Malakor (Born: 1258, Died: 1318, Status: Alive) - Ruthless keeper of the Red Ledger and high law enforcer.\n\n## Relic and Artifact Continuity\n- Relic: Sun-Forged Blade of Eldor (Forged: 1180, Shattered in: 1285, Status: Destroyed) - Sacred ancestral broadsword of the High Kings. Vaporized into molten slag during the Cataclysm of Blood Ridge in 1285.\n- Relic: Crown of the Seven Wyrms (Forged: 1210, Melted in: 1299, Status: Destroyed) - Golden circlet melted in dragonfire during the fall of Highkeep in 1299.\n- Relic: Eye of the Void Orb (Created: 1235, Destroyed in: 1294, Status: Destroyed) - Obsidian sphere used to channel necromantic ley lines. Crushed to dust by Branok in 1294.\n- Relic: Amulet of the First Archon (Forged: 1150, Status: Active) - Preserved safely in the vaults of the Obsidian Spire.\n\n## Universal Axioms & Physical Invariants\n- Rule: Any spellcaster channeling raw blood sorcery without an inscribed silver ward ring suffers instantaneous arterial combustion.\n- Rule: Frost Drakes cannot breathe combustion flame and perish within three minutes if exposed to desert heat exceeding 40 degrees Celsius.\n- Rule: No sovereign bearing the Curse of the Weeping Mark may touch the Iron Sept scepter without disintegrating into obsidian ash.\n"
+      },
+      "characters": [
+        {
+          "name": "High King Valerius IV",
+          "species": "HUMAN",
+          "birth_year": 1242,
+          "death_year": 1298,
+          "status": "DEAD",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "name": "Lady Morwen of House Karst",
+          "species": "HUMAN",
+          "birth_year": 1265,
+          "death_year": 1340,
+          "status": "ALIVE",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "name": "Lord Commander Branok",
+          "species": "HUMAN",
+          "birth_year": 1250,
+          "death_year": 1294,
+          "status": "DEAD",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "name": "Prince Kaelen the Frozen",
+          "species": "HUMAN",
+          "birth_year": 1270,
+          "death_year": null,
+          "status": "STASIS",
+          "stasis_start_year": 1292,
+          "stasis_end_year": 1320,
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "name": "Seraphina the Blind Prophet",
+          "species": "HUMAN",
+          "birth_year": 1220,
+          "death_year": 1289,
+          "status": "DEAD",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "name": "Grand Inquisitor Malakor",
+          "species": "HUMAN",
+          "birth_year": 1258,
+          "death_year": 1318,
+          "status": "ALIVE",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_AETHELGARD"
+        }
+      ],
+      "timeline_events": [],
+      "relationships": [
+        {
+          "subject_name": "High Kings",
+          "predicate": "POSSESSES",
+          "object_name": "Sun-Forged Blade of Eldor",
+          "valid_from_year": 1180,
+          "valid_to_year": 1285,
+          "status": "DESTROYED",
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "subject_name": "House Karst",
+          "predicate": "POSSESSES",
+          "object_name": "Crown of the Seven Wyrms",
+          "valid_from_year": 1210,
+          "valid_to_year": 1299,
+          "status": "DESTROYED",
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "subject_name": "Lord Branok",
+          "predicate": "POSSESSES",
+          "object_name": "Eye of the Void Orb",
+          "valid_from_year": 1235,
+          "valid_to_year": 1294,
+          "status": "DESTROYED",
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "subject_name": "Archon Order",
+          "predicate": "POSSESSES",
+          "object_name": "Amulet of the First Archon",
+          "valid_from_year": 1150,
+          "valid_to_year": 1400,
+          "status": "ACTIVE",
+          "universe_id": "CUSTOM_AETHELGARD"
+        }
+      ],
+      "lore_rules": [
+        {
+          "category": "MAGIC",
+          "entity_or_species": "Blood Sorcery",
+          "rule_statement": "Any spellcaster channeling raw blood sorcery without an inscribed silver ward ring suffers instantaneous arterial combustion.",
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "category": "BIOLOGY",
+          "entity_or_species": "Frost Drakes",
+          "rule_statement": "Frost Drakes cannot breathe combustion flame and perish within three minutes if exposed to desert heat exceeding 40 degrees Celsius.",
+          "universe_id": "CUSTOM_AETHELGARD"
+        },
+        {
+          "category": "PHYSICS",
+          "entity_or_species": "Iron Sept Scepter",
+          "rule_statement": "No sovereign bearing the Curse of the Weeping Mark may touch the Iron Sept scepter without disintegrating into obsidian ash.",
+          "universe_id": "CUSTOM_AETHELGARD"
+        }
+      ]
+    },
+    "CUSTOM_PROJECT_HYPERION": {
+      "metadata": {
+        "id": "CUSTOM_PROJECT_HYPERION",
+        "name": "Project Hyperion: 2180",
+        "genre": "Hard Sci-Fi / Cyberpunk",
+        "era": "2140\u20132195 (Sol Planetary Wars)",
+        "description": "Outer rim orbital war, quantum neural ciphers, dark-matter warp engines, and cryogenic sleeper pods.",
+        "default_year": 2182,
+        "default_location": "USC Vanguard",
+        "default_title": "Project_Hyperion:_2180.fountain",
+        "demo_traps": [
+          {
+            "id": 1,
+            "title": "Trap 1 (Dead Admiral & Destroyed Drive)",
+            "year": 2182,
+            "location": "USC Vanguard",
+            "script": "ADMIRAL TERESA CRUZ stands commanding at the center holotank, ordering the Hyperion Dark-Matter Drive fully engaged in 2182!"
+          },
+          {
+            "id": 2,
+            "title": "Trap 2 (Stasis Agent Cross)",
+            "year": 2182,
+            "location": "USC Vanguard",
+            "script": "Beside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor in 2182."
+          },
+          {
+            "id": 3,
+            "title": "Trap 3 (Combined 3-Mistake Scene)",
+            "year": 2182,
+            "location": "USC Vanguard",
+            "script": "INT. USC VANGUARD - COMMAND BRIDGE - 2182\n\nWarning klaxons echo across the battle bridge as enemy cruisers approach from the asteroid belt.\n\nADMIRAL TERESA CRUZ stands commanding at the center holotank, barked orders ringing across the flight deck!\n\nADMIRAL TERESA CRUZ\nChief Engineer Vance, divert all auxiliary reactors! I want the Hyperion Dark-Matter Drive fully engaged in three minutes!\n\nBeside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor.\n\nSPECIAL AGENT GABRIEL CROSS\nWeapons online, Admiral. We will jump out of the system the second the Hyperion Drive spools up in 2182!\n\nADMIRAL TERESA CRUZ\nEngage the jump immediately!"
+          }
+        ],
+        "source_scripts": [
+          {
+            "filename": "Hyperion_Ep1_The_Ganymede_Breach_2175.fountain",
+            "title": "Hyperion Ep1 The Ganymede Breach 2175",
+            "content": "Title: PROJECT HYPERION: 2180 - EPISODE 1: THE GANYMEDE BREACH\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 2175 A.D.\n\nINT. GANYMEDE SUB-SURFACE DOCK 4 - NIGHT - 2175\n\nRed emergency sirens strobe across the massive titanium bulkheads. Decompression klaxons wail.\n\nCHIEF ENGINEER MARCUS VANCE (37), soot smeared across his EVA suit, frantically types override codes into the primary console.\n\nBeside him stands DR. ARIS THORNE (Model AX-9), synthetic chrome skin reflecting the pulsing crimson warning indicators.\n\nDR. ARIS THORNE\nAntimatter magnetic field containment is decaying at 4.2 percent per second. The Hyperion Drive has entered runaway resonance!\n\nCHIEF ENGINEER MARCUS VANCE\nEject the core into the Jovian gravity well! We cannot let another disaster happen like Phobos in 2172!\n\nDR. ARIS THORNE\nAdmiral Teresa Cruz went down with Phobos Station when her hull breached. If this core detonates inside Dock 4, all twelve thousand colonists will follow her to the grave!\n\nVance pulls the manual emergency jettison lever. Sparks burst from the hydraulic couplings.\n\nThe blast doors shudder. Inside the containment chamber, the HYPERION DARK-MATTER DRIVE flares into a blinding sapphire vortex.\n\nDR. ARIS THORNE (CONT'D)\nContainment failure is absolute. The core is undergoing subatomic vaporization!\n\nA deafening shockwave rocks the station. The sapphire vortex collapses into a blinding pinprick, consuming the entire drive array.\n\nWhen the smoke clears, only a scorched, empty magnetic cradle remains. The Hyperion Dark-Matter Drive has been completely vaporized.\n\nCHIEF ENGINEER MARCUS VANCE\n(coughing into his respirator)\nThe drive... the prototype drive is completely destroyed. Record it in the naval archives. Year 2175. The Hyperion program is dead.\n"
+          },
+          {
+            "filename": "Hyperion_Ep2_Cold_Sleep_Transit_2178.fountain",
+            "title": "Hyperion Ep2 Cold Sleep Transit 2178",
+            "content": "Title: PROJECT HYPERION: 2180 - EPISODE 2: COLD SLEEP TRANSIT\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 2178 A.D.\n\nINT. USC BOREALIS - CRYOGENIC BAY - 2178\n\nThe steady, rhythmic hum of liquid helium pumps fills the silent chamber. Rows of frosted cylindrical pods line the dark corridor.\n\nDR. ARIS THORNE (Model AX-9) steps silently along the catwalk, checking biometric readouts on a handheld diagnostic pad.\n\nThorne stops before POD 09. Through the condensation-frosted quartz glass, the frozen face of SPECIAL AGENT GABRIEL CROSS (33) is visible. His eyelids are sealed behind a silver retinal sheath.\n\nA digital holographic readout hovers over the pod:\nSUBJECT: SPECIAL AGENT GABRIEL CROSS\nSTATUS: DEEP CRYOGENIC SUSPENSION (COMMENCED 2165)\nAUTOMATED REVIVAL SCHEDULED: 2190 A.D.\nCURRENT TRANSIT TIME: 13 YEARS ELAPSED / 12 YEARS REMAINING\n\nDR. ARIS THORNE\n(recording audio log)\nShip Log: Stardate 2178. Dr. Thorne reporting. USC Borealis has crossed the Saturn orbital boundary on conventional ion cruise.\n\nThorne taps the stasis pod status panel.\n\nDR. ARIS THORNE (CONT'D)\nAgent Cross remains in stable deep-freeze stasis within Pod 09. Core temperature negative two-hundred-fourteen Celsius. Neural engrams fully frozen. No waking consciousness will occur until the year 2190.\n"
+          }
+        ],
+        "raw_document": "# STORY BIBLE: Project Hyperion: 2180\nGenre: Hard Sci-Fi / Cyberpunk\nEra: 2140\u20132195 (Sol Planetary Wars)\nSetting: Sol Outer Rim, Mars Shipyards & Jovian Colonies\n\n## Dramatis Personae (Character Canon)\n- Character: Admiral Teresa Cruz (Born: 2125, Died: 2172, Status: Dead) - Supreme Commander of the United Sol Fleet. Killed in the 2172 Phobos orbital decompression catastrophe.\n- Character: Chief Engineer Marcus Vance (Born: 2138, Died: 2205, Status: Alive) - Chief quantum propulsion engineer aboard USC Vanguard.\n- Character: Special Agent Gabriel Cross (Born: 2145, Stasis: 2165-2190, Status: Stasis) - Cyber-infiltrator frozen in stasis pod 09 aboard USC Borealis from 2165 until 2190.\n- Character: Dr. Aris Thorne (Born: 2150, Died: 2210, Status: Alive) - Synthetic android model AX-9 serving as Chief Science Officer.\n- Character: Commander David Sterling (Born: 2130, Died: 2168, Status: Dead) - Leader of the Helium-3 lunar uprising, executed in 2168.\n\n## Technology & Relic Continuity\n- Relic: Hyperion Dark-Matter Drive (Built: 2155, Destroyed in: 2175, Status: Destroyed) - Experimental FTL warp engine. Overheated and atomized in the Ganymede Breach of 2175.\n- Relic: Quantum Neural Cipher (Created: 2160, Destroyed in: 2172, Status: Destroyed) - Military decryption keycard atomized during the Phobos Station hull breach.\n- Relic: Titanium AI Core Theta (Created: 2152, Destroyed in: 2169, Status: Destroyed) - Rogue AI mainframe melted in plasma acid.\n- Relic: Mark-IV Exosuit Rig (Built: 2162, Status: Active) - Standard heavy EVA pressurized suit.\n\n## Universal Axioms & Physical Invariants\n- Rule: Unpressurized exposure to Titan liquid methane surface causes cellular flash-freezing in less than four seconds without thermal EVA insulation.\n- Rule: Direct neural interface with unshielded hyper-drives causes permanent cortical synapse meltdown.\n- Rule: Armed orbital bombardment vessels are strictly prohibited within the Martian Demilitarized Lunar Arc under the Sol Defense Treaty.\n"
+      },
+      "characters": [
+        {
+          "name": "Admiral Teresa Cruz",
+          "species": "HUMAN",
+          "birth_year": 2125,
+          "death_year": 2172,
+          "status": "DEAD",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "name": "Chief Engineer Marcus Vance",
+          "species": "HUMAN",
+          "birth_year": 2138,
+          "death_year": 2205,
+          "status": "ALIVE",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "name": "Special Agent Gabriel Cross",
+          "species": "HUMAN",
+          "birth_year": 2145,
+          "death_year": null,
+          "status": "STASIS",
+          "stasis_start_year": 2165,
+          "stasis_end_year": 2190,
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "name": "Dr. Aris Thorne",
+          "species": "HUMAN",
+          "birth_year": 2150,
+          "death_year": 2210,
+          "status": "ALIVE",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "name": "Commander David Sterling",
+          "species": "HUMAN",
+          "birth_year": 2130,
+          "death_year": 2168,
+          "status": "DEAD",
+          "stasis_start_year": null,
+          "stasis_end_year": null,
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        }
+      ],
+      "timeline_events": [],
+      "relationships": [
+        {
+          "subject_name": "United Sol Fleet",
+          "predicate": "POSSESSES",
+          "object_name": "Hyperion Dark-Matter Drive",
+          "valid_from_year": 2155,
+          "valid_to_year": 2175,
+          "status": "DESTROYED",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "subject_name": "Military Intelligence",
+          "predicate": "POSSESSES",
+          "object_name": "Quantum Neural Cipher",
+          "valid_from_year": 2160,
+          "valid_to_year": 2172,
+          "status": "DESTROYED",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "subject_name": "Rogue Syndicate",
+          "predicate": "POSSESSES",
+          "object_name": "Titanium AI Core Theta",
+          "valid_from_year": 2152,
+          "valid_to_year": 2169,
+          "status": "DESTROYED",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "subject_name": "Sol Marines",
+          "predicate": "POSSESSES",
+          "object_name": "Mark-IV Exosuit Rig",
+          "valid_from_year": 2162,
+          "valid_to_year": 2200,
+          "status": "ACTIVE",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        }
+      ],
+      "lore_rules": [
+        {
+          "category": "PHYSICS",
+          "entity_or_species": "Titan Surface",
+          "rule_statement": "Unpressurized exposure to Titan liquid methane surface causes cellular flash-freezing in less than four seconds without thermal EVA insulation.",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "category": "PHYSICS",
+          "entity_or_species": "Hyper-Drive",
+          "rule_statement": "Direct neural interface with unshielded hyper-drives causes permanent cortical synapse meltdown.",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        },
+        {
+          "category": "PHYSICS",
+          "entity_or_species": "Demilitarized Arc",
+          "rule_statement": "Armed orbital bombardment vessels are strictly prohibited within the Martian Demilitarized Lunar Arc under the Sol Defense Treaty.",
+          "universe_id": "CUSTOM_PROJECT_HYPERION"
+        }
+      ]
+    },
     "CUSTOM_CYBERCITY_2099": {
       "metadata": {
         "id": "CUSTOM_CYBERCITY_2099",
@@ -11,7 +339,9 @@
         "default_year": 2095,
         "default_location": "Central Facility",
         "default_title": "CyberCity_2099.fountain",
-        "demo_traps": []
+        "demo_traps": [],
+        "source_scripts": [],
+        "raw_document": ""
       },
       "characters": [
         {
@@ -53,209 +383,6 @@
           "entity_or_species": "Sector 4",
           "rule_statement": "Sector 4 is bathed in lethal neurotoxin gas without cybernetic respirators.",
           "universe_id": "CUSTOM_CYBERCITY_2099"
-        }
-      ]
-    },
-    "CUSTOM_PROJECT_HYPERIO_6892": {
-      "metadata": {
-        "id": "CUSTOM_PROJECT_HYPERIO_6892",
-        "name": "Project Hyperion Test",
-        "genre": "Sci-Fi / Space Opera",
-        "era": "2160s-2190s",
-        "description": "Humanity navigates the dangers of advanced space technology, from experimental dark-matter drives to long-term cryogenic suspension, amidst the backdrop of interplanetary colonization and naval operations.",
-        "default_year": 2175,
-        "default_location": "Ganymede Sub-Surface Dock 4",
-        "default_title": "Project_Hyperion_Test.fountain",
-        "demo_traps": [],
-        "source_scripts": [
-          {
-            "filename": "Hyperion_Ep1_The_Ganymede_Breach_2175.fountain",
-            "content": "Title: PROJECT HYPERION: 2180 - EPISODE 1: THE GANYMEDE BREACH\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 2175 A.D.\n\nINT. GANYMEDE SUB-SURFACE DOCK 4 - NIGHT - 2175\n\nRed emergency sirens strobe across the massive titanium bulkheads. Decompression klaxons wail.\n\nCHIEF ENGINEER MARCUS VANCE (37), soot smeared across his EVA suit, frantically types override codes into the primary console.\n\nBeside him stands DR. ARIS THORNE (Model AX-9), synthetic chrome skin reflecting the pulsing crimson warning indicators.\n\nDR. ARIS THORNE\nAntimatter magnetic field containment is decaying at 4.2 percent per second. The Hyperion Drive has entered runaway resonance!\n\nCHIEF ENGINEER MARCUS VANCE\nEject the core into the Jovian gravity well! We cannot let another disaster happen like Phobos in 2172!\n\nDR. ARIS THORNE\nAdmiral Teresa Cruz went down with Phobos Station when her hull breached. If this core detonates inside Dock 4, all twelve thousand colonists will follow her to the grave!\n\nVance pulls the manual emergency jettison lever. Sparks burst from the hydraulic couplings.\n\nThe blast doors shudder. Inside the containment chamber, the HYPERION DARK-MATTER DRIVE flares into a blinding sapphire vortex.\n\nDR. ARIS THORNE (CONT'D)\nContainment failure is absolute. The core is undergoing subatomic vaporization!\n\nA deafening shockwave rocks the station. The sapphire vortex collapses into a blinding pinprick, consuming the entire drive array.\n\nWhen the smoke clears, only a scorched, empty magnetic cradle remains. The Hyperion Dark-Matter Drive has been completely vaporized.\n\nCHIEF ENGINEER MARCUS VANCE\n(coughing into his respirator)\nThe drive... the prototype drive is completely destroyed. Record it in the naval archives. Year 2175. The Hyperion program is dead.\n"
-          },
-          {
-            "filename": "Hyperion_Ep2_Cold_Sleep_Transit_2178.fountain",
-            "content": "Title: PROJECT HYPERION: 2180 - EPISODE 2: COLD SLEEP TRANSIT\nCredit: Written by Screenplay Vault\nAuthor: CanonGuard Franchise Archives\nDraft date: 2178 A.D.\n\nINT. USC BOREALIS - CRYOGENIC BAY - 2178\n\nThe steady, rhythmic hum of liquid helium pumps fills the silent chamber. Rows of frosted cylindrical pods line the dark corridor.\n\nDR. ARIS THORNE (Model AX-9) steps silently along the catwalk, checking biometric readouts on a handheld diagnostic pad.\n\nThorne stops before POD 09. Through the condensation-frosted quartz glass, the frozen face of SPECIAL AGENT GABRIEL CROSS (33) is visible. His eyelids are sealed behind a silver retinal sheath.\n\nA digital holographic readout hovers over the pod:\nSUBJECT: SPECIAL AGENT GABRIEL CROSS\nSTATUS: DEEP CRYOGENIC SUSPENSION (COMMENCED 2165)\nAUTOMATED REVIVAL SCHEDULED: 2190 A.D.\nCURRENT TRANSIT TIME: 13 YEARS ELAPSED / 12 YEARS REMAINING\n\nDR. ARIS THORNE\n(recording audio log)\nShip Log: Stardate 2178. Dr. Thorne reporting. USC Borealis has crossed the Saturn orbital boundary on conventional ion cruise.\n\nThorne taps the stasis pod status panel.\n\nDR. ARIS THORNE (CONT'D)\nAgent Cross remains in stable deep-freeze stasis within Pod 09. Core temperature negative two-hundred-fourteen Celsius. Neural engrams fully frozen. No waking consciousness will occur until the year 2190.\n"
-          }
-        ],
-        "raw_document": ""
-      },
-      "characters": [
-        {
-          "character_id": "f0d1511e-d50e-4e5e-9e4b-050095e75fbe",
-          "name": "Marcus Vance",
-          "aliases": [],
-          "species": "HUMAN",
-          "birth_year": 2138,
-          "death_year": null,
-          "status": "ALIVE",
-          "stasis_start_year": null,
-          "stasis_end_year": null,
-          "home_planet": "Earth",
-          "powers": [
-            "Chief Engineer",
-            "Field Operative"
-          ],
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "character_id": "681b7377-50c8-4f33-9456-758c3a2a756f",
-          "name": "Dr. Aris Thorne",
-          "aliases": [],
-          "species": "SYNTHETIC",
-          "birth_year": null,
-          "death_year": null,
-          "status": "ALIVE",
-          "stasis_start_year": null,
-          "stasis_end_year": null,
-          "home_planet": null,
-          "powers": [
-            "Scientist",
-            "Diagnostic Specialist"
-          ],
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "character_id": "ef940963-76a3-4d2e-95c0-f5ede5d5a254",
-          "name": "Admiral Teresa Cruz",
-          "aliases": [],
-          "species": "HUMAN",
-          "birth_year": null,
-          "death_year": 2172,
-          "status": "DEAD",
-          "stasis_start_year": null,
-          "stasis_end_year": null,
-          "home_planet": "Earth",
-          "powers": [
-            "Admiral",
-            "Commander"
-          ],
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "character_id": "848a48f8-bf43-4e97-9889-60f08f75fa0b",
-          "name": "Special Agent Gabriel Cross",
-          "aliases": [],
-          "species": "HUMAN",
-          "birth_year": 2145,
-          "death_year": null,
-          "status": "STASIS",
-          "stasis_start_year": 2165,
-          "stasis_end_year": 2190,
-          "home_planet": "Earth",
-          "powers": [
-            "Special Agent"
-          ],
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        }
-      ],
-      "timeline_events": [
-        {
-          "event_id": "32dbec9a-2e1f-44af-a12c-1190a4c86593",
-          "title": "Special Agent Gabriel Cross commences deep cryogenic suspension.",
-          "year": 2165,
-          "location": "USC Borealis",
-          "canon_tier": "PRIMARY",
-          "media_type": "SCRIPT_CATALOG",
-          "description": "Special Agent Gabriel Cross commences deep cryogenic suspension.",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "event_id": "f4e1bd0d-9086-4fa4-8b7e-b1f87bff43b4",
-          "title": "Phobos Station disaster occurs, resulting in the death of Admiral Teresa Cruz and all onboard.",
-          "year": 2172,
-          "location": "Phobos Station",
-          "canon_tier": "PRIMARY",
-          "media_type": "SCRIPT_CATALOG",
-          "description": "Phobos Station disaster occurs, resulting in the death of Admiral Teresa Cruz and all onboard.",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "event_id": "1e126bd8-bc92-40d9-be0e-040c757303b8",
-          "title": "The Hyperion Dark-Matter Drive prototype undergoes runaway resonance and is completely vaporized due to containment failure.",
-          "year": 2175,
-          "location": "Ganymede Sub-Surface Dock 4",
-          "canon_tier": "PRIMARY",
-          "media_type": "SCRIPT_CATALOG",
-          "description": "The Hyperion Dark-Matter Drive prototype undergoes runaway resonance and is completely vaporized due to containment failure.",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "event_id": "dc9756c2-0b97-418b-a855-d9ed29184ea5",
-          "title": "The USC Borealis crosses the Saturn orbital boundary on conventional ion cruise, with Agent Cross still in stasis.",
-          "year": 2178,
-          "location": "Saturn Orbital Boundary",
-          "canon_tier": "PRIMARY",
-          "media_type": "SCRIPT_CATALOG",
-          "description": "The USC Borealis crosses the Saturn orbital boundary on conventional ion cruise, with Agent Cross still in stasis.",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "event_id": "8e11bf6e-dae7-48b5-8726-6c2718dd98ca",
-          "title": "Automated revival scheduled for Special Agent Gabriel Cross from cryogenic suspension.",
-          "year": 2190,
-          "location": "USC Borealis (projected)",
-          "canon_tier": "PRIMARY",
-          "media_type": "SCRIPT_CATALOG",
-          "description": "Automated revival scheduled for Special Agent Gabriel Cross from cryogenic suspension.",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        }
-      ],
-      "relationships": [
-        {
-          "relationship_id": "9fd2f11d-db28-4965-9b00-88c7aa9c2a3e",
-          "subject_name": "Project Hyperion Test",
-          "predicate": "POSSESSES",
-          "object_name": "Hyperion Dark-Matter Drive",
-          "valid_from_year": 2175,
-          "valid_to_year": 2175,
-          "status": "DESTROYED",
-          "source_media": "Screenplay Batch (2 scripts)",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "relationship_id": "b79544bc-04ab-4d1e-a1b6-9c4b92e034aa",
-          "subject_name": "Project Hyperion Test",
-          "predicate": "POSSESSES",
-          "object_name": "USC Borealis",
-          "valid_from_year": 2178,
-          "valid_to_year": 2000,
-          "status": "ACTIVE",
-          "source_media": "Screenplay Batch (2 scripts)",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        }
-      ],
-      "lore_rules": [
-        {
-          "rule_id": "3adaf93a-5d25-4a48-b1eb-eb5e612cff32",
-          "category": "TECH",
-          "entity_or_species": "Antimatter magnetic field containment",
-          "rule_statement": "Antimatter magnetic field containment can decay, leading to runaway resonance and core detonation.",
-          "canon_tier": "ABSOLUTE",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "rule_id": "d6991aba-4558-46bd-a58b-ddfec17f8c27",
-          "category": "PHYSICS",
-          "entity_or_species": "Jovian gravity well",
-          "rule_statement": "Jovian gravity wells can be used as a viable method for safely ejecting unstable energy cores.",
-          "canon_tier": "ABSOLUTE",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "rule_id": "01727214-b1c9-46c1-89b7-eb6f12182cb3",
-          "category": "TECH",
-          "entity_or_species": "Hyperion Dark-Matter Drive",
-          "rule_statement": "The Hyperion Dark-Matter Drive operates with subatomic vaporization during runaway resonance, resulting in complete destruction if containment fails.",
-          "canon_tier": "ABSOLUTE",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
-        },
-        {
-          "rule_id": "04cd8ed2-8691-4426-bf43-bbfc41299b78",
-          "category": "BIOLOGY",
-          "entity_or_species": "Deep Cryogenic Suspension",
-          "rule_statement": "Deep Cryogenic Suspension can preserve human life for decades (e.g., 25+ years) by freezing neural engrams and core temperature to extreme sub-zero levels, preventing waking consciousness until automated revival.",
-          "canon_tier": "ABSOLUTE",
-          "universe_id": "CUSTOM_PROJECT_HYPERIO_6892"
         }
       ]
     }

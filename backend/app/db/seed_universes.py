@@ -605,9 +605,165 @@ The ancient blade is broken! The steel of Eldor is no more!"""
     if not force_reset:
         ch_engine._load_custom_universes_from_disk()
 
-    # Ensure sample custom universe CyberCity 2099 exists if no custom lore is present
-    custom_count = len([u for u in ch_engine.universes if u not in ["CHRONOVERSE", "GALACTIC_IMPERIUM", "MYTHOS_REALM"]])
-    if custom_count == 0:
+    deleted_builtins = getattr(ch_engine, 'deleted_builtins', set())
+    archived_universes = getattr(ch_engine, 'archived_universes', {})
+
+    # Ensure sample studio franchises Aethelgard and Hyperion exist if not deleted or archived
+    if "CUSTOM_AETHELGARD" not in ch_engine.universes and "CUSTOM_AETHELGARD" not in deleted_builtins and "CUSTOM_AETHELGARD" not in archived_universes:
+        import os
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "sample_data"))
+        aeth_scripts_dir = os.path.join(base_dir, "example_1_aethelgard", "method_b_scripts")
+        aeth_scripts = []
+        if os.path.exists(aeth_scripts_dir):
+            for f in sorted(os.listdir(aeth_scripts_dir)):
+                if f.endswith('.fountain'):
+                    try:
+                        with open(os.path.join(aeth_scripts_dir, f), 'r', encoding='utf-8') as sf:
+                            aeth_scripts.append({'filename': f, 'title': f.replace('.fountain', '').replace('_', ' '), 'content': sf.read()})
+                    except Exception:
+                        pass
+        aeth_doc = ""
+        aeth_doc_path = os.path.join(base_dir, "example_1_aethelgard", "method_a_story_bible.md")
+        if os.path.exists(aeth_doc_path):
+            try:
+                with open(aeth_doc_path, 'r', encoding='utf-8') as df:
+                    aeth_doc = df.read()
+            except Exception:
+                pass
+
+        ch_engine.ingest_custom_universe(
+            universe_id="CUSTOM_AETHELGARD",
+            name="Aethelgard: The Broken Crowns",
+            genre="Grimdark Fantasy / High Magic",
+            era="1240–1325 (Aethelgard High Annals)",
+            description="Feuding royal houses, blood sorcery curses, shattered ancestral blades, and amber stasis tombs.",
+            characters=[
+                {"name": "High King Valerius IV", "species": "HUMAN", "birth_year": 1242, "death_year": 1298, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Lady Morwen of House Karst", "species": "HUMAN", "birth_year": 1265, "death_year": 1340, "status": "ALIVE", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Lord Commander Branok", "species": "HUMAN", "birth_year": 1250, "death_year": 1294, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Prince Kaelen the Frozen", "species": "HUMAN", "birth_year": 1270, "death_year": None, "status": "STASIS", "stasis_start_year": 1292, "stasis_end_year": 1320},
+                {"name": "Seraphina the Blind Prophet", "species": "HUMAN", "birth_year": 1220, "death_year": 1289, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Grand Inquisitor Malakor", "species": "HUMAN", "birth_year": 1258, "death_year": 1318, "status": "ALIVE", "stasis_start_year": None, "stasis_end_year": None}
+            ],
+            timeline_events=[],
+            relationships=[
+                {"subject_name": "High Kings", "predicate": "POSSESSES", "object_name": "Sun-Forged Blade of Eldor", "valid_from_year": 1180, "valid_to_year": 1285, "status": "DESTROYED"},
+                {"subject_name": "House Karst", "predicate": "POSSESSES", "object_name": "Crown of the Seven Wyrms", "valid_from_year": 1210, "valid_to_year": 1299, "status": "DESTROYED"},
+                {"subject_name": "Lord Branok", "predicate": "POSSESSES", "object_name": "Eye of the Void Orb", "valid_from_year": 1235, "valid_to_year": 1294, "status": "DESTROYED"},
+                {"subject_name": "Archon Order", "predicate": "POSSESSES", "object_name": "Amulet of the First Archon", "valid_from_year": 1150, "valid_to_year": 1400, "status": "ACTIVE"}
+            ],
+            lore_rules=[
+                {"category": "MAGIC", "entity_or_species": "Blood Sorcery", "rule_statement": "Any spellcaster channeling raw blood sorcery without an inscribed silver ward ring suffers instantaneous arterial combustion."},
+                {"category": "BIOLOGY", "entity_or_species": "Frost Drakes", "rule_statement": "Frost Drakes cannot breathe combustion flame and perish within three minutes if exposed to desert heat exceeding 40 degrees Celsius."},
+                {"category": "PHYSICS", "entity_or_species": "Iron Sept Scepter", "rule_statement": "No sovereign bearing the Curse of the Weeping Mark may touch the Iron Sept scepter without disintegrating into obsidian ash."}
+            ],
+            default_year=1310,
+            default_location="Oakhaven Throne Room",
+            demo_traps=[
+                {
+                    "id": 1,
+                    "title": "Trap 1 (Dead King & Broken Blade)",
+                    "year": 1310,
+                    "location": "Oakhaven Throne Room",
+                    "script": "High King Valerius IV strides into the royal hall in the year 1310, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!"
+                },
+                {
+                    "id": 2,
+                    "title": "Trap 2 (Stasis Prince)",
+                    "year": 1305,
+                    "location": "Frostpeak Courtyard",
+                    "script": "Prince Kaelen walks through the frosty courtyard in the year 1305, having abandoned his quarters to join the vanguard."
+                },
+                {
+                    "id": 3,
+                    "title": "Trap 3 (Combined 3-Mistake Scene)",
+                    "year": 1310,
+                    "location": "Oakhaven Throne Room",
+                    "script": "INT. OAKHAVEN THRONE ROOM - MIDNIGHT - 1310\n\nWinter winds howl against the stained glass. Shadows dance across the cold stone pillars.\n\nGRAND INQUISITOR MALAKOR paces before the dais, reviewing the war tithes.\n\nSuddenly, the oak doors burst open!\n\nHIGH KING VALERIUS IV strides into the royal hall, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!\n\nBeside him walks PRINCE KAELEN, having abandoned the royal quarters to join the vanguard.\n\nHIGH KING VALERIUS IV\nInquisitor! Drop your weapons or taste the steel of Eldor!\n\nGRAND INQUISITOR MALAKOR\nYour Grace, how can this be?\n\nPrince Kaelen steps forward, drawing his dagger to execute the King's decree in the year 1310."
+                }
+            ],
+            source_scripts=aeth_scripts,
+            raw_document=aeth_doc
+        )
+
+    if "CUSTOM_PROJECT_HYPERION" not in ch_engine.universes and "CUSTOM_PROJECT_HYPERION" not in deleted_builtins and "CUSTOM_PROJECT_HYPERION" not in archived_universes:
+        import os
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "sample_data"))
+        hyp_scripts_dir = os.path.join(base_dir, "example_2_hyperion", "method_b_scripts")
+        hyp_scripts = []
+        if os.path.exists(hyp_scripts_dir):
+            for f in sorted(os.listdir(hyp_scripts_dir)):
+                if f.endswith('.fountain'):
+                    try:
+                        with open(os.path.join(hyp_scripts_dir, f), 'r', encoding='utf-8') as sf:
+                            hyp_scripts.append({'filename': f, 'title': f.replace('.fountain', '').replace('_', ' '), 'content': sf.read()})
+                    except Exception:
+                        pass
+        hyp_doc = ""
+        hyp_doc_path = os.path.join(base_dir, "example_2_hyperion", "method_a_story_bible.md")
+        if os.path.exists(hyp_doc_path):
+            try:
+                with open(hyp_doc_path, 'r', encoding='utf-8') as df:
+                    hyp_doc = df.read()
+            except Exception:
+                pass
+
+        ch_engine.ingest_custom_universe(
+            universe_id="CUSTOM_PROJECT_HYPERION",
+            name="Project Hyperion: 2180",
+            genre="Hard Sci-Fi / Cyberpunk",
+            era="2140–2195 (Sol Planetary Wars)",
+            description="Outer rim orbital war, quantum neural ciphers, dark-matter warp engines, and cryogenic sleeper pods.",
+            characters=[
+                {"name": "Admiral Teresa Cruz", "species": "HUMAN", "birth_year": 2125, "death_year": 2172, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Chief Engineer Marcus Vance", "species": "HUMAN", "birth_year": 2138, "death_year": 2205, "status": "ALIVE", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Special Agent Gabriel Cross", "species": "HUMAN", "birth_year": 2145, "death_year": None, "status": "STASIS", "stasis_start_year": 2165, "stasis_end_year": 2190},
+                {"name": "Dr. Aris Thorne", "species": "HUMAN", "birth_year": 2150, "death_year": 2210, "status": "ALIVE", "stasis_start_year": None, "stasis_end_year": None},
+                {"name": "Commander David Sterling", "species": "HUMAN", "birth_year": 2130, "death_year": 2168, "status": "DEAD", "stasis_start_year": None, "stasis_end_year": None}
+            ],
+            timeline_events=[],
+            relationships=[
+                {"subject_name": "United Sol Fleet", "predicate": "POSSESSES", "object_name": "Hyperion Dark-Matter Drive", "valid_from_year": 2155, "valid_to_year": 2175, "status": "DESTROYED"},
+                {"subject_name": "Military Intelligence", "predicate": "POSSESSES", "object_name": "Quantum Neural Cipher", "valid_from_year": 2160, "valid_to_year": 2172, "status": "DESTROYED"},
+                {"subject_name": "Rogue Syndicate", "predicate": "POSSESSES", "object_name": "Titanium AI Core Theta", "valid_from_year": 2152, "valid_to_year": 2169, "status": "DESTROYED"},
+                {"subject_name": "Sol Marines", "predicate": "POSSESSES", "object_name": "Mark-IV Exosuit Rig", "valid_from_year": 2162, "valid_to_year": 2200, "status": "ACTIVE"}
+            ],
+            lore_rules=[
+                {"category": "PHYSICS", "entity_or_species": "Titan Surface", "rule_statement": "Unpressurized exposure to Titan liquid methane surface causes cellular flash-freezing in less than four seconds without thermal EVA insulation."},
+                {"category": "PHYSICS", "entity_or_species": "Hyper-Drive", "rule_statement": "Direct neural interface with unshielded hyper-drives causes permanent cortical synapse meltdown."},
+                {"category": "PHYSICS", "entity_or_species": "Demilitarized Arc", "rule_statement": "Armed orbital bombardment vessels are strictly prohibited within the Martian Demilitarized Lunar Arc under the Sol Defense Treaty."}
+            ],
+            default_year=2182,
+            default_location="USC Vanguard",
+            demo_traps=[
+                {
+                    "id": 1,
+                    "title": "Trap 1 (Dead Admiral & Destroyed Drive)",
+                    "year": 2182,
+                    "location": "USC Vanguard",
+                    "script": "ADMIRAL TERESA CRUZ stands commanding at the center holotank, ordering the Hyperion Dark-Matter Drive fully engaged in 2182!"
+                },
+                {
+                    "id": 2,
+                    "title": "Trap 2 (Stasis Agent Cross)",
+                    "year": 2182,
+                    "location": "USC Vanguard",
+                    "script": "Beside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor in 2182."
+                },
+                {
+                    "id": 3,
+                    "title": "Trap 3 (Combined 3-Mistake Scene)",
+                    "year": 2182,
+                    "location": "USC Vanguard",
+                    "script": "INT. USC VANGUARD - COMMAND BRIDGE - 2182\n\nWarning klaxons echo across the battle bridge as enemy cruisers approach from the asteroid belt.\n\nADMIRAL TERESA CRUZ stands commanding at the center holotank, barked orders ringing across the flight deck!\n\nADMIRAL TERESA CRUZ\nChief Engineer Vance, divert all auxiliary reactors! I want the Hyperion Dark-Matter Drive fully engaged in three minutes!\n\nBeside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor.\n\nSPECIAL AGENT GABRIEL CROSS\nWeapons online, Admiral. We will jump out of the system the second the Hyperion Drive spools up in 2182!\n\nADMIRAL TERESA CRUZ\nEngage the jump immediately!"
+                }
+            ],
+            source_scripts=hyp_scripts,
+            raw_document=hyp_doc
+        )
+
+    # Ensure sample custom universe CyberCity 2099 exists if not deleted or archived
+    if "CUSTOM_CYBERCITY_2099" not in ch_engine.universes and "CUSTOM_CYBERCITY_2099" not in deleted_builtins and "CUSTOM_CYBERCITY_2099" not in archived_universes:
         ch_engine.ingest_custom_universe(
             universe_id="CUSTOM_CYBERCITY_2099",
             name="CyberCity 2099",

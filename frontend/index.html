@@ -705,40 +705,75 @@
           if (activeRightPanelTab === 'lore') renderSidebarLore();
         });
       }
-      if (!isCustomScriptActive) {
-        const yr = universe.default_year || 1982;
-        const loc = universe.default_location || "Earth";
-        const title = universe.default_title || `${(universe.name || 'Screenplay').replace(/[^a-zA-Z0-9_]/g, '_')}.fountain`;
+      const yr = universe.default_year || 1982;
+      const loc = universe.default_location || "Earth";
+      const title = universe.default_title || `${(universe.name || 'Screenplay').replace(/[^a-zA-Z0-9_]/g, '_')}.fountain`;
+      
+      if (document.getElementById('current-year-display')) {
         document.getElementById('current-year-display').textContent = yr;
-        document.getElementById('current-setting-display').textContent = loc;
-        document.getElementById('current-title-display').textContent = title;
-        
-        const slugEl = document.getElementById('editor-slug-display');
-        if (slugEl) {
-          slugEl.textContent = `INT. ${loc.toUpperCase()} - ${yr}`;
-        }
       }
-      // Render dynamic traps or disabled custom script state
+      if (document.getElementById('current-setting-display')) {
+        document.getElementById('current-setting-display').textContent = loc;
+      }
+      if (document.getElementById('current-title-display')) {
+        document.getElementById('current-title-display').textContent = title;
+      }
+      
+      const slugEl = document.getElementById('editor-slug-display');
+      if (slugEl) {
+        slugEl.textContent = `INT. ${loc.toUpperCase()} - ${yr}`;
+      }
+
+      // Render dynamic traps or custom script state
       renderTraps(universe.demo_traps || []);
       
-      // Set sample script if textarea is empty or default, ONLY IF no custom script is active
+      // When applying/switching universe without an uploaded script file, load the first trap or clear
       if (!isCustomScriptActive) {
-        if (!textarea.value.trim() || textarea.value.includes("Viktor") || textarea.value.includes("Kael") || textarea.value.includes("Eldor")) {
-          if (universe.demo_traps && universe.demo_traps.length > 0) {
-            textarea.value = universe.demo_traps[0].script;
-            validateScript(textarea.value);
-            updateEditorWordCount(textarea.value);
-          } else {
-            // For custom universes without built-in demo traps, clear out old demo text so writer starts fresh!
-            textarea.value = "";
-            validateScript("");
-            updateEditorWordCount("");
+        if (universe.demo_traps && universe.demo_traps.length > 0) {
+          const trap = universe.demo_traps[0];
+          textarea.value = trap.script;
+          if (trap.year && document.getElementById('current-year-display')) {
+            document.getElementById('current-year-display').textContent = trap.year;
           }
+          if (trap.location && document.getElementById('current-setting-display')) {
+            document.getElementById('current-setting-display').textContent = trap.location;
+          }
+          validateScript(textarea.value);
+          updateEditorWordCount(textarea.value);
+        } else {
+          textarea.value = "";
+          validateScript("");
+          updateEditorWordCount("");
         }
       }
       if (activeRightPanelTab === 'lore') {
         renderSidebarLore();
       }
+    }
+
+    async function startWritingForUniverse(universeId) {
+      isCustomScriptActive = false;
+      customScriptFilename = '';
+      await switchActiveUniverse(universeId);
+      closeFranchiseHub();
+
+      // Ensure the first trap/test scene is loaded and validated for this universe
+      if (currentUniverseMetadata && currentUniverseMetadata.demo_traps && currentUniverseMetadata.demo_traps.length > 0) {
+        const trap = currentUniverseMetadata.demo_traps[0];
+        textarea.value = trap.script;
+        if (trap.year && document.getElementById('current-year-display')) {
+          document.getElementById('current-year-display').textContent = trap.year;
+        }
+        if (trap.location && document.getElementById('current-setting-display')) {
+          document.getElementById('current-setting-display').textContent = trap.location;
+        }
+        updateEditorWordCount(textarea.value);
+        validateScript(textarea.value);
+      } else {
+        clearScriptEditor();
+      }
+      switchRightPanelTab('diagnostics');
+      textarea.focus();
     }
 
     function clearScriptEditor() {
@@ -852,84 +887,70 @@
             <span class="truncate max-w-[160px] sm:max-w-[220px]" title="${escapeHtml(customScriptFilename)}">Script: <strong>${escapeHtml(customScriptFilename)}</strong></span>
             <span class="text-emerald-400/90 text-[10px] uppercase font-bold tracking-wider ml-1 bg-emerald-900/60 px-1.5 py-0.5 rounded shrink-0">Active</span>
           </span>
-          <button onclick="unloadCustomScript()" class="px-2.5 py-1 text-xs font-medium text-purple-300 hover:text-white bg-purple-950/80 hover:bg-purple-900 rounded-lg border border-purple-800/80 hover:border-purple-500 transition cursor-pointer flex items-center space-x-1 shadow-sm shrink-0" title="Switch back to Demo Playground with sample scenes">
-            <span>🎯 Switch to Demo Playground</span>
+          <button onclick="unloadCustomScript()" class="px-2.5 py-1 text-xs font-medium text-purple-300 hover:text-white bg-purple-950/80 hover:bg-purple-900 rounded-lg border border-purple-800/80 hover:border-purple-500 transition cursor-pointer flex items-center space-x-1 shadow-sm shrink-0" title="Switch back to Sample Scenes">
+            <span>🎯 Switch to Sample Scenes</span>
           </button>
         `;
         container.appendChild(wrap);
         return;
       }
 
-      // CASE 2: Studio Franchise Active (Custom Ingested Lore Bible)
-      if (!isBuiltin) {
-        const wrap = document.createElement('div');
-        wrap.className = "flex items-center space-x-2.5";
-        wrap.innerHTML = `
-          <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/90 text-emerald-300 border border-emerald-700/80 text-[11px] font-semibold flex items-center space-x-1 shrink-0 shadow-sm">
-            <span>🎬</span>
-            <span class="hidden md:inline">Studio Workspace</span>
-            <span class="md:hidden">Studio</span>
-          </span>
-          <div class="flex items-center space-x-2 text-xs text-slate-300 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-1 font-mono shadow-inner">
-            <span class="text-slate-400 font-semibold">Active Canon:</span>
-            <span class="text-sky-400 font-bold">${currentUniverseMetadata ? (currentUniverseMetadata.rules_count || 0) : 0} Rules</span>
-            <span class="text-slate-600">•</span>
-            <span class="text-amber-400 font-bold">${currentUniverseMetadata ? (currentUniverseMetadata.characters_count || 0) : 0} Chars</span>
-            <span class="text-slate-600">•</span>
-            <span class="text-emerald-400 font-bold">${currentUniverseMetadata ? (currentUniverseMetadata.relationships_count || 0) : 0} Relics</span>
-          </div>
-        `;
-        container.appendChild(wrap);
-        return;
-      }
-
-      // CASE 3: Built-in Demo Franchise Active (Demo Playground Mode)
+      // CASE 2: Both Built-in AND Studio Franchises render their test scenes / traps!
       const wrap = document.createElement('div');
       wrap.className = "flex items-center space-x-2 overflow-x-auto custom-scrollbar";
       wrap.innerHTML = `
-        <span class="px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 border border-purple-700/80 text-[11px] font-semibold flex items-center space-x-1 shrink-0 shadow-sm">
-          <span>🎯</span>
-          <span class="hidden md:inline">Try Sample Mistakes</span>
-          <span class="md:hidden">Demos</span>
+        <span class="px-2.5 py-0.5 rounded-full ${isBuiltin ? 'bg-purple-950/90 text-purple-300 border border-purple-700/80' : 'bg-emerald-950/90 text-emerald-300 border border-emerald-700/80'} text-[11px] font-semibold flex items-center space-x-1 shrink-0 shadow-sm">
+          <span>${isBuiltin ? '🎯' : '📁'}</span>
+          <span class="hidden md:inline">${isBuiltin ? 'Try Sample Mistakes' : 'Franchise Test Scenes'}</span>
+          <span class="md:hidden">Tests</span>
         </span>
         <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1 shrink-0">
-          <span class="hidden sm:inline">Sample Mistakes:</span>
-          <span class="sm:hidden">Mistakes:</span>
+          <span class="hidden sm:inline">Test Scenes:</span>
+          <span class="sm:hidden">Tests:</span>
         </span>
       `;
 
-      if (!traps || traps.length === 0) {
-        wrap.innerHTML += `<span class="text-[11px] text-slate-500 font-mono">None</span>`;
-        container.appendChild(wrap);
-        return;
+      if (traps && traps.length > 0) {
+        traps.forEach((trap, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-900/40 text-xs font-medium border border-slate-700 hover:border-purple-500/50 text-slate-200 transition cursor-pointer shrink-0 shadow-sm";
+          let titleText = trap.title || `Mistake ${idx + 1}`;
+          titleText = titleText.replace(/^Trap\s*/i, 'Mistake ').replace(/^Demo Trap\s*/i, 'Mistake ');
+          if (titleText.toLowerCase().includes('stasis') && !titleText.toLowerCase().includes('prince') && !titleText.toLowerCase().includes('agent')) titleText = '1. Frozen Hero';
+          else if (titleText.toLowerCase().includes('relic') && !titleText.toLowerCase().includes('blade') && !titleText.toLowerCase().includes('drive')) titleText = '2. Destroyed Item';
+          else if (titleText.toLowerCase().includes('bio') && !titleText.toLowerCase().includes('blood')) titleText = '3. Broken World Rule';
+          btn.innerHTML = `<span class="text-amber-400 mr-1">⚡</span><span>${escapeHtml(titleText)}</span>`;
+          btn.title = `Load Sample Mistake: ${titleText} - ${trap.location || ''} (${trap.year || ''})`;
+          btn.onclick = () => {
+            if (isCustomScriptActive) {
+              if (!confirm(`⚠️ A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Sample Test Scene will overwrite your active screenplay. Do you want to proceed?`)) {
+                return;
+              }
+              isCustomScriptActive = false;
+              customScriptFilename = '';
+              renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
+            }
+            if (document.getElementById('current-year-display')) {
+              document.getElementById('current-year-display').textContent = trap.year || currentUniverseMetadata.default_year || 1982;
+            }
+            if (document.getElementById('current-setting-display')) {
+              document.getElementById('current-setting-display').textContent = trap.location || currentUniverseMetadata.default_location || "Location";
+            }
+            textarea.value = trap.script;
+            updateEditorWordCount(textarea.value);
+            validateScript(trap.script);
+          };
+          wrap.appendChild(btn);
+        });
       }
 
-      traps.forEach((trap, idx) => {
-        const btn = document.createElement('button');
-        btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-purple-900/40 text-xs font-medium border border-slate-700 hover:border-purple-500/50 text-slate-200 transition cursor-pointer shrink-0 shadow-sm";
-        let titleText = trap.title || `Mistake ${idx + 1}`;
-        titleText = titleText.replace(/^Trap\s*/i, 'Mistake ').replace(/^Demo Trap\s*/i, 'Mistake ');
-        if (titleText.toLowerCase().includes('stasis')) titleText = '1. Frozen Hero';
-        else if (titleText.toLowerCase().includes('relic')) titleText = '2. Destroyed Item';
-        else if (titleText.toLowerCase().includes('bio')) titleText = '3. Broken World Rule';
-        btn.innerHTML = `<span class="text-amber-400 mr-1">⚡</span><span>${escapeHtml(titleText)}</span>`;
-        btn.title = `Load Sample Mistake: ${titleText} - ${trap.location || ''} (${trap.year || ''})`;
-        btn.onclick = () => {
-          if (isCustomScriptActive) {
-            if (!confirm(`⚠️ A custom script ("${customScriptFilename}") is currently loaded.\n\nLoading a Sample Test Scene will overwrite your active screenplay. Do you want to proceed?`)) {
-              return;
-            }
-            isCustomScriptActive = false;
-            customScriptFilename = '';
-            renderTraps(currentUniverseMetadata ? currentUniverseMetadata.demo_traps || [] : []);
-          }
-          document.getElementById('current-year-display').textContent = trap.year || 1982;
-          document.getElementById('current-setting-display').textContent = trap.location || "Location";
-          textarea.value = trap.script;
-          validateScript(trap.script);
-        };
-        wrap.appendChild(btn);
-      });
+      // Add Clear / Blank Scene button
+      const blankBtn = document.createElement('button');
+      blankBtn.className = "px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-medium border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white transition cursor-pointer shrink-0";
+      blankBtn.innerHTML = `<span>🧹 Blank Scene</span>`;
+      blankBtn.title = "Clear editor to write your own scene";
+      blankBtn.onclick = () => clearScriptEditor();
+      wrap.appendChild(blankBtn);
 
       container.appendChild(wrap);
     }
@@ -1212,7 +1233,7 @@
                   <span>${isExpanded ? 'Hide Lore' : 'View Lore Details'}</span>
                 </button>
                 ${!isActive 
-                  ? `<button onclick="switchActiveUniverse('${u.id}'); closeFranchiseHub();" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
+                  ? `<button onclick="startWritingForUniverse('${u.id}');" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 hover:border-sky-500 transition cursor-pointer">Select</button>` 
                   : `<span class="text-xs text-emerald-400 font-bold px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/60">Active Now</span>`}
                 <button onclick="archiveUniverseById('${u.id}', '${attrName}')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/80 hover:border-amber-500 shadow-sm flex items-center space-x-1.5 cursor-pointer transition active:scale-95" title="Safely move this franchise into cold storage archive">
                   <span>📦</span>
@@ -1999,7 +2020,7 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
               <span>📚</span>
               <span>View in Franchise Library</span>
             </button>
-            <button onclick="${universeId ? `switchActiveUniverse('${universeId}'); ` : ''}closeFranchiseHub();" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-md text-xs">
+            <button onclick="${universeId ? `startWritingForUniverse('${universeId}');` : 'closeFranchiseHub();'}" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-md text-xs">
               <span>🎬</span>
               <span>Start Writing in Screenplay Editor</span>
             </button>

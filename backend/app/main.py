@@ -198,6 +198,109 @@ def reset_default_universes():
         "active_universe": ch_engine.get_active_universe()
     }
 
+def build_universe_demo_traps(universe_name: str, characters: list, relationships: list, rules: list, default_year: int, default_location: str) -> list:
+    """Generates authentic interactive mistake demo traps for custom universes."""
+    name_lower = universe_name.lower()
+
+    # 1. Special-case Aethelgard sample dataset
+    if "aethelgard" in name_lower:
+        return [
+            {
+                "id": 1,
+                "title": "Trap 1 (Dead King & Broken Blade)",
+                "year": 1310,
+                "location": "Oakhaven Throne Room",
+                "script": "High King Valerius IV strides into the royal hall in the year 1310, eyes blazing with fury. In his right hand, he proudly brandishes the glowing Sun-Forged Blade of Eldor!"
+            },
+            {
+                "id": 2,
+                "title": "Trap 2 (Stasis Prince)",
+                "year": 1305,
+                "location": "Frostpeak Courtyard",
+                "script": "Prince Kaelen walks through the frosty courtyard in the year 1305, having abandoned his quarters to join the vanguard."
+            },
+            {
+                "id": 3,
+                "title": "Trap 3 (Blood Sorcery Rule)",
+                "year": 1310,
+                "location": "Oakhaven Throne Room",
+                "script": "Lady Morwen channels raw blood sorcery without an inscribed silver ward ring before the dais in 1310."
+            }
+        ]
+
+    # 2. Special-case Hyperion sample dataset
+    if "hyperion" in name_lower:
+        return [
+            {
+                "id": 1,
+                "title": "Trap 1 (Dead Admiral & Destroyed Drive)",
+                "year": 2182,
+                "location": "USC Vanguard",
+                "script": "ADMIRAL TERESA CRUZ stands commanding at the center holotank, ordering the Hyperion Dark-Matter Drive fully engaged in 2182!"
+            },
+            {
+                "id": 2,
+                "title": "Trap 2 (Stasis Agent)",
+                "year": 2182,
+                "location": "USC Vanguard",
+                "script": "Beside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol, checking the tactical readouts on the central bridge monitor in 2182."
+            },
+            {
+                "id": 3,
+                "title": "Trap 3 (Combined 3-Mistake Scene)",
+                "year": 2182,
+                "location": "USC Vanguard",
+                "script": "INT. USC VANGUARD - COMMAND BRIDGE - 2182\n\nADMIRAL TERESA CRUZ stands commanding at the center holotank!\n\nADMIRAL TERESA CRUZ\nEngage the Hyperion Dark-Matter Drive in 2182!\n\nBeside Cruz, SPECIAL AGENT GABRIEL CROSS unholsters his pulse pistol."
+            }
+        ]
+
+    # 3. Dynamic generic trap generation for any user-uploaded franchise
+    traps = []
+    tid = 1
+
+    dead_chars = [c for c in characters if c.get("status") == "DEAD" and c.get("death_year")]
+    if dead_chars:
+        dc = dead_chars[0]
+        dy = dc.get("death_year") or default_year
+        t_year = max(default_year, dy + 5)
+        traps.append({
+            "id": tid,
+            "title": f"Trap {tid} (Deceased {dc['name'][:14]})",
+            "year": t_year,
+            "location": default_location,
+            "script": f"{dc['name']} arrives at the {default_location} in the year {t_year} to issue an urgent decree."
+        })
+        tid += 1
+
+    dest_relics = [r for r in relationships if r.get("status") == "DESTROYED" and r.get("valid_to_year")]
+    if dest_relics:
+        dr = dest_relics[0]
+        ry = dr.get("valid_to_year") or default_year
+        t_year = max(default_year, ry + 5)
+        traps.append({
+            "id": tid,
+            "title": f"Trap {tid} (Destroyed {dr['object_name'][:14]})",
+            "year": t_year,
+            "location": default_location,
+            "script": f"The protagonist draws the {dr['object_name']} to unlock the vault in the year {t_year}."
+        })
+        tid += 1
+
+    stasis_chars = [c for c in characters if c.get("status") == "STASIS" and c.get("stasis_start_year") and c.get("stasis_end_year")]
+    if stasis_chars:
+        sc = stasis_chars[0]
+        s_mid = (sc["stasis_start_year"] + sc["stasis_end_year"]) // 2
+        traps.append({
+            "id": tid,
+            "title": f"Trap {tid} (Stasis {sc['name'][:14]})",
+            "year": s_mid,
+            "location": default_location,
+            "script": f"{sc['name']} walks through the {default_location} in the year {s_mid}, conferring with the guards."
+        })
+        tid += 1
+
+    return traps
+
 class IngestLoreDocumentRequest(BaseModel):
     universe_name: str
     genre: Optional[str] = "Custom Sci-Fi / Fantasy"
@@ -366,6 +469,36 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
                     "powers": ["Leadership"]
                 })
 
+    # Detect default year & setting
+    default_year = 2026
+    default_location = "Central Facility"
+    era_match = re.search(r'era[:\s]+(\d+)[–\-](\d+)', req.document_content, re.I)
+    if era_match:
+        default_year = int(era_match.group(2)) - 15
+    elif req.era:
+        era_match2 = re.search(r'(\d+)[–\-](\d+)', req.era)
+        if era_match2:
+            default_year = int(era_match2.group(2)) - 15
+
+    setting_match = re.search(r'setting[:\s]+([^\n\r]+)', req.document_content, re.I)
+    if setting_match:
+        default_location = setting_match.group(1).strip().strip('#*')
+    elif "aethelgard" in req.universe_name.lower():
+        default_year = 1310
+        default_location = "Oakhaven Throne Room"
+    elif "hyperion" in req.universe_name.lower():
+        default_year = 2182
+        default_location = "USC Vanguard"
+
+    demo_traps = build_universe_demo_traps(
+        universe_name=req.universe_name,
+        characters=characters,
+        relationships=relationships,
+        rules=rules,
+        default_year=default_year,
+        default_location=default_location
+    )
+
     # Ingest into ClickHouse
     universe_metadata = ch_engine.ingest_custom_universe(
         universe_id=uid,
@@ -377,6 +510,9 @@ def ingest_lore_document(req: IngestLoreDocumentRequest):
         timeline_events=events,
         relationships=relationships,
         lore_rules=rules,
+        default_year=default_year,
+        default_location=default_location,
+        demo_traps=demo_traps,
         raw_document=req.document_content
     )
 
@@ -494,6 +630,24 @@ def ingest_from_screenplays(req: IngestFromScreenplaysRequest):
             "description": ev.get("event_summary", "")
         })
 
+    extracted_def_year = extracted.get("default_year") or 1982
+    extracted_def_loc = extracted.get("default_location") or "Main Base"
+    if "aethelgard" in req.universe_name.lower():
+        extracted_def_year = 1310
+        extracted_def_loc = "Oakhaven Throne Room"
+    elif "hyperion" in req.universe_name.lower():
+        extracted_def_year = 2182
+        extracted_def_loc = "USC Vanguard"
+
+    demo_traps = build_universe_demo_traps(
+        universe_name=req.universe_name,
+        characters=characters,
+        relationships=relationships,
+        rules=rules,
+        default_year=extracted_def_year,
+        default_location=extracted_def_loc
+    )
+
     universe_metadata = ch_engine.ingest_custom_universe(
         universe_id=uid,
         name=req.universe_name,
@@ -504,8 +658,9 @@ def ingest_from_screenplays(req: IngestFromScreenplaysRequest):
         timeline_events=events,
         relationships=relationships,
         lore_rules=rules,
-        default_year=extracted.get("default_year", 1982),
-        default_location=extracted.get("default_location", "Main Base"),
+        default_year=extracted_def_year,
+        default_location=extracted_def_loc,
+        demo_traps=demo_traps,
         source_scripts=scripts_dicts
     )
 
