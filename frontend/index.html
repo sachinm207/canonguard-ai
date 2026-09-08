@@ -1265,21 +1265,61 @@ Rule: The Abyssal Trench causes instantaneous flesh rot for living mortals witho
       }
     }
 
+    function clearIngestForm() {
+      const nameInput = document.getElementById('ingest-univ-name');
+      if (nameInput) nameInput.value = '';
+
+      const genreInput = document.getElementById('ingest-genre');
+      if (genreInput) genreInput.value = '';
+
+      const eraInput = document.getElementById('ingest-era');
+      if (eraInput) eraInput.value = '';
+
+      const descInput = document.getElementById('ingest-desc');
+      if (descInput) descInput.value = '';
+
+      const bibleText = document.getElementById('ingest-content');
+      if (bibleText) bibleText.value = '';
+
+      const scriptsText = document.getElementById('batch-scripts-content');
+      if (scriptsText) scriptsText.value = '';
+
+      loadedBatchScriptFiles = [];
+      const badge = document.getElementById('batch-files-count-badge');
+      if (badge) {
+        badge.textContent = '0 files';
+        badge.classList.add('hidden');
+      }
+
+      const loreStatus = document.getElementById('lore-file-status');
+      if (loreStatus) loreStatus.textContent = '';
+
+      const fileInput = document.getElementById('lore-file-input');
+      if (fileInput) fileInput.value = '';
+
+      const batchFileInput = document.getElementById('batch-script-files');
+      if (batchFileInput) batchFileInput.value = '';
+    }
+
     async function handleBatchScriptFiles(event) {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
+      
+      // Auto-sort files naturally so e.g. Ep01, Ep02 or 1982, 1994 are in order even if clicked randomly
+      files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
       loadedBatchScriptFiles = [];
       let combined = "";
 
       for (const file of files) {
         const text = await file.text();
         loadedBatchScriptFiles.push({ filename: file.name, content: text });
-        combined += `\n--- SCREENPLAY: ${file.name} ---\n${text}\n`;
+        combined += `\n--- SCREENPLAY FILE: ${file.name} ---\n${text}\n`;
       }
 
       const badge = document.getElementById('batch-files-count-badge');
       if (badge) {
-        badge.textContent = `📁 ${files.length} file${files.length > 1 ? 's' : ''} loaded`;
+        badge.textContent = `📁 ${files.length} file${files.length > 1 ? 's' : ''} loaded (Chronologically Sorted)`;
         badge.classList.remove('hidden');
       }
 
@@ -1572,10 +1612,16 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
 
           <!-- PANEL A: Direct Story Bible -->
           <div id="panel-ingest-bible" class="space-y-3">
-            <div class="flex items-center space-x-2 text-[11px] bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
-              <span class="text-amber-400 font-bold">Quick Templates:</span>
-              <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition cursor-pointer">⚡ CyberCity 2099</button>
-              <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition cursor-pointer">🔮 Shadow Realm (Dark Fantasy)</button>
+            <div class="flex items-center justify-between text-[11px] bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                <span class="text-amber-400 font-bold">Quick Templates:</span>
+                <button onclick="loadSampleBible('cyberpunk')" class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 transition cursor-pointer">⚡ CyberCity 2099</button>
+                <button onclick="loadSampleBible('darkfantasy')" class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition cursor-pointer">🔮 Shadow Realm (Dark Fantasy)</button>
+              </div>
+              <button onclick="clearIngestForm()" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/80 transition cursor-pointer flex items-center space-x-1 font-medium shrink-0 ml-2" title="Clear all fields and start fresh with an empty form">
+                <span>🧹</span>
+                <span>Clear Form</span>
+              </button>
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-2">
@@ -1604,12 +1650,18 @@ Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
                   <span>🤖</span>
                   <span>Gemini AI Screenplay Catalog Extractor</span>
                 </span>
-                <p class="text-[11px] text-slate-400">Upload multiple past scripts or load sample batch. Gemini automatically discovers characters, stasis dates, destroyed relics & universe rules.</p>
+                <p class="text-[11px] text-slate-400">Select files in any order (random or chronological)—Gemini & CanonGuard auto-sort timelines by scene dates.</p>
               </div>
-              <button onclick="loadSampleScriptBatch()" class="px-3 py-1 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 hover:border-purple-500 transition text-xs font-bold shrink-0 flex items-center space-x-1 cursor-pointer shadow-sm">
-                <span>⚡</span>
-                <span>Load Sample Script Batch (2 Ep.)</span>
-              </button>
+              <div class="flex items-center space-x-2 shrink-0">
+                <button onclick="loadSampleScriptBatch()" class="px-3 py-1 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 hover:border-purple-500 transition text-xs font-bold flex items-center space-x-1 cursor-pointer shadow-sm">
+                  <span>⚡</span>
+                  <span>Load Sample Batch (2 Ep.)</span>
+                </button>
+                <button onclick="clearIngestForm()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/80 transition text-xs font-medium cursor-pointer flex items-center space-x-1" title="Clear all fields and loaded scripts">
+                  <span>🧹</span>
+                  <span>Clear</span>
+                </button>
+              </div>
             </div>
 
             <div class="flex items-center justify-between">
