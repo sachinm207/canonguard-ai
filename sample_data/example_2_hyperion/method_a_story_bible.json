@@ -1,0 +1,164 @@
+{
+  "universe_name": "Project Hyperion: 2180",
+  "genre": "Hard Sci-Fi / Cyberpunk",
+  "era": "2140\u20132195 (Sol Planetary Wars)",
+  "description": "A hard science-fiction franchise chronicling the corporate cold war across Mars orbital shipyards, Jovian mining colonies, and experimental quantum propulsion systems.",
+  "default_year": 2175,
+  "default_location": "Ganymede Sub-Surface Orbital Complex",
+  "characters": [
+    {
+      "name": "Admiral Teresa Cruz",
+      "species": "HUMAN",
+      "birth_year": 2125,
+      "death_year": 2172,
+      "status": "DEAD",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Earth (New Geneva)",
+      "powers": [
+        "Fleet Command",
+        "Orbital Warfare"
+      ],
+      "aliases": [
+        "The Iron Admiral",
+        "Cruz of Phobos"
+      ]
+    },
+    {
+      "name": "Chief Engineer Marcus Vance",
+      "species": "HUMAN",
+      "birth_year": 2138,
+      "death_year": 2205,
+      "status": "ALIVE",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Mars (Olympus Colony)",
+      "powers": [
+        "Quantum Propulsion Engineering",
+        "Sub-light Navigation"
+      ],
+      "aliases": [
+        "The Hyperion Architect"
+      ]
+    },
+    {
+      "name": "Special Agent Gabriel Cross",
+      "species": "CYBORG",
+      "birth_year": 2145,
+      "death_year": 2225,
+      "status": "STASIS",
+      "stasis_start_year": 2165,
+      "stasis_end_year": 2190,
+      "home_planet": "Earth (Neo-Tokyo)",
+      "powers": [
+        "Neural Cyber-Espionage",
+        "Sub-zero Stasis Longevity"
+      ],
+      "aliases": [
+        "Agent 09",
+        "The Frozen Phantom"
+      ]
+    },
+    {
+      "name": "Dr. Aris Thorne",
+      "species": "SYNTHETIC",
+      "birth_year": 2150,
+      "death_year": 2210,
+      "status": "ALIVE",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Lunar Orbital Outpost",
+      "powers": [
+        "Astrophysical Computation",
+        "Synthetic Systems Diagnostics"
+      ],
+      "aliases": [
+        "Model AX-9",
+        "Dr. Thorne"
+      ]
+    },
+    {
+      "name": "Commander David Sterling",
+      "species": "HUMAN",
+      "birth_year": 2130,
+      "death_year": 2168,
+      "status": "DEAD",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Lunar Helium Basin",
+      "powers": [
+        "Mining Sector Defense"
+      ],
+      "aliases": [
+        "Sterling the Rebel"
+      ]
+    }
+  ],
+  "relics": [
+    {
+      "name": "Hyperion Dark-Matter Drive",
+      "valid_from_year": 2155,
+      "destruction_year": 2175,
+      "status": "DESTROYED",
+      "source_media": "USC Ganymede Disaster Official Investigation Report"
+    },
+    {
+      "name": "Quantum Neural Cipher",
+      "valid_from_year": 2160,
+      "destruction_year": 2172,
+      "status": "DESTROYED",
+      "source_media": "Phobos Orbital Station Decompression Black Box"
+    },
+    {
+      "name": "Titanium AI Core Theta",
+      "valid_from_year": 2152,
+      "destruction_year": 2169,
+      "status": "DESTROYED",
+      "source_media": "The Luna Acid Smelting Log"
+    },
+    {
+      "name": "Mark-IV Exosuit Rig",
+      "valid_from_year": 2162,
+      "destruction_year": null,
+      "status": "ACTIVE",
+      "source_media": "Jovian Mining Fleet Standard Manifest"
+    }
+  ],
+  "rules": [
+    {
+      "category": "PHYSICS",
+      "entity_or_species": "Titan Atmosphere",
+      "rule_statement": "Unpressurized exposure to Titan liquid methane surface causes cellular flash-freezing in less than four seconds without thermal EVA insulation.",
+      "canon_tier": "ABSOLUTE"
+    },
+    {
+      "category": "TECH",
+      "entity_or_species": "Hyperion Drive Core",
+      "rule_statement": "Direct neural interface with unshielded hyper-drives causes permanent cortical synapse meltdown.",
+      "canon_tier": "ABSOLUTE"
+    },
+    {
+      "category": "LAW",
+      "entity_or_species": "Sol Defense Treaty",
+      "rule_statement": "Armed orbital bombardment vessels are strictly prohibited within the Martian Demilitarized Lunar Arc under the Sol Defense Treaty.",
+      "canon_tier": "ABSOLUTE"
+    }
+  ],
+  "timeline_events": [
+    {
+      "year": 2165,
+      "location": "USC Borealis Deep Space Courier",
+      "event_summary": "Special Agent Gabriel Cross enters cryogenic stasis pod 09 for the 25-year outer rim voyage, scheduled to revive in 2190."
+    },
+    {
+      "year": 2172,
+      "location": "Phobos Orbital Station (Mars)",
+      "event_summary": "Catastrophic hull breach at Phobos Station: Admiral Teresa Cruz is killed in decompression, and the Quantum Neural Cipher is atomized."
+    },
+    {
+      "year": 2175,
+      "location": "Ganymede Sub-Surface Dock 4",
+      "event_summary": "The Ganymede Breach: The Hyperion Dark-Matter Drive suffers catastrophic antimatter resonance and vaporizes into ionizing radiation."
+    }
+  ]
+}

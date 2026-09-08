@@ -1,0 +1,186 @@
+{
+  "universe_name": "Aethelgard: The Broken Crowns",
+  "genre": "Grimdark Fantasy / High Magic",
+  "era": "1240\u20131325 (Aethelgard High Annals)",
+  "description": "An epic grimdark fantasy chronicles of the seven broken realms of Aethelgard, where blood sorcery, ancient elven runes, and the shattering of royal ancestral blades govern the destiny of dynasties.",
+  "default_year": 1285,
+  "default_location": "Iron Citadel of Oakhaven",
+  "characters": [
+    {
+      "name": "High King Valerius IV",
+      "species": "HUMAN",
+      "birth_year": 1242,
+      "death_year": 1298,
+      "status": "DEAD",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Aethelgard Prime",
+      "powers": [
+        "Royal Command",
+        "High Sept Swordsmanship"
+      ],
+      "aliases": [
+        "The Iron Sovereign",
+        "Valerius the Stern"
+      ]
+    },
+    {
+      "name": "Lady Morwen of House Karst",
+      "species": "HUMAN",
+      "birth_year": 1265,
+      "death_year": 1340,
+      "status": "ALIVE",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Aethelgard Prime",
+      "powers": [
+        "Arch-Mage Arcana",
+        "Obsidian Warding"
+      ],
+      "aliases": [
+        "The Raven Sorceress"
+      ]
+    },
+    {
+      "name": "Lord Commander Branok",
+      "species": "HUMAN",
+      "birth_year": 1250,
+      "death_year": 1294,
+      "status": "DEAD",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Aethelgard Prime",
+      "powers": [
+        "Heavy Vanguard Warfare",
+        "Siege Engineering"
+      ],
+      "aliases": [
+        "The Blood Shield of Karst"
+      ]
+    },
+    {
+      "name": "Prince Kaelen the Frozen",
+      "species": "HUMAN",
+      "birth_year": 1270,
+      "death_year": 1355,
+      "status": "STASIS",
+      "stasis_start_year": 1292,
+      "stasis_end_year": 1320,
+      "home_planet": "Aethelgard Prime",
+      "powers": [
+        "Cryo-Arcane Resilience",
+        "Royal Bloodline"
+      ],
+      "aliases": [
+        "The Slumbering Prince",
+        "Kaelen of Frostpeak"
+      ]
+    },
+    {
+      "name": "Seraphina the Blind Prophet",
+      "species": "SILVER_ELF",
+      "birth_year": 1220,
+      "death_year": 1289,
+      "status": "DEAD",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Aethelgard Prime",
+      "powers": [
+        "Temporal Divination",
+        "Astral Sight"
+      ],
+      "aliases": [
+        "The Seer of the Weeping Mire"
+      ]
+    },
+    {
+      "name": "Grand Inquisitor Malakor",
+      "species": "HUMAN",
+      "birth_year": 1258,
+      "death_year": 1318,
+      "status": "ALIVE",
+      "stasis_start_year": null,
+      "stasis_end_year": null,
+      "home_planet": "Aethelgard Prime",
+      "powers": [
+        "Inquisition Law",
+        "Pyromancy"
+      ],
+      "aliases": [
+        "The Red Ledger"
+      ]
+    }
+  ],
+  "relics": [
+    {
+      "name": "Sun-Forged Blade of Eldor",
+      "valid_from_year": 1180,
+      "destruction_year": 1285,
+      "status": "DESTROYED",
+      "source_media": "Annals of Aethelgard Vol. IV"
+    },
+    {
+      "name": "Crown of the Seven Wyrms",
+      "valid_from_year": 1210,
+      "destruction_year": 1299,
+      "status": "DESTROYED",
+      "source_media": "The Fall of Highkeep (Chronicle 1299)"
+    },
+    {
+      "name": "Eye of the Void Orb",
+      "valid_from_year": 1235,
+      "destruction_year": 1294,
+      "status": "DESTROYED",
+      "source_media": "The Red Mire Siege Record"
+    },
+    {
+      "name": "Amulet of the First Archon",
+      "valid_from_year": 1150,
+      "destruction_year": null,
+      "status": "ACTIVE",
+      "source_media": "Vault of the Obsidian Spire"
+    }
+  ],
+  "rules": [
+    {
+      "category": "MAGIC",
+      "entity_or_species": "Blood Sigil",
+      "rule_statement": "Any spellcaster channeling raw blood sorcery without an inscribed silver ward ring suffers instantaneous arterial combustion.",
+      "canon_tier": "ABSOLUTE"
+    },
+    {
+      "category": "BIOLOGY",
+      "entity_or_species": "Frost Drake",
+      "rule_statement": "Frost Drakes cannot breathe combustion flame and perish within three minutes if exposed to desert heat exceeding 40 degrees Celsius.",
+      "canon_tier": "ABSOLUTE"
+    },
+    {
+      "category": "LAW",
+      "entity_or_species": "High Throne of Aethelgard",
+      "rule_statement": "No sovereign bearing the Curse of the Weeping Mark may touch the Iron Sept scepter without disintegrating into obsidian ash.",
+      "canon_tier": "ABSOLUTE"
+    }
+  ],
+  "timeline_events": [
+    {
+      "year": 1285,
+      "location": "Blood Ridge Gorge",
+      "event_summary": "The Cataclysm of Blood Ridge: The Sun-Forged Blade of Eldor is shattered by dragonfire into molten slag."
+    },
+    {
+      "year": 1292,
+      "location": "Frostpeak Amber Vault",
+      "event_summary": "Prince Kaelen is sealed into the cryo-enchanted Amber Tomb to halt a fatal necro-poison, remaining in stasis until 1320."
+    },
+    {
+      "year": 1294,
+      "location": "The Red Mire Fortress",
+      "event_summary": "Lord Commander Branok shatters the Eye of the Void Orb before being executed by inquisitors."
+    },
+    {
+      "year": 1298,
+      "location": "Oakhaven High Keep",
+      "event_summary": "High King Valerius IV is assassinated by poisoned elder wine during the Winter Solstice banquet."
+    }
+  ]
+}
