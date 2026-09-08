@@ -116,15 +116,15 @@
         </button>
       </div>
 
-      <!-- Right: Interactive Retcon Traps -->
+      <!-- Right: Demo Traps -->
       <div id="traps-container" class="flex items-center space-x-2">
         <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1">
           <span>⚡</span>
-          <span>Interactive Traps:</span>
+          <span>Demo Traps:</span>
         </span>
-        <button onclick="loadTrap(1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer">Trap 1 (Stasis)</button>
-        <button onclick="loadTrap(2)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer">Trap 2 (Relic)</button>
-        <button onclick="loadTrap(3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer">Trap 3 (Bio)</button>
+        <button onclick="loadTrap(1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer" title="Demo Trap 1 (Stasis) - Berlin Safehouse (1982)">Demo Trap 1 (Stasis)</button>
+        <button onclick="loadTrap(2)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer" title="Demo Trap 2 (Relic) - Berlin Safehouse (1982)">Demo Trap 2 (Relic)</button>
+        <button onclick="loadTrap(3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer" title="Demo Trap 3 (Bio) - Planet Zora (1988)">Demo Trap 3 (Bio)</button>
       </div>
     </div>
 
@@ -552,8 +552,8 @@
       container.innerHTML = `
         <span class="text-xs font-medium text-slate-400 mr-1 flex items-center space-x-1">
           <span>⚡</span>
-          <span class="hidden sm:inline">Interactive Traps:</span>
-          <span class="sm:hidden">Traps:</span>
+          <span class="hidden sm:inline">Demo Traps:</span>
+          <span class="sm:hidden">Demos:</span>
         </span>
       `;
       if (!traps || traps.length === 0) {
@@ -563,8 +563,9 @@
       traps.forEach((trap, idx) => {
         const btn = document.createElement('button');
         btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-xs font-medium border border-slate-700 hover:border-rose-500/50 transition cursor-pointer";
-        btn.textContent = trap.title || `Trap ${idx + 1}`;
-        btn.title = `${trap.title || `Trap ${idx + 1}`} - ${trap.location || ''} (${trap.year || ''})`;
+        const titleText = trap.title ? trap.title.replace(/^Trap\s*/i, 'Demo Trap ') : `Demo Trap ${idx + 1}`;
+        btn.textContent = titleText;
+        btn.title = `Load ${titleText} - ${trap.location || ''} (${trap.year || ''})`;
         btn.onclick = () => {
           document.getElementById('current-year-display').textContent = trap.year || 1982;
           document.getElementById('current-setting-display').textContent = trap.location || "Location";
@@ -1299,7 +1300,7 @@ Rule: Sector 4 has lethal neurotoxin without respirators."></textarea>
           </h3>
           <ul class="text-xs space-y-2 text-slate-300">
             <li><strong class="text-slate-100">🌌 Universe Dropdown:</strong> Choose your story world! Switch between <em>The ChronoVerse</em> (Sci-Fi Spy Thriller), <em>Galactic Imperium</em> (Space Battles), or <em>Mythos Realm</em> (Fantasy with Knights & Magic).</li>
-            <li><strong class="text-slate-100">Trap 1 / Trap 2 / Trap 3:</strong> Test buttons! Click any trap to paste a famous movie continuity mistake into your script and watch the AI catch it in less than 1 millisecond.</li>
+            <li><strong class="text-slate-100">⚡ Demo Traps (Demo Trap 1 / 2 / 3):</strong> One-click continuity demonstration buttons! Click any demo trap to paste an intentional classic movie retcon into your script and watch the AI catch it in less than 1 millisecond.</li>
             <li><strong class="text-slate-100">Cold War Requiem.fountain:</strong> The file name of your script. <code class="text-sky-300 font-mono">.fountain</code> is the free standard format screenwriters use to type scripts without expensive software.</li>
             <li><strong class="text-slate-100">Setting & Scene Year (1982):</strong> The "where" and "when" of your scene. The AI needs to know the year so it knows who is alive, who is frozen in ice, and what weapons exist at that time.</li>
             <li><strong class="text-slate-100">📂 Upload Script:</strong> Upload any script from your computer or just drag-and-drop a file directly onto the editor.</li>
