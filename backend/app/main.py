@@ -609,6 +609,12 @@ def get_lore_rules():
     rules = [r for r in ch_engine.lore_rules if r.get("universe_id") == ch_engine.active_universe_id]
     return {"total": len(rules), "universe": ch_engine.active_universe_id, "rules": rules}
 
+@app.get("/api/lore/relics")
+def get_lore_relics():
+    """Returns canonical relics, artifacts, and items in the active universe."""
+    relics = [r for r in ch_engine.relationships if r.get("universe_id") == ch_engine.active_universe_id]
+    return {"total": len(relics), "universe": ch_engine.active_universe_id, "relics": relics}
+
 @app.get("/api/audit-logs")
 def get_audit_logs():
     """Returns real-time telemetry logs of caught retcons and query latencies."""
