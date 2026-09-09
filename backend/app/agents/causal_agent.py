@@ -388,6 +388,14 @@ class CausalContradictionAgent:
                             canon_hierarchy_tier="Tier-1 Story Bible Axiom"
                         ))
 
-        return violations
+        # Deduplicate violations by violation_id
+        unique_violations = []
+        seen_ids = set()
+        for v in violations:
+            if v.violation_id not in seen_ids:
+                seen_ids.add(v.violation_id)
+                unique_violations.append(v)
+
+        return unique_violations
 
 causal_agent = CausalContradictionAgent()

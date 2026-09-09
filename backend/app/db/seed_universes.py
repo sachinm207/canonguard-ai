@@ -745,6 +745,9 @@ The ancient blade is broken! The steel of Eldor is no more!"""
     print(f"   2. {univ_galactic['name']} ({len(galactic_chars)} chars)")
     print(f"   3. {univ_mythos['name']} ({len(mythos_chars)} chars)")
     print(f"   Total memory: {len(all_chars)} characters, {len(all_events)} events, {len(all_rels)} relationships, {len(all_rules)} rules.")
+    
+    # Sync all seeded canon facts to native ClickHouse tables if connected
+    ch_engine.sync_to_native()
 
 if __name__ == "__main__":
     seed_all_universes()

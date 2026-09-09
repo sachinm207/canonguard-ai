@@ -17,6 +17,7 @@ class ClickHouseEngine:
     def __init__(self):
         self.client = None
         self.is_native = False
+        self._init_embedded_tables()
         self._init_connection()
 
     def _init_connection(self):
@@ -38,7 +39,6 @@ class ClickHouseEngine:
         except Exception as e:
             logger.warning(f"Native ClickHouse unavailable ({e}). Initializing High-Performance Embedded Columnar Engine.")
             self.is_native = False
-            self._init_embedded_tables()
 
     def _init_embedded_tables(self):
         # Columnar In-Memory Storage
@@ -499,7 +499,76 @@ class ClickHouseEngine:
         self.lore_rules.extend(lore_rules)
         self.active_universe_id = universe_id
         self._save_custom_universes_to_disk()
+        self.sync_to_native()
         return self.universes[universe_id]
+
+    def sync_to_native(self):
+        """Syncs all in-memory entities into native ClickHouse tables."""
+        if not self.is_native or not self.client:
+            return
+        try:
+            # Sync characters
+            if self.characters:
+                char_rows = []
+                for c in self.characters:
+                    char_rows.append([
+                        c.get("universe_id", self.active_universe_id),
+                        c["name"],
+                        c.get("aliases", []),
+                        c.get("species", "HUMAN"),
+                        c.get("birth_year") or 1900,
+                        c.get("death_year"),
+                        c.get("status", "ALIVE"),
+                        c.get("stasis_start_year"),
+                        c.get("stasis_end_year"),
+                        c.get("home_planet", "Earth"),
+                        c.get("powers", [])
+                    ])
+                self.client.insert(
+                    "franchise_characters",
+                    char_rows,
+                    column_names=["universe_id", "name", "aliases", "species", "birth_year", "death_year", "status", "stasis_start_year", "stasis_end_year", "home_planet", "powers"]
+                )
+
+            # Sync relationships (relics)
+            if self.relationships:
+                rel_rows = []
+                for r in self.relationships:
+                    rel_rows.append([
+                        r.get("universe_id", self.active_universe_id),
+                        r.get("subject_name", ""),
+                        r.get("predicate", "POSSESSES"),
+                        r.get("object_name", ""),
+                        r.get("valid_from_year", 0),
+                        r.get("valid_to_year"),
+                        r.get("status", "ACTIVE"),
+                        r.get("source_media", "Canon Core")
+                    ])
+                self.client.insert(
+                    "entity_relationships",
+                    rel_rows,
+                    column_names=["universe_id", "subject_name", "predicate", "object_name", "valid_from_year", "valid_to_year", "status", "source_media"]
+                )
+
+            # Sync lore rules
+            if self.lore_rules:
+                rule_rows = []
+                for rule in self.lore_rules:
+                    rule_rows.append([
+                        rule.get("universe_id", self.active_universe_id),
+                        rule.get("category", "PHYSICS"),
+                        rule.get("entity_or_species", ""),
+                        rule.get("rule_statement", ""),
+                        rule.get("canon_tier", "ABSOLUTE")
+                    ])
+                self.client.insert(
+                    "canon_lore_rules",
+                    rule_rows,
+                    column_names=["universe_id", "category", "entity_or_species", "rule_statement", "canon_tier"]
+                )
+            logger.info("Successfully synced all canon entities to native ClickHouse tables.")
+        except Exception as e:
+            logger.warning(f"Failed to sync entities to native ClickHouse: {e}")
 
     def check_character_status(self, character_names: List[str], scene_year: int) -> Dict[str, Any]:
         """
@@ -529,7 +598,7 @@ class ClickHouseEngine:
                           if(stasis_start_year IS NOT NULL AND {year:Int32} >= stasis_start_year AND ({year:Int32} <= ifNull(stasis_end_year, 9999)), 'IN_CRYOGENIC_STASIS', 'VALID_ACTIVE')
                        )
                     ) AS temporal_evaluation
-                FROM franchise_characters
+                FROM franchise_characters FINAL
                 WHERE universe_id = {univ:String}
                   AND lower(name) IN ({names:Array(String)})
                 LIMIT 10
@@ -539,7 +608,11 @@ class ClickHouseEngine:
                     "univ": self.active_universe_id,
                     "names": normalized_names
                 })
+                seen_names = set()
                 for row in res.result_rows:
+                    if row[0].lower() in seen_names:
+                        continue
+                    seen_names.add(row[0].lower())
                     results.append({
                         "name": row[0],
                         "species": row[1],
@@ -612,7 +685,7 @@ class ClickHouseEngine:
         if self.is_native and self.client:
             try:
                 query = """
-                SELECT 
+                SELECT DISTINCT
                     subject_name, 
                     predicate, 
                     object_name, 
@@ -742,6 +815,7 @@ class ClickHouseEngine:
         self.audit_logs.append(log_entry)
         if self.is_native and self.client:
             try:
+                from datetime import datetime
                 self.client.insert("audit_retcon_logs", [[
                     log_entry["log_id"],
                     log_entry["universe_id"],
@@ -751,7 +825,7 @@ class ClickHouseEngine:
                     log_entry["mitigation_suggested"],
                     0,
                     latency_ms,
-                    log_entry["timestamp"]
+                    datetime.now()
                 ]])
             except Exception as e:
                 logger.error(f"Failed to record native audit log: {e}")
