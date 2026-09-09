@@ -9,5 +9,6 @@ COPY backend/ backend/
 COPY frontend/ frontend/
 
 EXPOSE 8005
+ENV PORT=8005
 
-CMD ["python", "-m", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8005"]
+CMD ["sh", "-c", "python -m uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT}"]
