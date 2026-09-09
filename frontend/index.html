@@ -93,9 +93,9 @@
           <span class="text-xs text-slate-400 hidden sm:inline">Check Speed:</span>
           <span class="font-mono text-xs font-bold text-amber-400" id="hud-latency">0.64 ms</span>
         </div>
-        <button onclick="openGuideModal()" class="px-3 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-xs font-semibold text-indigo-300 border border-indigo-700/60 hover:border-indigo-500 transition flex items-center space-x-1.5 shadow-sm cursor-pointer" title="Beginner's Guide & Glossary">
-          <span>📘</span>
-          <span>Simple Guide</span>
+        <button onclick="openGuideModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-xs font-bold text-white shadow-md shadow-indigo-950/60 border border-indigo-400/40 transition flex items-center space-x-1.5 cursor-pointer" title="How to Use CanonGuard AI - Complete App Guide">
+          <span>💡</span>
+          <span>How to Use</span>
         </button>
       </div>
     </div>
@@ -189,6 +189,10 @@
           <span class="flex px-2 py-1 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 items-center space-x-1">
             <span>🟢 Live: On</span>
           </span>
+          <button onclick="openGuideModal()" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-800/80 hover:border-indigo-500 transition flex items-center space-x-1 font-medium cursor-pointer" title="How to Use CanonGuard AI - Complete App Guide">
+            <span>💡</span>
+            <span class="hidden sm:inline">How to Use</span>
+          </button>
         </div>
       </div>
 
@@ -3156,11 +3160,31 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    function openGuideModal() {
-      document.getElementById('guide-modal').classList.remove('hidden');
+    function openGuideModal(defaultTab = 'quickstart') {
+      const modal = document.getElementById('guide-modal');
+      if (modal) modal.classList.remove('hidden');
+      switchGuideTab(defaultTab);
     }
     function closeGuideModal() {
-      document.getElementById('guide-modal').classList.add('hidden');
+      const modal = document.getElementById('guide-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchGuideTab(tabId) {
+      const tabs = ['quickstart', 'editor', 'projects', 'worlds', 'archives', 'glossary'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`guide-tab-btn-${t}`);
+        const view = document.getElementById(`guide-tab-view-${t}`);
+        if (btn && view) {
+          if (t === tabId) {
+            btn.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs transition shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer";
+            view.classList.remove('hidden');
+          } else {
+            btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5 shrink-0";
+            view.classList.add('hidden');
+          }
+        }
+      });
     }
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -3460,144 +3484,394 @@ Ryan entered the deep cryo-stasis capsule before the shockwave hit. He is sealed
     </div>
   </div>
 
-  <!-- SIMPLE BEGINNER'S GUIDE MODAL -->
-  <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[88vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+  <!-- COMPLETE APP GUIDE & HOW TO USE MODAL -->
+  <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       
       <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 shrink-0">
         <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300 text-lg">
-            📘
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-700 border border-indigo-400/40 flex items-center justify-center text-white text-lg shadow-md shadow-indigo-950">
+            💡
           </div>
           <div>
-            <h2 class="text-base font-bold text-white">Simple Guide: How to Use CanonGuard</h2>
-            <p class="text-xs text-slate-400">A friendly 1-minute guide to checking your movie scripts for story mistakes</p>
+            <h2 class="text-base font-bold text-white flex items-center space-x-2">
+              <span>How to Use CanonGuard AI</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-indigo-950 text-indigo-300 border border-indigo-800">COMPLETE APP GUIDE</span>
+            </h2>
+            <p class="text-xs text-slate-400">Everything you need to know about writing continuity-safe screenplays, inspecting proof, managing scripts, and creating AI story worlds.</p>
           </div>
         </div>
         <button onclick="closeGuideModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition font-bold cursor-pointer">✕</button>
       </div>
 
+      <!-- Navigation Tabs Bar -->
+      <div class="px-6 py-2.5 border-b border-slate-800 bg-slate-950/60 flex items-center space-x-2 overflow-x-auto custom-scrollbar shrink-0">
+        <button id="guide-tab-btn-quickstart" onclick="switchGuideTab('quickstart')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs transition shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer">
+          <span>🚀</span>
+          <span>1. Quick Start</span>
+        </button>
+        <button id="guide-tab-btn-editor" onclick="switchGuideTab('editor')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5 shrink-0">
+          <span>✍️</span>
+          <span>2. Live Story Check & Proof</span>
+        </button>
+        <button id="guide-tab-btn-projects" onclick="switchGuideTab('projects')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5 shrink-0">
+          <span>📜</span>
+          <span>3. Project Scripts & Saving</span>
+        </button>
+        <button id="guide-tab-btn-worlds" onclick="switchGuideTab('worlds')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5 shrink-0">
+          <span>🌌</span>
+          <span>4. Create Worlds (AI Ingest)</span>
+        </button>
+        <button id="guide-tab-btn-archives" onclick="switchGuideTab('archives')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5 shrink-0">
+          <span>📦</span>
+          <span>5. Story Bible & Archives</span>
+        </button>
+        <button id="guide-tab-btn-glossary" onclick="switchGuideTab('glossary')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5 shrink-0">
+          <span>📖</span>
+          <span>6. Glossary & Speed</span>
+        </button>
+      </div>
+
       <!-- Modal Body (Scrollable) -->
-      <div class="p-6 overflow-y-auto custom-scrollbar space-y-5 text-sm text-slate-300">
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 text-xs text-slate-300">
         
-        <!-- Step 1-2-3 Visual Card -->
-        <div class="bg-gradient-to-br from-indigo-950/50 via-slate-950/60 to-slate-900/80 border border-indigo-900/40 rounded-xl p-5 space-y-3">
-          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
-            <span>✨</span>
-            <span>What is CanonGuard? (In Simple Words)</span>
-          </h3>
-          <p class="text-xs leading-relaxed text-slate-200">
-            Think of CanonGuard as a <strong>smart spellchecker for movie stories</strong>. When writing a script for a big series (like Marvel, Star Wars, or Harry Potter), it's easy to forget who died, who was frozen in ice, or what magical weapons were destroyed 3 movies ago. CanonGuard watches your typing in real time and warns you immediately if you write an impossible plot hole!
-          </p>
-        </div>
+        <!-- TAB VIEW 1: QUICK START -->
+        <div id="guide-tab-view-quickstart" class="space-y-4">
+          <div class="bg-gradient-to-br from-indigo-950/50 via-slate-950/60 to-slate-900/80 border border-indigo-900/40 rounded-xl p-5 space-y-3">
+            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+              <span>✨</span>
+              <span>What is CanonGuard AI?</span>
+            </h3>
+            <p class="text-xs leading-relaxed text-slate-200">
+              CanonGuard AI is a <strong>real-time story continuity guardian for film and television franchises</strong>. In cinematic universes with multiple movies, seasons, and writers, it's easy for screenplays to accidentally violate past canon—such as putting a deceased hero in a scene, using a destroyed weapon, or ignoring physical universe rules. CanonGuard checks your screenplay in real-time (<strong class="text-emerald-400">&lt; 1 ms</strong> latency via ClickHouse) and warns you immediately when a plot hole occurs.
+            </p>
+          </div>
 
-        <!-- 3 Simple Steps -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-2">
-            <span>🚀</span>
-            <span>How to Use It in 3 Easy Steps</span>
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-              <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-xs">1</div>
-              <h4 class="text-xs font-bold text-white">Type Your Scene</h4>
-              <p class="text-[11px] text-slate-400 leading-relaxed">
-                Write dialogue or action in the editor on the left, or click one of the <strong>Sample Mistakes</strong> buttons at the top to test.
-              </p>
+          <div class="space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-2">
+              <span>🚀</span>
+              <span>The 3-Step Writing Loop</span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-xs">1</div>
+                <h4 class="text-xs font-bold text-white">Select Story World</h4>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Choose a franchise (ChronoVerse, Galactic Imperium, Mythos Realm, or your own created universe) from the top dropdown.
+                </p>
+              </div>
+              <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div class="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-300 font-bold flex items-center justify-center text-xs">2</div>
+                <h4 class="text-xs font-bold text-white">Write Your Scene</h4>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Write scene headings, action, and dialogue in standard Fountain format. Continuity mistakes are highlighted with red squiggly underlines.
+                </p>
+              </div>
+              <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center text-xs">3</div>
+                <h4 class="text-xs font-bold text-white">Inspect Proof & Auto-Fix</h4>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Click any red underlined mistake to see the exact scene quote from past movies proving the conflict, then click <strong>"Apply Fix"</strong> to auto-correct it.
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-              <div class="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-300 font-bold flex items-center justify-center text-xs">2</div>
-              <h4 class="text-xs font-bold text-white">See Red Underline</h4>
-              <p class="text-[11px] text-slate-400 leading-relaxed">
-                If an action contradicts a past movie, the system underlines the word in red and explains why it broke history.
-              </p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-              <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center text-xs">3</div>
-              <h4 class="text-xs font-bold text-white">1-Click Story Fix</h4>
-              <p class="text-[11px] text-slate-400 leading-relaxed">
-                Click <strong>"Apply Fix"</strong> on the right panel to automatically update your script with an approved story alternative!
-              </p>
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center space-x-2">
+              <span>🎯</span>
+              <span>Try the 3 Demo Mistakes at the Top</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">Click any of these buttons in the top header to instantly see how CanonGuard catches complex lore mistakes:</p>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80 flex items-start space-x-2">
+                <span class="text-amber-400 font-bold shrink-0">⚡ 1. Frozen Hero:</span>
+                <p class="text-[11px] text-slate-300">Viktor was sealed in a cryogenic stasis capsule from 1975 to 1995. Having him walking in Berlin in 1982 triggers an instant temporal conflict.</p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80 flex items-start space-x-2">
+                <span class="text-amber-400 font-bold shrink-0">⚡ 2. Destroyed Item:</span>
+                <p class="text-[11px] text-slate-300">Elena uses the Sunstone crystal in 1982, but the Sunstone was melted into slag in 1960. CanonGuard flags the dead artifact immediately.</p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80 flex items-start space-x-2">
+                <span class="text-amber-400 font-bold shrink-0">⚡ 3. Broken World Rule:</span>
+                <p class="text-[11px] text-slate-300">Lord Vane takes his helmet off on Planet Oberon, but Oberon's atmosphere is lethal ammonia. CanonGuard flags the violated physical law.</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Try the 3 Sample Buttons -->
-        <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center space-x-2">
-            <span>🎯</span>
-            <span>Try the 3 Demo Buttons at the Top</span>
-          </h3>
-          <div class="space-y-2 text-xs text-slate-300">
-            <div class="flex items-start space-x-2">
-              <span class="text-amber-400 font-bold shrink-0">⚡ 1. Frozen Hero:</span>
-              <p class="text-[11px] text-slate-400">Elena talks to Viktor in 1982, but Viktor was frozen in a cryo-pod from 1975 to 1995! CanonGuard warns you that Viktor cannot be in Berlin.</p>
+        <!-- TAB VIEW 2: LIVE CHECK & PROOF -->
+        <div id="guide-tab-view-editor" class="hidden space-y-4">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center space-x-2">
+              <span>✍️</span>
+              <span>Screenplay Scene Editor (Fountain Standard)</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              CanonGuard uses the industry-standard <strong>Fountain plain-text screenplay syntax</strong>. You can type freely or import scripts from Final Draft, Highland, or Fade In:
+            </p>
+            <div class="p-3 rounded-lg bg-black/60 border border-slate-800 font-screenplay text-xs text-slate-200 space-y-1">
+              <div class="text-sky-400 font-bold">INT. BERLIN SAFEHOUSE - NIGHT - 1982</div>
+              <div class="text-slate-300">Elena examines the ancient map spread across the metal table.</div>
+              <div class="text-amber-400 font-bold pt-1">ELENA</div>
+              <div class="text-slate-100 italic">(whispering)</div>
+              <div class="text-slate-100">Viktor, the portal sequence is almost complete.</div>
             </div>
-            <div class="flex items-start space-x-2">
-              <span class="text-amber-400 font-bold shrink-0">⚡ 2. Destroyed Item:</span>
-              <p class="text-[11px] text-slate-400">Elena pulls out the Sunstone crystal in 1982, but the stone was permanently melted in a reactor in 1960! CanonGuard flags the dead artifact.</p>
+            <p class="text-[11px] text-slate-400">
+              💡 <strong>Smart Scene Detection:</strong> The scene header automatically extracts the <strong>Scene Year</strong> (1982) and <strong>Location</strong> (Berlin Safehouse) so the engine can evaluate temporal and geographical continuity.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center space-x-2">
+              <span>🔍</span>
+              <span>The 4 Canon Invariant Checks</span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-rose-300">1. Character Existence & Lifespans</span>
+                <p class="text-[11px] text-slate-400">Verifies character birth and death years, active time periods, and stasis windows (e.g. cryo-pods, comas).</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-amber-300">2. Relic & Artifact Lifecycles</span>
+                <p class="text-[11px] text-slate-400">Tracks whether an item, weapon, or ship was destroyed, shattered, lost in another dimension, or dismantled.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-emerald-300">3. Immutable Universe Rules</span>
+                <p class="text-[11px] text-slate-400">Enforces planetary physics, biological limitations, magic laws, and tech rules established in earlier films.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-sky-300">4. Spatiotemporal Logic</span>
+                <p class="text-[11px] text-slate-400">Flags impossible travel times or presence in two mutually exclusive locations simultaneously.</p>
+              </div>
             </div>
-            <div class="flex items-start space-x-2">
-              <span class="text-amber-400 font-bold shrink-0">⚡ 3. Broken World Rule:</span>
-              <p class="text-[11px] text-slate-400">Lord Vane removes his helmet on Planet Oberon, but the air is toxic ammonia! CanonGuard catches the broken physical rule.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-2">
+              <span>🎬</span>
+              <span>Inspecting Movie Proof & 1-Click Fixes</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              When a conflict is detected, words in the script are highlighted with a <strong>red wavy retcon underline</strong>. Clicking the underlined text or clicking the diagnostic card in the right column opens the <strong>Movie Proof Modal</strong>:
+            </p>
+            <ul class="space-y-1.5 text-[11px] text-slate-300 list-disc list-inside">
+              <li><strong>Side-by-Side View:</strong> Shows your draft line alongside the established historical movie fact.</li>
+              <li><strong>Past Movie Citation:</strong> Shows the previous film title, scene header, and exact dialogue proof.</li>
+              <li><strong>⚡ Apply Fix:</strong> 1-click replaces the offending action with an approved story mitigation directly in your editor.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- TAB VIEW 3: PROJECTS & SAVING -->
+        <div id="guide-tab-view-projects" class="hidden space-y-4">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-2">
+              <span>📜</span>
+              <span>Project Screenplays & Scene Management</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Every Story World stores its own database of screenplay scenes and drafts. You can access them anytime via the Script Meta Bar above the editor:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                <span class="font-bold text-amber-300 flex items-center space-x-1">
+                  <span>📜</span>
+                  <span>Project Scripts (N) Button</span>
+                </span>
+                <p class="text-[11px] text-slate-400">Opens the Project Screenplays dialogue showing all scenes saved in this story world. Switch between scenes, create blank scenes, or import local files.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                <span class="font-bold text-emerald-300 flex items-center space-x-1">
+                  <span>💾</span>
+                  <span>Save to Project Button</span>
+                </span>
+                <p class="text-[11px] text-slate-400">Directly saves your current editor scene to the database. If already associated with a file, it saves instantly without asking. For new scenes, it asks for a name once.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                <span class="font-bold text-sky-300 flex items-center space-x-1">
+                  <span>✏️</span>
+                  <span>Rename Scene File</span>
+                </span>
+                <p class="text-[11px] text-slate-400">Click the script title or pencil icon next to it in the Script Meta Bar to rename your script file anytime via the dialogue box.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                <span class="font-bold text-purple-300 flex items-center space-x-1">
+                  <span>📥</span>
+                  <span>Export .fountain</span>
+                </span>
+                <p class="text-[11px] text-slate-400">Inside the Project Scripts dialogue, click <strong>"Export"</strong> on any scene to download it to your computer as a standard <code>.fountain</code> file.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-2">
+              <span>💡</span>
+              <span>Smart Save vs Clean Drafting</span>
+            </h3>
+            <div class="space-y-2 text-[11px] text-slate-300">
+              <p>• <strong>Working on an existing scene:</strong> Hit <code>[💾 Save to Project]</code> anytime. A green badge confirms: <em>Saved "Act1_Scene3.fountain"!</em> with zero interruptions.</p>
+              <p>• <strong>Starting a fresh scene:</strong> Hit <code>[🧹 Clear]</code> to wipe the editor, type your new scene, and hit <code>[💾 Save to Project]</code> to give it a filename.</p>
+              <p>• <strong>Multi-Scene Series:</strong> Use <code>[📜 Project Scripts]</code> to jump between scenes or compare episodes without losing unsaved changes.</p>
             </div>
           </div>
         </div>
 
-        <!-- Plain English Glossary -->
-        <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-2">
-            <span>📖</span>
-            <span>Common Words Meaning (No Confusing Jargon)</span>
-          </h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr class="border-b border-slate-800 text-slate-400 font-semibold">
-                  <th class="py-2 pr-4">Word Used</th>
-                  <th class="py-2">Plain English Meaning</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800/60 text-slate-300">
-                <tr>
-                  <td class="py-2 pr-4 font-semibold text-rose-300 whitespace-nowrap">Story Mistake (Retcon)</td>
-                  <td class="py-2">An accidental plot hole that breaks past movie history (like bringing back a dead hero without explaining how).</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-semibold text-emerald-300 whitespace-nowrap">Canon / Movie History</td>
-                  <td class="py-2">The official, true facts established in past released films that writers cannot contradict.</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-semibold text-sky-300 whitespace-nowrap">Story World (Universe)</td>
-                  <td class="py-2">The movie series you are writing for (e.g. ChronoVerse, Space Battles, or Fantasy Kingdom).</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-semibold text-amber-300 whitespace-nowrap">Story Bible</td>
-                  <td class="py-2">The master encyclopedia listing all characters, important weapons/items, and physical universe rules.</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-semibold text-indigo-300 whitespace-nowrap">Suggested Fix</td>
-                  <td class="py-2">A creative story idea suggested by the AI that solves the plot hole while keeping your scene exciting.</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-semibold text-purple-300 whitespace-nowrap">Fast Database (&lt; 1 ms)</td>
-                  <td class="py-2">We use ClickHouse, an ultra-fast database, so checking 50 years of movie facts happens in less than a millisecond with zero lag.</td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- TAB VIEW 4: CREATE STORY WORLDS -->
+        <div id="guide-tab-view-worlds" class="hidden space-y-4">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-2">
+              <span>🌌</span>
+              <span>Create Your Own Story Worlds (Story Library Hub)</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Click <strong>"📚 Story Library / Create New"</strong> in the top header to build new franchise universes. CanonGuard provides two powerful ingestion methods:
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Method A -->
+            <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold text-[10px]">METHOD A</span>
+                <h4 class="font-bold text-white text-xs">Structured Lore Bible</h4>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Best when you already have a world wiki, character sheet, or lore document. Simply paste or upload your lore bible text:
+              </p>
+              <div class="p-2.5 rounded bg-black/50 border border-slate-850 font-mono text-[10px] text-slate-300 space-y-1">
+                <div>Character: Nyx Shadow (Born: 2065, Status: Alive)</div>
+                <div>Character: Jax Vance (Born: 2040, Died: 2085, Status: Dead)</div>
+                <div>Relic: Neon Pulse Rifle (Destroyed in 2075)</div>
+                <div>Rule: Sector 4 is bathed in lethal neurotoxin gas.</div>
+              </div>
+              <p class="text-[10px] text-slate-500">Fast local parsing directly into ClickHouse database tables.</p>
+            </div>
+
+            <!-- Method B -->
+            <div class="p-4 rounded-xl bg-slate-950/80 border border-purple-900/60 space-y-3">
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 font-bold text-[10px]">METHOD B</span>
+                <h4 class="font-bold text-white text-xs">Batch Screenplay Ingestion (Gemini AI)</h4>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Best when you have past movie scripts, transcripts, or series episodes! You don't have to write a lore bible manually:
+              </p>
+              <div class="p-2.5 rounded bg-purple-950/30 border border-purple-800/40 text-[11px] text-purple-200 space-y-1">
+                <p>1. Upload or paste multiple past scripts (e.g. Episode 1, 2, 3).</p>
+                <p>2. Google Gemini AI reads all scenes and dialogues.</p>
+                <p>3. AI automatically extracts character bios, status, destroyed relics, and universe laws into ClickHouse!</p>
+              </div>
+              <p class="text-[10px] text-slate-500">Zero manual entry required; powered by Google Gemini AI.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB VIEW 5: STORY BIBLE & ARCHIVES -->
+        <div id="guide-tab-view-archives" class="hidden space-y-4">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-2">
+              <span>📖</span>
+              <span>The Story Bible Inspector (Right Panel)</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Click the <strong>"📖 Story Bible"</strong> tab in the right column to inspect the living encyclopedia of your active franchise:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-emerald-300">Characters</span>
+                <p class="text-[11px] text-slate-400">See all characters with birth/death years and live <span class="text-emerald-400 font-bold">ALIVE</span> / <span class="text-rose-400 font-bold">DEAD</span> badges.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-amber-300">Destroyed Relics</span>
+                <p class="text-[11px] text-slate-400">Review destroyed artifacts, melting years, and the films in which they were destroyed.</p>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                <span class="font-bold text-purple-300">Universe Rules</span>
+                <p class="text-[11px] text-slate-400">Examine physical laws, atmosphere toxicity, hyperspace speed limits, and magical costs.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center space-x-2">
+              <span>📦</span>
+              <span>Cold Storage Archiving & Restoration</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Inside <strong>"📚 Story Library / Create New"</strong> &gt; <strong>"Active Franchises"</strong>:
+            </p>
+            <ul class="space-y-1.5 text-[11px] text-slate-300 list-disc list-inside">
+              <li><strong>Move to Cold Storage:</strong> Unloads the franchise from ClickHouse memory and preserves all lore, characters, rules, and relics on disk.</li>
+              <li><strong>Inspect Cold Storage:</strong> In the "Archived" tab, view full lore documents for archived franchises anytime.</li>
+              <li><strong>1-Click Restoration:</strong> Click <code>[♻️ Restore to Active Memory]</code> to instantly bring an archived universe back into active ClickHouse memory.</li>
+              <li><strong>Reset Defaults:</strong> Restore the 4 default studio franchises (ChronoVerse, Galactic Imperium, Mythos Realm, CyberCity 2099) at any time.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- TAB VIEW 6: GLOSSARY & SPEED -->
+        <div id="guide-tab-view-glossary" class="hidden space-y-4">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-2">
+              <span>📖</span>
+              <span>Plain English Glossary</span>
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400 font-semibold">
+                    <th class="py-2 pr-4">Term</th>
+                    <th class="py-2">Meaning in Cinema Writing</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                  <tr>
+                    <td class="py-2 pr-4 font-semibold text-rose-300 whitespace-nowrap">Retcon / Continuity Error</td>
+                    <td class="py-2">Retroactive continuity mistake—an accidental plot hole that breaks past movie history (e.g. using a destroyed weapon or meeting someone who was dead).</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 pr-4 font-semibold text-emerald-300 whitespace-nowrap">Canon Fact</td>
+                    <td class="py-2">The official, established facts confirmed in previously released films that future writers cannot contradict.</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 pr-4 font-semibold text-sky-300 whitespace-nowrap">Story World / Universe</td>
+                    <td class="py-2">The franchise you are writing for (e.g. ChronoVerse, Galactic Imperium, or your own created universe).</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 pr-4 font-semibold text-amber-300 whitespace-nowrap">Story Bible</td>
+                    <td class="py-2">The master franchise encyclopedia containing all character lifespans, destroyed artifacts, and immutable physical laws.</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 pr-4 font-semibold text-purple-300 whitespace-nowrap">ClickHouse Story Engine</td>
+                    <td class="py-2">Ultra-fast columnar database with 768-dimensional vector embeddings, enabling real-time continuity checking in under 1 millisecond.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
+              <span>⚡</span>
+              <span>Sub-Millisecond Engine Telemetry</span>
+            </h3>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              Standard AI language models take 3 to 10 seconds to read a script. CanonGuard uses <strong>ClickHouse pre-indexed temporal vectors</strong>, reducing lookup time to <strong class="text-emerald-400">0.14 ms</strong>. As you type in the editor, your text is checked character-by-character with zero typing lag!
+            </p>
           </div>
         </div>
 
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
-        <span class="text-xs text-slate-500">Press <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px]">Esc</kbd> anytime to close</span>
-        <button onclick="closeGuideModal()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition cursor-pointer">Got it, close</button>
+      <div class="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-slate-950/80 shrink-0">
+        <div class="flex items-center space-x-2 text-xs text-slate-500">
+          <span>Press <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px]">Esc</kbd> anytime to close</span>
+        </div>
+        <button onclick="closeGuideModal()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition cursor-pointer shadow-sm">Got it, close</button>
       </div>
 
     </div>
