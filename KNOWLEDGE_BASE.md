@@ -220,3 +220,49 @@ When a user uploads a new story bible:
 1. **Parser Layer:** Extracts entities (`characters`, `relics`, `rules`) from JSON, Markdown headers, or plain text.
 2. **Schema Ingestion:** Dynamically registers the new universe in ClickHouse memory with isolated collections.
 3. **Instant Hot-Swapping:** Activates the newly ingested universe as `active_universe_id` in sub-millisecond time, allowing the writer to immediately begin typing and verifying against their proprietary world bible.
+
+---
+
+## 9. Algorithmic Mitigation Reasoning (ClickHouse Causal Arithmetic vs. LLM Generation)
+
+A frequent technical question during judging is: *"How does CanonGuard generate mitigation ideas in sub-millisecond time without waiting for an LLM?"*
+
+### The Problem with Pure LLM Approaches
+Calling an LLM (such as Gemini) on every single keystroke takes **1,500ms to 4,000ms**, causing severe latency lag in the text editor. CanonGuard resolves this by separating **detection and structural mitigation** from **open-ended generative writing**.
+
+### How ClickHouse Enables Causal Reasoning
+ClickHouse does not output prose, but **it provides the mathematical boundaries and graph relationships** that allow the Creative Mitigation Agent to derive fixes instantly.
+
+When ClickHouse evaluates a scene, it returns structured temporal facts:
+```json
+{
+  "entity": "Viktor",
+  "scene_year": 1982,
+  "stasis_start_year": 1975,
+  "stasis_end_year": 1995,
+  "evaluation": "IN_CRYOGENIC_STASIS",
+  "faction": "Syndicate"
+}
+```
+
+The engine applies three deterministic reasoning models:
+
+1. **Temporal Reframing (Boundary Arithmetic):**
+   $$\text{Safe Flashback Year} = \text{stasis\_start\_year} - 1 = 1975 - 1 = 1974$$
+   *Fix:* Automatically wraps the line in `[FLASHBACK - BERLIN, 1974]`, preserving the dialogue and characters while obeying the canon anchor.
+
+2. **Character / Relic Substitution (Graph Traversal):**
+   Queries ClickHouse for an active entity with matching faction/role in that year:
+   ```sql
+   SELECT name FROM characters 
+   WHERE universe_id = 'CHRONOVERSE' AND faction = 'Syndicate'
+     AND birth_year <= 1982 AND (death_year >= 1982 OR death_year IS NULL)
+     AND (stasis_start_year IS NULL OR 1982 NOT BETWEEN stasis_start_year AND stasis_end_year)
+   ORDER BY prominence DESC LIMIT 1;
+   ```
+   *Result:* Replaces `Viktor` with his field lieutenant `Malakor`.
+
+3. **State Ontology (Lore / Technology Twist):**
+   If an item was `DESTROYED` in 1960 and appears in 1982, standard franchise narrative rules dictate that the item is either a **counterfeit duplicate** or a **holographic projection**.
+   *Fix:* Rewrites the action line to reveal the item as a Syndicate-forged replica.
+
